@@ -7,6 +7,7 @@ export class UsersService {
   constructor(private readonly primsaService: PrismaService) {}
 
   async createUser(email: string, password: string): Promise<User> {
+    console.log(email, password);
     try {
       const res = await this.primsaService.user.create({
         data: { email: email, pwHash: password },

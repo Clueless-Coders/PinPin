@@ -18,8 +18,7 @@ export class UsersController {
   }
 
   @Post()
-  async createUser(@Body() { email, password }: UserCreateDTO) {
-    console.log(email, password);
-    return await this.usersService.createUser(email, password);
+  async createUser(@Body() user: UserCreateDTO) {
+    return await this.usersService.createUser(user.email, user.password);
   }
 }
