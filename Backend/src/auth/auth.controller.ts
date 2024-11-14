@@ -1,5 +1,4 @@
 import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
-import { UsersService } from 'src/users/users.service';
 import { AuthDTO } from './dto/auth.dto';
 import { AuthService } from './auth.service';
 
@@ -9,7 +8,9 @@ export class AuthController {
 
   @HttpCode(HttpStatus.OK)
   @Post('/signin')
-  async signin(@Body() { email, password }: AuthDTO) {
+  async signin(
+    @Body() { email, password }: AuthDTO,
+  ): Promise<{ access_token: string }> {
     return await this.authService.signin(email, password);
   }
 }
