@@ -2,6 +2,7 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { User } from '@prisma/client';
 import { UsersService } from 'src/users/users.service';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class AuthService {
@@ -28,9 +29,9 @@ export class AuthService {
     }
 
     //Check pw
-    //TODO: Implement encryption here.
-    if (user.pwHash !== password)
-      throw new UnauthorizedException('Password Incorrect.');
+    const pwValid = await bcrypt.compare(password, user.pwHash);
+
+    if (!pwValid) throw new UnauthorizedException('Password Incorrect.');
 
     //Return the JWT upon successful authentication
     return {
