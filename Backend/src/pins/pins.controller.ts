@@ -1,6 +1,7 @@
 import { Controller, Param, Get, Post, Body, Delete, Patch } from '@nestjs/common';
 import { PinsService } from './pins.service';
 import { Prisma } from '@prisma/client';
+import { CreatePinDTO, UpdatePinDTO} from './dto/pins.dto';
 
 @Controller('pins')
 export class PinsController {
@@ -17,12 +18,12 @@ export class PinsController {
     }
 
     @Post()
-    postPin(@Body() createPinDto: Prisma.PinCreateInput){
-        return this.pinsService.create(createPinDto);  
+    postPin(@Body() createPinDTO: CreatePinDTO){
+        return this.pinsService.create(createPinDTO);  
     }
 
     @Patch(':id')
-    updatePin(@Param('id') id: String, @Body() updatePinDTO: Prisma.PinUpdateInput){
+    updatePin(@Param('id') id: String, @Body() updatePinDTO: UpdatePinDTO){
         return this.pinsService.updatePin(+id, updatePinDTO);
     }
 

@@ -17,10 +17,13 @@ model User {
   email String @unique
   id    Int    @id @default(autoincrement())
   comments Comment[]
+  pins Pin[]
 }
 
 model Pin {
   id Int @id @default(autoincrement())
+  user User @relation(fields: [userID], references: [id])
+  userID Int 
   text String @db.VarChar(300)
   upvotes Int
   downvotes Int
