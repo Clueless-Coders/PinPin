@@ -3,7 +3,7 @@ import { PinsService } from './pins.service';
 import { Prisma } from '@prisma/client';
 import { CreatePinDTO, UpdatePinDTO} from './dto/pins.dto';
 
-@Controller('pins')
+@Controller()
 export class PinsController {
     constructor(private readonly pinsService: PinsService){}
 
