@@ -1,3 +1,4 @@
+import { AuthService } from "@/services/AuthService";
 import { Link, router } from "expo-router";
 import { useEffect, useState } from "react";
 import { Button, Text, View } from "react-native";
@@ -9,11 +10,19 @@ export default function Index() {
   const [isLoggedIn, setLoggedIn] = useState(false);
 
   useEffect(() => {
-    if (isLoggedIn) {
-      router.replace("/(home)");
-    }
-    return () => setLoggedIn(false);
-  }, [isLoggedIn]);
+    const authService = new AuthService();
+    const login = async () =>
+      await authService.login("adam2@google.com", "TestingTesting");
+
+    const loginPromise = login();
+
+    loginPromise.then((user) => {
+      if (user) {
+        router.replace("/(home)");
+        setLoggedIn(true);
+      }
+    });
+  }, []);
 
   return (
     <View
