@@ -14,35 +14,35 @@ datasource db {
 }
 
 model User {
-  email  String @unique
-  id     Int    @id @default(autoincrement())
-  pwHash String
+  email    String    @unique
+  id       Int       @id @default(autoincrement())
+  pwHash   String
   comments Comment[]
-  pins Pin[]
+  pins     Pin[]
 }
 
 model Pin {
-  id Int @id @default(autoincrement())
-  user User @relation(fields: [userID], references: [id])
-  userID Int 
-  text String @db.VarChar(300)
-  upvotes Int
+  id        Int       @id @default(autoincrement())
+  user      User      @relation(fields: [userID], references: [id])
+  userID    Int
+  text      String    @db.VarChar(300)
+  upvotes   Int
   downvotes Int
-  imageURL String?
+  imageURL  String?
   longitude Float
-  latitude Float
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  comments Comment[]
+  latitude  Float
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  comments  Comment[]
 }
 
-model Comment{
-  id Int @id @default(autoincrement())
-  userID Int
-  user User @relation(fields: [userID], references: [id])
-  pinID Int
-  pin Pin @relation(fields: [pinID], references: [id])
-  test String @db.VarChar(300)
-  upvotes Int
+model Comment {
+  id        Int    @id @default(autoincrement())
+  userID    Int
+  user      User   @relation(fields: [userID], references: [id])
+  pinID     Int
+  pin       Pin    @relation(fields: [pinID], references: [id])
+  text      String @db.VarChar(300)
+  upvotes   Int
   downvotes Int
 }
