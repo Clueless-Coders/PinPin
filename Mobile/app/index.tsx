@@ -1,8 +1,7 @@
 import { AuthService } from "@/services/AuthService";
 import { Link, router } from "expo-router";
-import { useContext, useEffect, useState } from "react";
-import { Button, Text, TextInput, View } from "react-native";
-import { test } from "./_layout";
+import { useEffect, useState } from "react";
+import { Button, TextInput, View } from "react-native";
 
 export const authService = new AuthService();
 
@@ -13,8 +12,6 @@ export default function Index() {
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-
-  console.log(useContext(test));
 
   useEffect(() => {
     async function login() {
@@ -46,7 +43,11 @@ export default function Index() {
     >
       <Link href="/signup">Click here for signup</Link>
 
-      <Button title="Login" onPress={() => setIsLoggingIn(true)}></Button>
+      <Button
+        title="Login"
+        onPress={() => setIsLoggingIn(true)}
+        disabled={isLoggingIn}
+      ></Button>
 
       <TextInput
         style={{ height: 40, borderColor: "black", borderRadius: 3 }}

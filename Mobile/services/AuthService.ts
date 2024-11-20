@@ -37,9 +37,10 @@ export class AuthService {
         }),
       });
       const token: ITokens = await res.json();
+      console.log(token);
 
       if (res.status !== 200) {
-        throw new Error("Error on sign in");
+        throw new Error("Error on sign in " + res.statusText);
       }
 
       this.tokens = token;
