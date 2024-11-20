@@ -17,10 +17,16 @@ export default function Index() {
     async function login() {
       try {
         //if email or pw not provided, don't attempt login
-        if (email.length === 0 || password.length === 0) return;
+        if (email.length === 0 || password.length === 0) {
+          setIsLoggingIn(false);
+          return;
+        }
+
+        if (authService.isLoggedIn()) router.replace("/(home)");
 
         const user = await authService.login(email, password);
         console.log(user);
+
         if (user) {
           router.replace("/(home)");
         }

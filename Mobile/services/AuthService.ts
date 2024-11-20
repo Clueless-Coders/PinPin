@@ -22,6 +22,7 @@ export class AuthService {
       //console.log("Hello!", config);
       config.headers.Authorization =
         "Bearer " + (this.tokens?.access_token ?? "");
+
       return config;
     });
   }
@@ -35,17 +36,6 @@ export class AuthService {
    */
   async login(email: string, password: string): Promise<User> {
     try {
-      /*const res = await fetch(`${API_BASE_URL}/auth/signin`, {
-        method: "POST",
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email: email,
-          password: password,
-        }),
-      });*/
       const res = await axios.post<ITokens>(`${API_BASE_URL}/auth/signin`, {
         email,
         password,
