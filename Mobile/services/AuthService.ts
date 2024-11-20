@@ -1,5 +1,6 @@
 import { API_BASE_URL } from "@/environment";
 import { User } from "@/interfaces/user.interface";
+import axios from "axios";
 import { jwtDecode } from "jwt-decode";
 
 export interface ITokens {
@@ -16,6 +17,15 @@ export class AuthService {
   private tokens?: ITokens;
   private currUser?: User;
 
+  constructor() {
+    axios.interceptors.request.use((config) => {
+      //console.log("Hello!", config);
+      config.headers.Authorization =
+        "Bearer " + (this.tokens?.access_token ?? "");
+      return config;
+    });
+  }
+
   /**
    * Logs in the user with the given email and password. Automatically stores
    * access tokens for subsequent requests.
@@ -25,7 +35,7 @@ export class AuthService {
    */
   async login(email: string, password: string): Promise<User> {
     try {
-      const res = await fetch(`${API_BASE_URL}/auth/signin`, {
+      /*const res = await fetch(`${API_BASE_URL}/auth/signin`, {
         method: "POST",
         headers: {
           Accept: "application/json",
@@ -35,13 +45,13 @@ export class AuthService {
           email: email,
           password: password,
         }),
+      });*/
+      const res = await axios.post<ITokens>(`${API_BASE_URL}/auth/signin`, {
+        email,
+        password,
       });
-      const token: ITokens = await res.json();
-      console.log(token);
 
-      if (res.status !== 200) {
-        throw new Error("Error on sign in " + res.statusText);
-      }
+      const token = res.data;
 
       this.tokens = token;
       const payload = jwtDecode<IJWTPayload>(this.tokens.access_token);
