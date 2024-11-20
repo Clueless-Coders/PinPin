@@ -4,12 +4,14 @@ export class CreatePinDTO {
     @IsString()
     @Length(1, 300)
     text: string;
-    @IsInt()
-    userID: number;
+
+    @IsOptional()
     @IsString()
     imageURL?: string;
+
     @IsNumber()
     longitude: number;
+
     @IsNumber()
     latitude: number;
 }
@@ -18,11 +20,9 @@ export class UpdatePinDTO {
     @IsString()
     @Length(1, 300)
     text: string;
-    @IsString()
-    imageURL: string;
-    @IsInt()
-    downvote: number;
-    @IsInt()
-    upvote: number;
+}
 
+export class UpdateVotes {
+    @IsInt()
+    changeBy: number
 }
