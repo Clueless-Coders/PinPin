@@ -5,13 +5,13 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { Pin } from '@prisma/client';
-import { DatabaseService } from 'src/database/database.service';
 import { CreatePinDTO, UpdatePinDTO } from './dto/pins.dto';
 import { Request } from 'express';
+import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
 export class PinsService {
-  constructor(private readonly databaseService: DatabaseService) {}
+  constructor(private readonly databaseService: PrismaService) {}
 
   async create(createPin: CreatePinDTO, req: Request) {
     try {

@@ -7,8 +7,8 @@ import {
 import { Reflector } from '@nestjs/core';
 import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
-import { Observable } from 'rxjs';
 import { IS_PUBLIC } from './public.decorator';
+import { IS_REFRESH } from './refresh.decorator';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
@@ -19,6 +19,11 @@ export class AuthGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC, [
+      context.getHandler(),
+      context.getClass(),
+    ]);
+
+    const isRefresh = this.reflector.getAllAndOverride<boolean>(IS_REFRESH, [
       context.getHandler(),
       context.getClass(),
     ]);
@@ -34,6 +39,7 @@ export class AuthGuard implements CanActivate {
     try {
       const user = await this.jwtService.verifyAsync(token, {
         secret: process.env.JWT_SECRET,
+        maxAge: isRefresh ? '7d' : undefined,
       });
       request['user'] = user;
     } catch (e: any) {

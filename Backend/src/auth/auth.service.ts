@@ -33,12 +33,27 @@ export class AuthService {
 
     if (!pwValid) throw new UnauthorizedException('Password Incorrect.');
 
-    //Return the JWT upon successful authentication
-    return {
-      access_token: await this.jwtService.signAsync({
+    //Generate tokens
+    const [access_token, refresh_token] = await Promise.all([
+      this.jwtService.signAsync({
         id: user.id,
         email: user.email,
       }),
+      this.jwtService.signAsync(
+        {
+          id: user.id,
+          email: user.email,
+        },
+        {
+          expiresIn: '7d',
+        },
+      ),
+    ]);
+
+    //Return the JWT upon successful authentication
+    return {
+      access_token,
+      refresh_token,
     };
   }
 }
