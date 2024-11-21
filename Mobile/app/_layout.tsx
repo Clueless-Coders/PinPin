@@ -1,5 +1,5 @@
 import { Stack } from "expo-router";
-import React from "react";
+import React = require("react");
 
 export default function RootLayout() {
   return (
