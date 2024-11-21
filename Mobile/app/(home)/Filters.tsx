@@ -1,4 +1,3 @@
-import React = require("react");
 import { useCallback, useRef, useMemo } from "react";
 import { StyleSheet, View, Text } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
@@ -7,6 +6,7 @@ import BottomSheet, {
   BottomSheetTextInput,
 } from "@gorhom/bottom-sheet";
 import PinPost from "@/components/PinPost";
+import React from "react";
 
 // TO DO
 // Implement PinList component to scrollable flatlist
@@ -52,7 +52,7 @@ export default function Filters() {
   }, []);
   return (
     <GestureHandlerRootView style={styles.container}>
-      <PinPost> </PinPost>
+      <PinPost />
 
       <BottomSheet
         ref={sheetRef}
@@ -60,7 +60,7 @@ export default function Filters() {
         enableDynamicSizing={false}
         onChange={handleSheetChange}
         enableHandlePanningGesture={true}
-        enableOverdrag={false}
+        enableOverDrag={false}
         backgroundStyle={{ backgroundColor: "#FFF9ED" }}
         handleIndicatorStyle={{ backgroundColor: "#000000" }}
       >
