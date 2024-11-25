@@ -21,6 +21,11 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
+      "config": {
+        "googleMaps": {
+          "apiKey": "AIzaSyDaz7bRt1Pk1z-ALmXm3ipdzmHKOw47fB8"
+        }
+      },
       "package": "com.clueless.pinpin"
     },
     "web": {
