@@ -1,11 +1,11 @@
 import { Module } from '@nestjs/common';
 import { PinsController } from './pins.controller';
 import { PinsService } from './pins.service';
-import { DatabaseModule } from 'src/database/database.module';
+import { PrismaModule } from 'src/prisma/prisma.module';
 
 @Module({
-  imports: [DatabaseModule],
+  imports: [PrismaModule],
   controllers: [PinsController],
-  providers: [PinsService]
+  providers: [PinsService],
 })
 export class PinsModule {}
