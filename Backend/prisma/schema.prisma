@@ -42,7 +42,7 @@ model Comment {
   user      User   @relation(fields: [userID], references: [id])
   pinID     Int
   pin       Pin    @relation(fields: [pinID], references: [id])
-  test      String @db.VarChar(300)
+  text      String @db.VarChar(300)
   upvotes   Int
   downvotes Int
 }
