@@ -3,6 +3,8 @@ import { JwtService } from '@nestjs/jwt';
 import { User } from '@prisma/client';
 import { UsersService } from 'src/users/users.service';
 import * as bcrypt from 'bcrypt';
+import { Request } from 'express';
+import { emitWarning } from 'process';
 
 @Injectable()
 export class AuthService {
@@ -45,7 +47,7 @@ export class AuthService {
           email: user.email,
         },
         {
-          expiresIn: '7d',
+          expiresIn: '30s',
         },
       ),
     ]);
@@ -54,6 +56,15 @@ export class AuthService {
     return {
       access_token,
       refresh_token,
+    };
+  }
+
+  async refresh(user: User) {
+    return {
+      access_token: await this.jwtService.signAsync({
+        id: user.id,
+        email: user.email,
+      }),
     };
   }
 }

@@ -15,7 +15,10 @@ export default function Index() {
 
   useEffect(() => {
     async function login() {
-      if (authService.isLoggedIn()) router.replace("/(home)");
+      if (authService.isLoggedIn()) {
+        console.log("Hi");
+        router.replace("/(home)");
+      }
 
       //if email or pw not provided, don't attempt login
       if (email.length === 0 || password.length === 0) {
