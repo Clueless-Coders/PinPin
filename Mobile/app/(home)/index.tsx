@@ -1,13 +1,5 @@
 import { Link } from "expo-router";
 import { View, Text, StyleSheet } from "react-native";
-import { useCallback, useEffect, useMemo, useRef } from "react";
-import { GestureHandlerRootView } from "react-native-gesture-handler";
-import {
-  BottomSheetModal,
-  BottomSheetModalProvider,
-  BottomSheetTextInput,
-  BottomSheetView,
-} from "@gorhom/bottom-sheet";
 import React from "react";
 
 //Map, create pin, etc

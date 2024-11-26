@@ -7,53 +7,62 @@ import BottomSheet, {
 } from "@gorhom/bottom-sheet";
 import PinPost from "@/components/PinPost";
 import React from "react";
+import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
+import { faFilter } from "@fortawesome/free-solid-svg-icons/faFilter";
 
 // TO DO
-// Implement PinList component to scrollable flatlist
-// Scrollable Pin List Component??
-// Finish search bar + filter button
+// Finish search bar + filter button styling
 // Square Buttons Component
-// Modal Customizations?
+// Modal Customizations (shadow, divider line, sticky top)
 // make keyboard work good
 // clean up code
-
-//scrolling stuff isnt working so we might just have to lock the modal to 75% for now idk
+// the top component must be registered as viewing and change color
 
 export default function Filters() {
-  // hooks
   const sheetRef = useRef<BottomSheet>(null);
 
-  // variables
+  // testing pin content rendering, need to connect to backend eek
   const data = useMemo(
     () =>
-      Array(20)
+      Array(25)
         .fill(0)
-        .map((_, index) => `index-${index}`),
+        .map((_, index) => ({
+          id: `index-${index}`,
+          distance: `${index + 1}mi`,
+          time: `${index + 2}s`,
+          text: `test pin index ${index}`,
+          comments: index + 3,
+          karma: index + 4,
+        })),
     []
   );
-  const snapPoints = useMemo(() => ["15%", "75%", "100%"], []);
+  // removed 100% snap point while nested scrolling doesnt work
+  const snapPoints = useMemo(() => ["12%", "75%"], []);
 
-  // callbacks
   const handleSheetChange = useCallback((index: number) => {
     console.log("handleSheetChange", index);
   }, []);
 
-  // const handleRefresh = useCallback(() => {   //idk if we're gonna need this in the future
+  // idk if we're gonna need this in the future
+  // const handleRefresh = useCallback(() => {
   //   console.log("handleRefresh");
   // }, []);
 
-  // render
-  const renderItem = useCallback((something: any) => {
+  const renderItem = useCallback(({ item }: { item: any }) => {
     return (
-      <View style={styles.itemContainer}>
-        <Text>{something.item}</Text>
+      <View style={{ marginBottom: 15 }}>
+        <PinPost
+          distance={item.distance}
+          time={item.time}
+          text={item.text}
+          comments={item.comments}
+          karma={item.karma}
+        />
       </View>
     );
   }, []);
   return (
-    <GestureHandlerRootView style={styles.container}>
-      <PinPost />
-
+    <GestureHandlerRootView style={styles.root}>
       <BottomSheet
         ref={sheetRef}
         snapPoints={snapPoints}
@@ -64,16 +73,21 @@ export default function Filters() {
         backgroundStyle={{ backgroundColor: "#FFF9ED" }}
         handleIndicatorStyle={{ backgroundColor: "#000000" }}
       >
-        <BottomSheetTextInput style={styles.input} />
+        <View style={styles.search}>
+          <BottomSheetTextInput style={styles.input} />
+          <FontAwesomeIcon icon={faFilter} />
+          {/* must add divider bar, try placing after filter instead of in view*/}
+        </View>
+
         <BottomSheetFlatList
           data={data}
-          keyExtractor={(i) => i}
+          keyExtractor={(item) => item.id}
           renderItem={renderItem}
-          contentContainerStyle={styles.contentContainer}
+          contentContainerStyle={styles.flatlist}
           // refreshing={false}
           // onRefresh={handleRefresh}
-          nestedScrollEnabled={true} // Enable nested scrolling
-          //keyboardShouldPersistTaps="handled" // Prevent taps from being blocked
+          // nestedScrollEnabled={true}  // should enable nested scrolling but it doesnt work :(
+          // keyboardShouldPersistTaps="handled"  // why are taps still being blocked :(
         />
       </BottomSheet>
     </GestureHandlerRootView>
@@ -81,22 +95,18 @@ export default function Filters() {
 }
 
 const styles = StyleSheet.create({
-  container: {
+  root: {
     flex: 1,
     paddingTop: 200,
   },
-  contentContainer: {
+  flatlist: {
     backgroundColor: "#FFF9ED",
-  },
-  itemContainer: {
-    padding: 6,
-    margin: 6,
-    backgroundColor: "#eee",
+    marginVertical: 10,
   },
   input: {
-    alignSelf: "stretch",
     marginHorizontal: 10,
-    marginVertical: 5,
+    marginTop: 8,
+    marginBottom: 15,
     borderRadius: 10,
     borderWidth: 2,
     borderColor: "#000000",
@@ -104,5 +114,11 @@ const styles = StyleSheet.create({
     lineHeight: 20,
     padding: 5,
     color: "#FFF9ED",
+    width: 350, //not sure why this is stretching beyond the screen, must fix to be dynamic
+  },
+  search: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
   },
 });
