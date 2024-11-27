@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "Pin" ALTER COLUMN "imageURL" DROP NOT NULL;
