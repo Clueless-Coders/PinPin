@@ -4,14 +4,14 @@ import {
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
-import { Pin } from '@prisma/client';
+import { Pin, pinVotes } from '@prisma/client';
 import { DatabaseService } from 'src/database/database.service';
 import { CreatePinDTO, UpdatePinDTO } from './dto/pins.dto';
 import { Request } from 'express';
 
 @Injectable()
 export class PinsService {
-  constructor(private readonly databaseService: DatabaseService) {}
+  constructor(private readonly databaseService: DatabaseService) { }
 
   async create(createPin: CreatePinDTO, req: Request) {
     try {
@@ -47,8 +47,11 @@ export class PinsService {
       throw new InternalServerErrorException('DB call failed');
     }
 
-    if (!res)
+    if (!res) {
       throw new NotFoundException('Pin with ID ' + pinID + ' not found.');
+    }
+
+
     return res;
   }
 
@@ -67,7 +70,25 @@ export class PinsService {
     });
   }
 
-  async patchUpvote(pinID: number, increment: number) {
+  async getPinVotes(pinID: number, userID: number) {
+    let res;
+    try {
+      res = await this.databaseService.pinVotes.aggregate({
+        _sum: {
+          vote: true,
+        },
+      });
+    } catch (e) {
+      throw new InternalServerErrorException('Votes DB call failed');
+    }
+
+    if (!res) {
+      return [];
+    } else {
+
+    }
+
+    return res;
     // return this.databaseService.pin.update({
     //     where: {
     //         id: pinID,
