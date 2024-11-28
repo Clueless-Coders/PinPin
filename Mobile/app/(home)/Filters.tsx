@@ -5,7 +5,7 @@ import BottomSheet, {
   BottomSheetFlatList,
   BottomSheetTextInput,
 } from "@gorhom/bottom-sheet";
-import PinPost from "@/components/PinPost";
+import PinPost, { PinPostProps } from "@/components/PinPost";
 import React from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { faFilter } from "@fortawesome/free-solid-svg-icons/faFilter";
@@ -26,12 +26,13 @@ export default function Filters() {
     () =>
       Array(25)
         .fill(0)
-        .map((_, index) => ({
+        .map((_, index): PinPostProps & { id: string } => ({
+          isFocused: index === 0,
           id: `index-${index}`,
-          distance: `${index + 1}mi`,
-          time: `${index + 2}s`,
-          text: `test pin index ${index}`,
-          comments: index + 3,
+          distance: index + 1,
+          time: new Date(Date.now() - 30000),
+          text: `test pin index ${index} asldkfjasdkl;jasdkljdflk;asjfl;adjfkl;asdjfklasdfjasdfjasdklfjasjklasdfjasdkl;jasdjajasdjasdfjasdl;fjasdkfjasdfjasd`,
+          commentCount: index + 3,
           karma: index + 4,
         })),
     []
@@ -48,15 +49,16 @@ export default function Filters() {
   //   console.log("handleRefresh");
   // }, []);
 
-  const renderItem = useCallback(({ item }: { item: any }) => {
+  const renderItem = useCallback(({ item }: { item: PinPostProps }) => {
     return (
       <View style={{ marginBottom: 15 }}>
         <PinPost
           distance={item.distance}
           time={item.time}
           text={item.text}
-          comments={item.comments}
+          commentCount={item.commentCount}
           karma={item.karma}
+          isFocused={item.isFocused}
         />
       </View>
     );
