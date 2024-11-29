@@ -1,5 +1,5 @@
 import { useCallback, useRef, useMemo } from "react";
-import { StyleSheet, View } from "react-native";
+import { StyleSheet, View, Text } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import BottomSheet, {
   BottomSheetFlatList,
@@ -87,12 +87,17 @@ export default function HomeIndex() {
       </View>
     );
   }, []);
+
   return (
     <GestureHandlerRootView style={styles.root}>
       <Link href={"/(home)/Filters"}>Filters page</Link>
       <Link href={"/(home)/NewPin"}>New Pin page</Link>
       <Link href={"/(home)/Settings"}>Settings page</Link>
       <Link href={"/(home)/0"}> PinDetail page</Link>
+
+      <Text>{JSON.stringify(location?.coords)}</Text>
+      {/* must add divider bar, try placing after filter instead of in view*/}
+      <MapView style={styles.map} provider={PROVIDER_GOOGLE} />
 
       <BottomSheet
         ref={sheetRef}
@@ -107,8 +112,6 @@ export default function HomeIndex() {
         <View style={styles.search}>
           <BottomSheetTextInput style={styles.input} />
           <FontAwesomeIcon icon={faFilter} />
-          {/* must add divider bar, try placing after filter instead of in view*/}
-          <MapView style={styles.map} provider={PROVIDER_GOOGLE} />
         </View>
 
         <BottomSheetFlatList
