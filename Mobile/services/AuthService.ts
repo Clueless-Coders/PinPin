@@ -15,6 +15,20 @@ export interface IJWTPayload {
   iat: number;
   exp: number;
 }
+
+export interface IPins {
+  id: number;
+  userID: number;
+  text: string;
+  upvotes: number;
+  downvotes: number;
+  imageURL?: string;
+  longitude: number;
+  latitude: number;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 export class AuthService {
   private tokens?: ITokens;
   private currUser?: User;
@@ -115,5 +129,21 @@ export class AuthService {
       console.log("Refreshing token...");
       this.refreshToken();
     }, timeToExpireInMs - 1000);
+  }
+}
+
+export class PinService {
+  // private pins: IPins[];
+  constructor() {
+
+  }
+  async getPin(pinID: number): Promise<IPins> {
+    console.log("starting fetching")
+    const res = await axios.get<IPins>(`${API_BASE_URL}/pin/${pinID}`);
+
+    var pin = res.data;
+    console.log(pin);
+    return pin;
+
   }
 }
