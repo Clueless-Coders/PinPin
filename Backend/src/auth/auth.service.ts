@@ -3,6 +3,8 @@ import { JwtService } from '@nestjs/jwt';
 import { User } from '@prisma/client';
 import { UsersService } from 'src/users/users.service';
 import * as bcrypt from 'bcrypt';
+import { Request } from 'express';
+import { emitWarning } from 'process';
 
 @Injectable()
 export class AuthService {
@@ -33,7 +35,31 @@ export class AuthService {
 
     if (!pwValid) throw new UnauthorizedException('Password Incorrect.');
 
+    //Generate tokens
+    const [access_token, refresh_token] = await Promise.all([
+      this.jwtService.signAsync({
+        id: user.id,
+        email: user.email,
+      }),
+      this.jwtService.signAsync(
+        {
+          id: user.id,
+          email: user.email,
+        },
+        {
+          expiresIn: '30s',
+        },
+      ),
+    ]);
+
     //Return the JWT upon successful authentication
+    return {
+      access_token,
+      refresh_token,
+    };
+  }
+
+  async refresh(user: User) {
     return {
       access_token: await this.jwtService.signAsync({
         id: user.id,
