@@ -19,11 +19,13 @@ model User {
   pwHash   String
   comments Comment[]
   pins     Pin[]
+  viewable Pin[]     @relation("viewable")
 }
 
 model Pin {
   id        Int       @id @default(autoincrement())
   user      User      @relation(fields: [userID], references: [id])
+  viewable  User[]    @relation("viewable")
   userID    Int
   text      String    @db.VarChar(300)
   upvotes   Int

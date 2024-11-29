@@ -47,7 +47,7 @@ export class AuthService {
           email: user.email,
         },
         {
-          expiresIn: '30s',
+          expiresIn: process.env.JWT_REFRESH_LENGTH,
         },
       ),
     ]);

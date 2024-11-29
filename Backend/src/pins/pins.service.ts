@@ -31,10 +31,6 @@ export class PinsService {
     }
   }
 
-  // async getAllPins() {
-  //     return this.databaseService.pin.findMany();
-  // }
-
   async getPin(pinID: number) {
     let res: Pin;
     try {
@@ -99,23 +95,68 @@ export class PinsService {
       },
     });
   }
+
+  /**
+   * Gets pins by a location range. The boundary box is defined by the Northeast and Southwest coordinates.
+   * Returns an array of pins within this boundary box.
+   * @param neLat
+   * @param neLong
+   * @param swLat
+   * @param swLong
+   */
+  async getPinsInLocationRange(
+    neLat: number,
+    neLong: number,
+    swLat: number,
+    swLong: number,
+  ): Promise<Pin[]> {
+    try {
+      return await this.databaseService.pin.findMany({
+        where: {
+          AND: [
+            {
+              latitude: {
+                gte: swLat,
+              },
+            },
+            {
+              latitude: {
+                lte: neLat,
+              },
+            },
+            {
+              longitude: {
+                gte: neLong,
+              },
+            },
+            {
+              longitude: {
+                lte: swLong,
+              },
+            },
+          ],
+        },
+      });
+    } catch (e: any) {
+      console.log(e);
+      throw new InternalServerErrorException('Database query failed', e);
+    }
+  }
+
+  async getVisiblePinsByUserID(userID: number) {
+    try {
+      return await this.databaseService.pin.findMany({
+        where: {
+          viewable: {
+            some: {
+              id: userID,
+            },
+          },
+        },
+      });
+    } catch (e: any) {
+      console.log(e);
+      throw new InternalServerErrorException('Database query failed', e);
+    }
+  }
 }
-// @Get()
-// getAllPins(){
-//     return []
-// }
-
-// @Get(':id')
-// getPin(@Param('id') id: string){
-//     return {id}
-// }
-
-// @Post()
-// postPin(@Body() createPinDto: Prisma.PinCreateInput){
-//     return this.pinsService.create(createPinDto);
-// }
-
-// @Delete()
-// deletePin(@Param('id') id: string){
-//     return id;
-// }
