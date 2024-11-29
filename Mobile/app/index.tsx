@@ -1,5 +1,6 @@
 import { AuthService } from "@/services/AuthService";
 import { Link, router } from "expo-router";
+import React from "react";
 import { useEffect, useState } from "react";
 import { Button, TextInput, View } from "react-native";
 
