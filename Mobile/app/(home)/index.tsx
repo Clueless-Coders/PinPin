@@ -19,8 +19,10 @@ export default function HomeIndex() {
   const [location, setLocation] = useState<Location.LocationObject | null>(
     null
   );
+
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
+  //Setup Maps
   useEffect(() => {
     async function getCurrentLocation() {
       let { status } = await Location.requestForegroundPermissionsAsync();
@@ -44,6 +46,7 @@ export default function HomeIndex() {
   }
 
   const sheetRef = useRef<BottomSheet>(null);
+  const mapRef = useRef<MapView>(null);
 
   // testing pin content rendering, need to connect to backend eek
   const data = useMemo(
@@ -88,6 +91,11 @@ export default function HomeIndex() {
     );
   }, []);
 
+  async function getCurrentBounds() {
+    console.log(await mapRef.current?.getMapBoundaries());
+    console.log(location?.coords);
+  }
+
   return (
     <GestureHandlerRootView style={styles.root}>
       <Link href={"/(home)/Filters"}>Filters page</Link>
@@ -97,7 +105,12 @@ export default function HomeIndex() {
 
       <Text>{JSON.stringify(location?.coords)}</Text>
       {/* must add divider bar, try placing after filter instead of in view*/}
-      <MapView style={styles.map} provider={PROVIDER_GOOGLE} />
+      <MapView
+        style={styles.map}
+        ref={mapRef}
+        onRegionChangeComplete={getCurrentBounds}
+        showsUserLocation={true}
+      />
 
       <BottomSheet
         ref={sheetRef}
