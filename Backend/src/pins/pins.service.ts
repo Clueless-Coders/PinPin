@@ -8,6 +8,7 @@ import { Pin } from '@prisma/client';
 import { CreatePinDTO, UpdatePinDTO } from './dto/pins.dto';
 import { Request } from 'express';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { computeDestinationPoint } from 'geolib';
 
 @Injectable()
 export class PinsService {
@@ -143,20 +144,70 @@ export class PinsService {
     }
   }
 
-  async getVisiblePinsByUserID(userID: number) {
+  /**
+   * Gets all pins marked as visible for the provided user ID
+   * @param userID
+   * @returns
+   */
+  async getVisiblePinsByUserID(userId: number) {
     try {
-      return await this.databaseService.pin.findMany({
+      return await this.databaseService.viewable.findMany({
         where: {
-          viewable: {
-            some: {
-              id: userID,
-            },
-          },
+          userId,
+        },
+        select: {
+          pin: true,
         },
       });
     } catch (e: any) {
       console.log(e);
       throw new InternalServerErrorException('Database query failed', e);
     }
+  }
+
+  async markVisibleByLocation(
+    location: {
+      latitude: number;
+      longitude: number;
+    },
+    userID: number,
+  ) {
+    //Gets upper left and bottom right location bounds for pins to be marked as visible
+    const swBearingInDegs = 135;
+    const neBearningInDegs = 315;
+    const swLoc = computeDestinationPoint(location, 5, swBearingInDegs);
+    const neLoc = computeDestinationPoint(location, 5, neBearningInDegs);
+
+    let pinsToMakeVisible: Pin[];
+    try {
+      //Gets all pins within the boundary box defined previously
+      pinsToMakeVisible = await this.getPinsInLocationRange(
+        neLoc.latitude,
+        neLoc.longitude,
+        swLoc.latitude,
+        swLoc.longitude,
+      );
+    } catch (e: any) {
+      console.log(e);
+      throw new InternalServerErrorException('Database query failed', e);
+    }
+
+    //Creates viewable relationship for pins to users...
+    const viewables = pinsToMakeVisible.map((pin) => ({
+      pinId: pin.id,
+      userId: userID,
+    }));
+
+    try {
+      //...And uploads them to the database
+      await this.databaseService.viewable.createMany({
+        data: viewables,
+      });
+    } catch (e: any) {
+      console.log(e);
+      throw new InternalServerErrorException('Marking Pins visible failed', e);
+    }
+
+    return pinsToMakeVisible;
   }
 }

@@ -11,6 +11,7 @@ import {
 import { PinsService } from './pins.service';
 import {
   CreatePinDTO,
+  LocationDTO,
   LocationRangeDTO,
   UpdatePinDTO,
   UpdateVotes,
@@ -37,13 +38,18 @@ export class PinsController {
   }
 
   @Get(':id')
-  getPin(@Param('id') id: String) {
-    return this.pinsService.getPin(+id);
+  async getPin(@Param('id') id: String) {
+    return await this.pinsService.getPin(+id);
   }
 
   @Post()
-  postPin(@Body() createPinDTO: CreatePinDTO, @Req() request: Request) {
-    return this.pinsService.create(createPinDTO, request);
+  async postPin(@Body() createPinDTO: CreatePinDTO, @Req() request: Request) {
+    return await this.pinsService.create(createPinDTO, request);
+  }
+
+  @Post('visible')
+  async markPinsVisibleByLocation(@Body() loc: LocationDTO, @Req() { user }) {
+    return await this.pinsService.markVisibleByLocation(loc, user.id);
   }
 
   @Post(':id/upvotes')
@@ -57,13 +63,13 @@ export class PinsController {
   }
 
   @Patch(':id')
-  updatePin(@Param('id') id: String, @Body() updatePinDTO: UpdatePinDTO) {
-    return this.pinsService.updatePin(+id, updatePinDTO);
+  async updatePin(@Param('id') id: String, @Body() updatePinDTO: UpdatePinDTO) {
+    return await this.pinsService.updatePin(+id, updatePinDTO);
   }
 
   //change delete to check if user is deleting their own posts
   @Delete(':id')
-  deletePin(@Param('id') id: String, @Req() request: Request) {
-    return this.pinsService.removePin(+id, request);
+  async deletePin(@Param('id') id: String, @Req() request: Request) {
+    return await this.pinsService.removePin(+id, request);
   }
 }

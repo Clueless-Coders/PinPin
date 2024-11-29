@@ -40,3 +40,11 @@ export class LocationRangeDTO {
   @IsNumber()
   swLong: number;
 }
+
+export class LocationDTO {
+  @IsNumber()
+  latitude: number;
+
+  @IsNumber()
+  longitude: number;
+}

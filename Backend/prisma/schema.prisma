@@ -14,28 +14,35 @@ datasource db {
 }
 
 model User {
-  email    String    @unique
-  id       Int       @id @default(autoincrement())
+  email    String     @unique
+  id       Int        @id @default(autoincrement())
   pwHash   String
   comments Comment[]
   pins     Pin[]
-  viewable Pin[]     @relation("viewable")
+  Viewable Viewable[]
+}
+
+model Viewable {
+  user   User @relation(fields: [userId], references: [id])
+  userId Int  @unique
+  pin    Pin  @relation(fields: [pinId], references: [id])
+  pinId  Int  @unique
 }
 
 model Pin {
-  id        Int       @id @default(autoincrement())
-  user      User      @relation(fields: [userID], references: [id])
-  viewable  User[]    @relation("viewable")
+  id        Int        @id @default(autoincrement())
+  user      User       @relation(fields: [userID], references: [id])
   userID    Int
-  text      String    @db.VarChar(300)
+  text      String     @db.VarChar(300)
   upvotes   Int
   downvotes Int
   imageURL  String?
   longitude Float
   latitude  Float
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
   comments  Comment[]
+  Viewable  Viewable[]
 }
 
 model Comment {
