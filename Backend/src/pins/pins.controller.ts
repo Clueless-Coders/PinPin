@@ -9,8 +9,13 @@ import {
     Req,
 } from '@nestjs/common';
 import { PinsService } from './pins.service';
-import { Prisma } from '@prisma/client';
-import { CreatePinDTO, UpdatePinDTO, UpdateVotes } from './dto/pins.dto';
+import {
+    CreatePinDTO,
+    LocationDTO,
+    LocationRangeDTO,
+    UpdatePinDTO,
+    UpdateVotes,
+} from './dto/pins.dto';
 import { Request } from 'express';
 import { request } from 'http';
 
@@ -18,41 +23,70 @@ import { request } from 'http';
 export class PinsController {
     constructor(private readonly pinsService: PinsService) { }
 
-    // @Get()
-    // getAllPins() {
-    //     return this.pinsService.getAllPins()
-    // }
+    @Post('location')
+    async getPinsByLocationRange(@Body() loc: LocationRangeDTO, @Req() { user }) {
+        return await this.pinsService.getPinsInLocationRangeByUserId(
+            loc.neLat,
+            loc.neLong,
+            loc.swLat,
+            loc.swLong,
+            user.id,
+        );
+    }
+
+    @Post('location/all')
+    async getAllPinsByLocationRange(@Body() loc: LocationRangeDTO) {
+        return await this.pinsService.getAllPinsInLocationRange(
+            loc.neLat,
+            loc.neLong,
+            loc.swLat,
+            loc.swLong,
+        );
+    }
+
+    @Get('visible')
+    async getVisiblePins(@Req() { user }) {
+        return await this.pinsService.getVisiblePinsByUserID(user.id);
+    }
+
 
     @Get(':id')
-    getPin(@Param() { id }: { id: string }) {
-        return this.pinsService.getPin(+id);
+    async getPin(@Param('id') id: String) {
+        return await this.pinsService.getPin(+id);
     }
 
     @Post()
-    postPin(@Body() createPinDTO: CreatePinDTO, @Req() request: Request) {
-        return this.pinsService.create(createPinDTO, request);
+    async postPin(@Body() createPinDTO: CreatePinDTO, @Req() request: Request) {
+        return await this.pinsService.create(createPinDTO, request);
+    }
+
+    @Post('visible')
+    async markPinsVisibleByLocation(@Body() loc: LocationDTO, @Req() { user }) {
+        return await this.pinsService.markVisibleByLocation(loc, user.id);
     }
 
     @Post(':id/upvotes')
     patchUpvote(@Param('id') id: String, @Body() increment: UpdateVotes) {
         return 'not implemented yet :(';
-        // return this.pinsService.patchUpvote(+id, increment['increment']);
     }
 
     @Post(':id/downvotes')
     patchDownvote(@Param('id') id: String, @Body() increment: UpdateVotes) {
         return 'not implemented yet :(';
-        // return this.pinsService.patchDownvote(+id, increment['increment']);
     }
 
     @Patch(':id')
-    updatePin(@Param('id') id: String, @Body() updatePinDTO: UpdatePinDTO, @Req() request: Request) {
-        return this.pinsService.updatePin(+id, updatePinDTO, request);
+    async updatePin(
+        @Param('id') id: String,
+        @Body() updatePinDTO: UpdatePinDTO,
+        @Req() req: Request,
+    ) {
+        return await this.pinsService.updatePin(+id, updatePinDTO, req);
     }
 
     //change delete to check if user is deleting their own posts
     @Delete(':id')
-    deletePin(@Param('id') id: String, @Req() request: Request) {
-        return this.pinsService.removePin(+id, request);
+    async deletePin(@Param('id') id: String, @Req() request: Request) {
+        return await this.pinsService.removePin(+id, request);
     }
 }
