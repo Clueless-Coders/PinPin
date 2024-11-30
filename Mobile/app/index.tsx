@@ -1,5 +1,5 @@
 import { AuthService } from "@/services/AuthService";
-import { Link, router } from "expo-router";
+import { Link, Redirect, router } from "expo-router";
 import React from "react";
 import { useEffect, useState } from "react";
 import { Button, TextInput, View } from "react-native";
@@ -13,6 +13,7 @@ export default function Index() {
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loggedIn, setLoggedIn] = useState(false);
 
   useEffect(() => {
     async function login() {
@@ -32,7 +33,9 @@ export default function Index() {
         console.log(user);
 
         if (authService.isLoggedIn()) {
-          router.replace("/(home)");
+          setEmail("");
+          setPassword("");
+          setLoggedIn(true);
         }
       } catch (e) {
         console.log(e);
@@ -42,6 +45,8 @@ export default function Index() {
 
     login();
   }, [isLoggingIn]);
+
+  if (loggedIn) return <Redirect href={"/home"}></Redirect>;
 
   return (
     <View
@@ -58,7 +63,6 @@ export default function Index() {
         onPress={() => setIsLoggingIn(true)}
         disabled={isLoggingIn}
       ></Button>
-
       <TextInput
         style={{ height: 40, borderColor: "black", borderRadius: 3 }}
         placeholder="Email"
