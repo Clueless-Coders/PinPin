@@ -53,7 +53,7 @@ export class PinsService {
     return res;
   }
 
-  async updatePin(pinID: number, updatePinDTO: UpdatePinDTO, req?: Request) {
+  async updatePin(pinID: number, updatePinDTO: UpdatePinDTO, req: Request) {
     const currUser = req['user'];
     const pinToEdit = await this.getPin(pinID);
 
@@ -92,6 +92,10 @@ export class PinsService {
 
     if (pinToDelete.userID !== currUser.id)
       throw new ForbiddenException('User can only delete their own pins');
+
+    await this.databaseService.viewable.deleteMany({
+      where: { pinId: pinID },
+    });
 
     return await this.databaseService.pin.delete({
       where: {

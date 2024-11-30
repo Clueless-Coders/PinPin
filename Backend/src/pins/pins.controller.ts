@@ -7,7 +7,6 @@ import {
   Delete,
   Patch,
   Req,
-  Query,
 } from '@nestjs/common';
 import { PinsService } from './pins.service';
 import {
@@ -75,8 +74,12 @@ export class PinsController {
   }
 
   @Patch(':id')
-  async updatePin(@Param('id') id: String, @Body() updatePinDTO: UpdatePinDTO) {
-    return await this.pinsService.updatePin(+id, updatePinDTO);
+  async updatePin(
+    @Param('id') id: String,
+    @Body() updatePinDTO: UpdatePinDTO,
+    @Req() req: Request,
+  ) {
+    return await this.pinsService.updatePin(+id, updatePinDTO, req);
   }
 
   //change delete to check if user is deleting their own posts

@@ -132,7 +132,7 @@ export default function HomeIndex() {
 
   return (
     <GestureHandlerRootView style={styles.root}>
-      <Pressable onPress={() => router.replace("/")}>
+      {/* <Pressable onPress={() => router.replace("/")}>
         <Text>Go to login.</Text>
       </Pressable>
       <Link href={"/(home)/Filters"}>Filters page</Link>
@@ -141,7 +141,7 @@ export default function HomeIndex() {
       <Link href={"/(home)/0"}> PinDetail page</Link>
 
       <Text>{JSON.stringify(location?.coords)}</Text>
-      {/* must add divider bar, try placing after filter instead of in view*/}
+ */}
       <MapView
         style={styles.map}
         ref={mapRef}
