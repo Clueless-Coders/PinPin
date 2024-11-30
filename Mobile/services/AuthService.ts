@@ -4,7 +4,6 @@ import axios from "axios";
 import { router } from "expo-router";
 import { jwtDecode } from "jwt-decode";
 
-
 export interface ITokens {
   access_token: string;
   refresh_token: string;
@@ -142,9 +141,7 @@ export class AuthService {
 
 export class PinService {
   // private pins: IPins[];
-  constructor() {
-
-  }
+  constructor() { }
   async getPin(pinID: number): Promise<IPins | undefined> {
     console.log("starting fetching");
     try {
@@ -154,8 +151,8 @@ export class PinService {
       return pin;
     } catch (e) {
       console.log("Failed to get pin");
+      console.log(e);
     }
-
   }
 
   async deletePin(pinID: number) {

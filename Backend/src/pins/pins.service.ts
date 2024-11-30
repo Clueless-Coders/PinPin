@@ -44,6 +44,7 @@ export class PinsService {
         },
       });
     } catch (e) {
+      console.log(e);
       throw new InternalServerErrorException('DB call failed');
     }
 

@@ -1,4 +1,13 @@
-import { Controller, Param, Get, Post, Body, Delete, Patch, Req } from '@nestjs/common';
+import {
+    Controller,
+    Param,
+    Get,
+    Post,
+    Body,
+    Delete,
+    Patch,
+    Req,
+} from '@nestjs/common';
 import { PinsService } from './pins.service';
 import { Prisma } from '@prisma/client';
 import { CreatePinDTO, UpdatePinDTO, UpdateVotes } from './dto/pins.dto';
@@ -15,8 +24,8 @@ export class PinsController {
     // }
 
     @Get(':id')
-    getPin(@Param('id') id: String) {
-        return this.pinsService.getPin(+id)
+    getPin(@Param() { id }: { id: string }) {
+        return this.pinsService.getPin(+id);
     }
 
     @Post()
@@ -24,15 +33,15 @@ export class PinsController {
         return this.pinsService.create(createPinDTO, request);
     }
 
-    @Post(":id/upvotes")
+    @Post(':id/upvotes')
     patchUpvote(@Param('id') id: String, @Body() increment: UpdateVotes) {
-        return "not implemented yet :(";
+        return 'not implemented yet :(';
         // return this.pinsService.patchUpvote(+id, increment['increment']);
     }
 
-    @Post(":id/downvotes")
+    @Post(':id/downvotes')
     patchDownvote(@Param('id') id: String, @Body() increment: UpdateVotes) {
-        return "not implemented yet :(";
+        return 'not implemented yet :(';
         // return this.pinsService.patchDownvote(+id, increment['increment']);
     }
 
