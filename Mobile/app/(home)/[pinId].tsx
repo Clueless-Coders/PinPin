@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, Button } from "react-native";
-import { PinService } from "@/services/AuthService"; // Assume this is the service that provides getPin
+import { PinService } from "@/services/PinService"; // Assume this is the service that provides getPin
 import { TextInput } from "react-native";
-import { IPins, ICreatePin } from "@/services/AuthService";
+import { IPins, ICreatePin } from "@/services/PinService";
 import { useLocalSearchParams } from "expo-router";
 
 const pinService = new PinService();
