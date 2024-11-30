@@ -9,6 +9,7 @@ import { CreatePinDTO, UpdatePinDTO } from './dto/pins.dto';
 import { Request } from 'express';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { computeDestinationPoint } from 'geolib';
+import { InvisiblePin } from 'src/interfaces/invisible-pin.interface';
 
 @Injectable()
 export class PinsService {
@@ -105,12 +106,101 @@ export class PinsService {
    * @param swLat
    * @param swLong
    */
-  async getPinsInLocationRange(
+  async getPinsInLocationRangeByUserId(
     neLat: number,
     neLong: number,
     swLat: number,
     swLong: number,
-  ): Promise<Pin[]> {
+    userId: number,
+  ): Promise<Pin | InvisiblePin[]> {
+    const [invisRes, visRes] = await Promise.all([
+      this.getInvisiblePinsInLocationRange(
+        neLat,
+        neLong,
+        swLat,
+        swLong,
+        userId,
+      ),
+      this.getViewablePinsInLocationRange(neLat, neLong, swLat, swLong, userId),
+    ]);
+
+    return invisRes.concat(visRes);
+  }
+
+  async getViewablePinsInLocationRange(
+    neLat: number,
+    neLong: number,
+    swLat: number,
+    swLong: number,
+    userId: number,
+  ) {
+    const viewable = await this.getVisiblePinsByUserID(userId);
+
+    return viewable.reduce((prev, curr) => {
+      const lat = curr.pin.latitude;
+      const long = curr.pin.longitude;
+      if (lat >= swLat && long <= neLat && long >= neLong && long <= swLong)
+        prev.push(curr.pin);
+      return prev;
+    }, [] as Pin[]);
+  }
+
+  async getInvisiblePinsInLocationRange(
+    neLat: number,
+    neLong: number,
+    swLat: number,
+    swLong: number,
+    userId: number,
+  ): Promise<InvisiblePin[]> {
+    return await this.databaseService.pin.findMany({
+      where: {
+        AND: [
+          {
+            latitude: {
+              gte: swLat,
+            },
+          },
+          {
+            latitude: {
+              lte: neLat,
+            },
+          },
+          {
+            longitude: {
+              gte: neLong,
+            },
+          },
+          {
+            longitude: {
+              lte: swLong,
+            },
+          },
+          {
+            Viewable: {
+              none: {
+                userId,
+              },
+            },
+          },
+        ],
+      },
+      select: {
+        latitude: true,
+        longitude: true,
+        createdAt: true,
+        updatedAt: true,
+        userID: true,
+        id: true,
+      },
+    });
+  }
+
+  async getAllPinsInLocationRange(
+    neLat: number,
+    neLong: number,
+    swLat: number,
+    swLong: number,
+  ) {
     try {
       return await this.databaseService.pin.findMany({
         where: {
@@ -140,7 +230,7 @@ export class PinsService {
       });
     } catch (e: any) {
       console.log(e);
-      throw new InternalServerErrorException('Database query failed', e);
+      throw new InternalServerErrorException('Database query failed ', e);
     }
   }
 
@@ -178,14 +268,15 @@ export class PinsService {
     const swLoc = computeDestinationPoint(location, 5, swBearingInDegs);
     const neLoc = computeDestinationPoint(location, 5, neBearningInDegs);
 
-    let pinsToMakeVisible: Pin[];
+    let pinsToMakeVisible: InvisiblePin[];
     try {
       //Gets all pins within the boundary box defined previously
-      pinsToMakeVisible = await this.getPinsInLocationRange(
+      pinsToMakeVisible = await this.getInvisiblePinsInLocationRange(
         neLoc.latitude,
         neLoc.longitude,
         swLoc.latitude,
         swLoc.longitude,
+        userID,
       );
     } catch (e: any) {
       console.log(e);

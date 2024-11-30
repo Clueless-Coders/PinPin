@@ -23,12 +23,13 @@ export class PinsController {
   constructor(private readonly pinsService: PinsService) {}
 
   @Get('location')
-  async getPinsByLocationRange(@Body() loc: LocationRangeDTO) {
-    return await this.pinsService.getPinsInLocationRange(
+  async getPinsByLocationRange(@Body() loc: LocationRangeDTO, @Req() { user }) {
+    return await this.pinsService.getViewablePinsInLocationRange(
       loc.neLat,
       loc.neLong,
       loc.swLat,
       loc.swLong,
+      user.id,
     );
   }
 
