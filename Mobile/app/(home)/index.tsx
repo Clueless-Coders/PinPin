@@ -1,26 +1,57 @@
 import { useCallback, useRef, useMemo } from "react";
 import { StyleSheet, View, Text } from "react-native";
-import { GestureHandlerRootView } from "react-native-gesture-handler";
+import {
+  GestureHandlerRootView,
+  Pressable,
+} from "react-native-gesture-handler";
 import BottomSheet, {
   BottomSheetFlatList,
   BottomSheetTextInput,
 } from "@gorhom/bottom-sheet";
 import PinPost, { PinPostProps } from "@/components/PinPost";
-import React from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { faFilter } from "@fortawesome/free-solid-svg-icons/faFilter";
-import { Link } from "expo-router";
+import React from "react";
+import { useState, useEffect } from "react";
+import MapView, { PROVIDER_GOOGLE } from "react-native-maps";
+import { Link, useRouter } from "expo-router";
+import * as Location from "expo-location";
 
-// TO DO
-// Finish search bar + filter button styling
-// Square Buttons Component
-// Modal Customizations (shadow, divider line, sticky top)
-// make keyboard work good
-// clean up code
-// the top component must be registered as viewing and change color
-
+//Map, create pin, etc
 export default function HomeIndex() {
+  const router = useRouter();
+
+  const [location, setLocation] = useState<Location.LocationObject | null>(
+    null
+  );
+
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  //Setup Maps
+  useEffect(() => {
+    async function getCurrentLocation() {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== "granted") {
+        setErrorMsg("Permission to access location was denied");
+        return;
+      }
+
+      let location = await Location.getCurrentPositionAsync({});
+      setLocation(location);
+    }
+
+    getCurrentLocation();
+  }, []);
+
+  let display_location = "Waiting...";
+  if (errorMsg) {
+    display_location = errorMsg;
+  } else if (location) {
+    display_location = JSON.stringify(location);
+  }
+
   const sheetRef = useRef<BottomSheet>(null);
+  const mapRef = useRef<MapView>(null);
 
   // testing pin content rendering, need to connect to backend eek
   const data = useMemo(
@@ -64,12 +95,30 @@ export default function HomeIndex() {
       </View>
     );
   }, []);
+
+  async function getCurrentBounds() {
+    console.log(await mapRef.current?.getMapBoundaries());
+    console.log(location?.coords);
+  }
+
   return (
     <GestureHandlerRootView style={styles.root}>
+      <Pressable onPress={() => router.replace("/")}>
+        <Text>Go to login.</Text>
+      </Pressable>
       <Link href={"/(home)/Filters"}>Filters page</Link>
       <Link href={"/(home)/NewPin"}>New Pin page</Link>
       <Link href={"/(home)/Settings"}>Settings page</Link>
       <Link href={"/(home)/0"}> PinDetail page</Link>
+
+      <Text>{JSON.stringify(location?.coords)}</Text>
+      {/* must add divider bar, try placing after filter instead of in view*/}
+      <MapView
+        style={styles.map}
+        ref={mapRef}
+        onRegionChangeComplete={getCurrentBounds}
+        showsUserLocation={true}
+      />
 
       <BottomSheet
         ref={sheetRef}
@@ -84,7 +133,6 @@ export default function HomeIndex() {
         <View style={styles.search}>
           <BottomSheetTextInput style={styles.input} />
           <FontAwesomeIcon icon={faFilter} />
-          {/* must add divider bar, try placing after filter instead of in view*/}
         </View>
 
         <BottomSheetFlatList
@@ -105,7 +153,7 @@ export default function HomeIndex() {
 const styles = StyleSheet.create({
   root: {
     flex: 1,
-    paddingTop: 200,
+    //paddingTop: 200,
   },
   flatlist: {
     backgroundColor: "#FFF9ED",
@@ -128,5 +176,17 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
+  },
+
+  container: {
+    flex: 1,
+  },
+  map: {
+    width: "100%",
+    height: "100%",
+  },
+  paragraph: {
+    fontSize: 18,
+    textAlign: "center",
   },
 });
