@@ -3,6 +3,7 @@ import { PinsService } from './pins.service';
 import { Prisma } from '@prisma/client';
 import { CreatePinDTO, UpdatePinDTO, UpdateVotes } from './dto/pins.dto';
 import { Request } from 'express';
+import { request } from 'http';
 
 @Controller()
 export class PinsController {
@@ -36,8 +37,8 @@ export class PinsController {
     }
 
     @Patch(':id')
-    updatePin(@Param('id') id: String, @Body() updatePinDTO: UpdatePinDTO) {
-        return this.pinsService.updatePin(+id, updatePinDTO);
+    updatePin(@Param('id') id: String, @Body() updatePinDTO: UpdatePinDTO, @Req() request: Request) {
+        return this.pinsService.updatePin(+id, updatePinDTO, request);
     }
 
     //change delete to check if user is deleting their own posts

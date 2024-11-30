@@ -19,6 +19,7 @@ export default function PinDetail() {
   useEffect(() => {
     const updatePin = async () => {
       try {
+        console.log(buttonValue);
         let fetchedPin: IPins | undefined;
         if (buttonValue == 0) {
           return;
@@ -42,7 +43,7 @@ export default function PinDetail() {
 
     updatePin(); // Invoke the async function
     console.log("inside useEffects");
-  }, [isRequesting]); // Empty dependency array to run this effect only once
+  }, [requesting]); // Empty dependency array to run this effect only once
 
   return (
     <View>

@@ -173,7 +173,7 @@ export class PinService {
   async patchPin(pinID: number, text: string) {
     console.log("updating pin " + pinID);
     try {
-      const res = await axios.patch<IPins>(`${API_BASE_URL}/pin/${pinID}`, text);
+      const res = await axios.patch<IPins>(`${API_BASE_URL}/pin/${pinID}`, { text });
       const pin = res.data;
       console.log(pin);
       return pin;
