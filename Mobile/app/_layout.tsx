@@ -1,5 +1,5 @@
 import { Stack } from "expo-router";
-import React, { createContext } from "react";
+import React from "react";
 
 export default function RootLayout() {
   return (

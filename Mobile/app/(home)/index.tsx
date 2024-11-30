@@ -1,6 +1,9 @@
 import { useCallback, useRef, useMemo } from "react";
 import { StyleSheet, View, Text } from "react-native";
-import { GestureHandlerRootView } from "react-native-gesture-handler";
+import {
+  GestureHandlerRootView,
+  Pressable,
+} from "react-native-gesture-handler";
 import BottomSheet, {
   BottomSheetFlatList,
   BottomSheetTextInput,
@@ -11,11 +14,13 @@ import { faFilter } from "@fortawesome/free-solid-svg-icons/faFilter";
 import React from "react";
 import { useState, useEffect } from "react";
 import MapView, { PROVIDER_GOOGLE } from "react-native-maps";
-import { Link } from "expo-router";
+import { Link, useRouter } from "expo-router";
 import * as Location from "expo-location";
 
 //Map, create pin, etc
 export default function HomeIndex() {
+  const router = useRouter();
+
   const [location, setLocation] = useState<Location.LocationObject | null>(
     null
   );
@@ -98,6 +103,9 @@ export default function HomeIndex() {
 
   return (
     <GestureHandlerRootView style={styles.root}>
+      <Pressable onPress={() => router.replace("/")}>
+        <Text>Go to login.</Text>
+      </Pressable>
       <Link href={"/(home)/Filters"}>Filters page</Link>
       <Link href={"/(home)/NewPin"}>New Pin page</Link>
       <Link href={"/(home)/Settings"}>Settings page</Link>
@@ -145,7 +153,7 @@ export default function HomeIndex() {
 const styles = StyleSheet.create({
   root: {
     flex: 1,
-    paddingTop: 200,
+    //paddingTop: 200,
   },
   flatlist: {
     backgroundColor: "#FFF9ED",
