@@ -289,6 +289,7 @@ export class PinsService {
       userId: userID,
     }));
 
+    console.log(viewables);
     try {
       //...And uploads them to the database
       await this.databaseService.viewable.createMany({

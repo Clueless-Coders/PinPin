@@ -7,6 +7,7 @@ import {
   Delete,
   Patch,
   Req,
+  Query,
 } from '@nestjs/common';
 import { PinsService } from './pins.service';
 import {
@@ -22,7 +23,7 @@ import { Request } from 'express';
 export class PinsController {
   constructor(private readonly pinsService: PinsService) {}
 
-  @Get('location')
+  @Post('location')
   async getPinsByLocationRange(@Body() loc: LocationRangeDTO, @Req() { user }) {
     return await this.pinsService.getViewablePinsInLocationRange(
       loc.neLat,
@@ -30,6 +31,16 @@ export class PinsController {
       loc.swLat,
       loc.swLong,
       user.id,
+    );
+  }
+
+  @Post('location/all')
+  async getAllPinsByLocationRange(@Body() loc: LocationRangeDTO) {
+    return await this.pinsService.getAllPinsInLocationRange(
+      loc.neLat,
+      loc.neLong,
+      loc.swLat,
+      loc.swLong,
     );
   }
 

@@ -13,9 +13,11 @@ import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { faFilter } from "@fortawesome/free-solid-svg-icons/faFilter";
 import React from "react";
 import { useState, useEffect } from "react";
-import MapView, { PROVIDER_GOOGLE } from "react-native-maps";
+import MapView, { Details, PROVIDER_GOOGLE, Region } from "react-native-maps";
 import { Link, useRouter } from "expo-router";
 import * as Location from "expo-location";
+import axios from "axios";
+import { API_BASE_URL } from "@/environment";
 
 //Map, create pin, etc
 export default function HomeIndex() {
@@ -96,9 +98,35 @@ export default function HomeIndex() {
     );
   }, []);
 
-  async function getCurrentBounds() {
-    console.log(await mapRef.current?.getMapBoundaries());
+  async function getCurrentBounds(region: Region, details: Details) {
+    const bounds = await mapRef.current?.getMapBoundaries();
+    console.log(bounds);
     console.log(location?.coords);
+
+    if (!bounds) return;
+    try {
+      const res = await axios.post(`${API_BASE_URL}/pin`, {
+        text: "Hi I'm at Google!",
+        latitude: location?.coords.latitude,
+        longitude: location?.coords.longitude,
+      });
+
+      const visible = await axios.post(`${API_BASE_URL}/pin/visible`, {
+        latitude: location?.coords.latitude,
+        longitude: location?.coords.longitude,
+      });
+
+      const final = await axios.post(`${API_BASE_URL}/pin/location/all`, {
+        neLat: bounds.northEast.latitude,
+        neLong: bounds.northEast.longitude,
+        swLat: bounds.southWest.latitude,
+        swLong: bounds.southWest.longitude,
+      });
+
+      console.log(final.data);
+    } catch (e: any) {
+      console.log(e);
+    }
   }
 
   return (

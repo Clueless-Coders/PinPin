@@ -24,9 +24,11 @@ model User {
 
 model Viewable {
   user   User @relation(fields: [userId], references: [id])
-  userId Int  @unique
+  userId Int
   pin    Pin  @relation(fields: [pinId], references: [id])
-  pinId  Int  @unique
+  pinId  Int
+
+  @@id([userId, pinId])
 }
 
 model Pin {
