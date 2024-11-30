@@ -69,7 +69,7 @@ export default function HomeIndex() {
       <Link href={"/(home)/Filters"}>Filters page</Link>
       <Link href={"/(home)/NewPin"}>New Pin page</Link>
       <Link href={"/(home)/Settings"}>Settings page</Link>
-      <Link href={"/(home)/0"}> PinDetail page</Link>
+      <Link href={"/(home)/1"}> PinDetail page</Link>
 
       <BottomSheet
         ref={sheetRef}

@@ -3,17 +3,19 @@ import { View, Text, Button } from "react-native";
 import { PinService } from "@/services/AuthService"; // Assume this is the service that provides getPin
 import { TextInput } from "react-native";
 import { IPins, ICreatePin } from "@/services/AuthService";
+import { useLocalSearchParams } from "expo-router";
 
 const pinService = new PinService();
 
 export default function PinDetail() {
-  const [pin, setPin] = useState<IPins | null>(null);// State to store pin data
-  const [pinText, setText] = useState('');
-  const [pinID, setID] = useState('');
-  const [latitude, setLatitude] = useState('');
-  const [longitude, setLongitude] = useState('');
+  const [pin, setPin] = useState<IPins | null>(null); // State to store pin data
+  const [pinText, setText] = useState("");
+  const [pinID, setID] = useState("");
+  const [latitude, setLatitude] = useState("");
+  const [longitude, setLongitude] = useState("");
   const [buttonValue, setButton] = useState(0);
   const [requesting, isRequesting] = useState(false);
+  const { pinId } = useLocalSearchParams();
   // const []
 
   useEffect(() => {
@@ -23,16 +25,20 @@ export default function PinDetail() {
         if (buttonValue == 0) {
           return;
         } else if (buttonValue == 1) {
-          fetchedPin = await pinService.deletePin(+pinID);
+          fetchedPin = await pinService.deletePin(+pinId);
         } else if (buttonValue == 2) {
-          fetchedPin = await pinService.getPin(+pinID); // Call the async function
+          fetchedPin = await pinService.getPin(+pinId); // Call the async function
         } else if (buttonValue == 3) {
-          fetchedPin = await pinService.patchPin(+pinID, pinText);
+          fetchedPin = await pinService.patchPin(+pinId, pinText);
         } else if (buttonValue == 4) {
-          let newPin: ICreatePin = { text: pinText, latitude: +latitude, longitude: +longitude };
+          let newPin: ICreatePin = {
+            text: pinText,
+            latitude: +latitude,
+            longitude: +longitude,
+          };
           fetchedPin = await pinService.createPin(newPin);
         }
-        setPin((fetchedPin !== undefined) ? fetchedPin : null); // Update state with fetched pin
+        setPin(fetchedPin !== undefined ? fetchedPin : null); // Update state with fetched pin
         setButton(0);
         isRequesting(false);
       } catch (error) {
@@ -43,6 +49,22 @@ export default function PinDetail() {
     updatePin(); // Invoke the async function
     console.log("inside useEffects");
   }, [isRequesting]); // Empty dependency array to run this effect only once
+
+  useEffect(() => {
+    async function getPin() {
+      const res = await pinService.getPin(+pinId);
+      console.log(res);
+
+      if (!res) {
+        console.log("Pin load fail");
+        return;
+      }
+
+      setPin(res);
+    }
+
+    getPin();
+  }, []);
 
   return (
     <View>
@@ -62,13 +84,19 @@ export default function PinDetail() {
 
       <Button
         title="Delete"
-        onPress={() => { setButton(1); isRequesting(true) }}
+        onPress={() => {
+          setButton(1);
+          isRequesting(true);
+        }}
         disabled={!isRequesting}
       ></Button>
 
       <Button
         title="Get"
-        onPress={() => { setButton(2); isRequesting(true) }}
+        onPress={() => {
+          setButton(2);
+          isRequesting(true);
+        }}
         disabled={!isRequesting}
       ></Button>
 
@@ -100,17 +128,21 @@ export default function PinDetail() {
         onChangeText={(val) => setLongitude(val)}
       ></TextInput>
 
-
       <Button
         title="Patch"
-        onPress={() => { setButton(3); isRequesting(true) }}
+        onPress={() => {
+          setButton(3);
+          isRequesting(true);
+        }}
         disabled={!isRequesting}
       ></Button>
 
-
       <Button
         title="Create"
-        onPress={() => { setButton(4); isRequesting(true) }}
+        onPress={() => {
+          setButton(4);
+          isRequesting(true);
+        }}
         disabled={!isRequesting}
       ></Button>
     </View>
