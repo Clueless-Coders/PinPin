@@ -25,7 +25,7 @@ export class PinsController {
 
   @Post('location')
   async getPinsByLocationRange(@Body() loc: LocationRangeDTO, @Req() { user }) {
-    return await this.pinsService.getViewablePinsInLocationRange(
+    return await this.pinsService.getPinsInLocationRangeByUserId(
       loc.neLat,
       loc.neLong,
       loc.swLat,

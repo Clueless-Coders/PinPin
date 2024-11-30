@@ -9,7 +9,10 @@ import { CreatePinDTO, UpdatePinDTO } from './dto/pins.dto';
 import { Request } from 'express';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { computeDestinationPoint } from 'geolib';
-import { InvisiblePin } from 'src/interfaces/invisible-pin.interface';
+import {
+  InvisiblePin,
+  VisiblePin,
+} from 'src/interfaces/invisible-pin.interface';
 
 @Injectable()
 export class PinsService {
@@ -112,7 +115,7 @@ export class PinsService {
     swLat: number,
     swLong: number,
     userId: number,
-  ): Promise<Pin | InvisiblePin[]> {
+  ): Promise<{ visible: VisiblePin[]; invisible: InvisiblePin[] }> {
     const [invisRes, visRes] = await Promise.all([
       this.getInvisiblePinsInLocationRange(
         neLat,
@@ -124,7 +127,10 @@ export class PinsService {
       this.getViewablePinsInLocationRange(neLat, neLong, swLat, swLong, userId),
     ]);
 
-    return invisRes.concat(visRes);
+    return {
+      visible: visRes,
+      invisible: invisRes,
+    };
   }
 
   async getViewablePinsInLocationRange(
@@ -133,16 +139,16 @@ export class PinsService {
     swLat: number,
     swLong: number,
     userId: number,
-  ) {
+  ): Promise<VisiblePin[]> {
     const viewable = await this.getVisiblePinsByUserID(userId);
 
     return viewable.reduce((prev, curr) => {
       const lat = curr.pin.latitude;
       const long = curr.pin.longitude;
-      if (lat >= swLat && long <= neLat && long >= neLong && long <= swLong)
-        prev.push(curr.pin);
+      if (lat >= swLat && lat <= neLat && long <= neLong && long >= swLong)
+        prev.push({ ...curr.pin, viewable: true });
       return prev;
-    }, [] as Pin[]);
+    }, [] as VisiblePin[]);
   }
 
   async getInvisiblePinsInLocationRange(
@@ -152,57 +158,8 @@ export class PinsService {
     swLong: number,
     userId: number,
   ): Promise<InvisiblePin[]> {
-    return await this.databaseService.pin.findMany({
-      where: {
-        AND: [
-          {
-            latitude: {
-              gte: swLat,
-            },
-          },
-          {
-            latitude: {
-              lte: neLat,
-            },
-          },
-          {
-            longitude: {
-              gte: neLong,
-            },
-          },
-          {
-            longitude: {
-              lte: swLong,
-            },
-          },
-          {
-            Viewable: {
-              none: {
-                userId,
-              },
-            },
-          },
-        ],
-      },
-      select: {
-        latitude: true,
-        longitude: true,
-        createdAt: true,
-        updatedAt: true,
-        userID: true,
-        id: true,
-      },
-    });
-  }
-
-  async getAllPinsInLocationRange(
-    neLat: number,
-    neLong: number,
-    swLat: number,
-    swLong: number,
-  ) {
     try {
-      return await this.databaseService.pin.findMany({
+      const res = await this.databaseService.pin.findMany({
         where: {
           AND: [
             {
@@ -217,17 +174,74 @@ export class PinsService {
             },
             {
               longitude: {
-                gte: neLong,
+                lte: neLong,
               },
             },
             {
               longitude: {
-                lte: swLong,
+                gte: swLong,
+              },
+            },
+            {
+              Viewable: {
+                none: {
+                  userId,
+                },
+              },
+            },
+          ],
+        },
+        select: {
+          latitude: true,
+          longitude: true,
+          createdAt: true,
+          updatedAt: true,
+          userID: true,
+          id: true,
+        },
+      });
+      const mut = res.map((invisPin) => ({ ...invisPin, viewable: false }));
+      return mut;
+    } catch (e: any) {
+      console.log(e);
+      throw new InternalServerErrorException('DB call failed ', e);
+    }
+  }
+
+  async getAllPinsInLocationRange(
+    neLat: number,
+    neLong: number,
+    swLat: number,
+    swLong: number,
+  ) {
+    try {
+      const res = await this.databaseService.pin.findMany({
+        where: {
+          AND: [
+            {
+              latitude: {
+                gte: swLat,
+              },
+            },
+            {
+              latitude: {
+                lte: neLat,
+              },
+            },
+            {
+              longitude: {
+                lte: neLong,
+              },
+            },
+            {
+              longitude: {
+                gte: swLong,
               },
             },
           ],
         },
       });
+      return res;
     } catch (e: any) {
       console.log(e);
       throw new InternalServerErrorException('Database query failed ', e);
@@ -241,7 +255,7 @@ export class PinsService {
    */
   async getVisiblePinsByUserID(userId: number) {
     try {
-      return await this.databaseService.viewable.findMany({
+      const res = await this.databaseService.viewable.findMany({
         where: {
           userId,
         },
@@ -249,6 +263,7 @@ export class PinsService {
           pin: true,
         },
       });
+      return res;
     } catch (e: any) {
       console.log(e);
       throw new InternalServerErrorException('Database query failed', e);
@@ -263,10 +278,19 @@ export class PinsService {
     userID: number,
   ) {
     //Gets upper left and bottom right location bounds for pins to be marked as visible
-    const swBearingInDegs = 135;
-    const neBearningInDegs = 315;
-    const swLoc = computeDestinationPoint(location, 5, swBearingInDegs);
-    const neLoc = computeDestinationPoint(location, 5, neBearningInDegs);
+    const swBearingInDegs = 225;
+    const neBearningInDegs = 45;
+    const radiusToMarkVisibleInMeters = 1000;
+    const swLoc = computeDestinationPoint(
+      location,
+      radiusToMarkVisibleInMeters,
+      swBearingInDegs,
+    );
+    const neLoc = computeDestinationPoint(
+      location,
+      radiusToMarkVisibleInMeters,
+      neBearningInDegs,
+    );
 
     let pinsToMakeVisible: InvisiblePin[];
     try {
@@ -289,7 +313,6 @@ export class PinsService {
       userId: userID,
     }));
 
-    console.log(viewables);
     try {
       //...And uploads them to the database
       await this.databaseService.viewable.createMany({

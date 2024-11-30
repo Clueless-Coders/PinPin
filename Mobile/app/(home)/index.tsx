@@ -18,6 +18,7 @@ import { Link, useRouter } from "expo-router";
 import * as Location from "expo-location";
 import axios from "axios";
 import { API_BASE_URL } from "@/environment";
+import { PinLocationRangeData, VisiblePin } from "@/interfaces/pin.interface";
 
 //Map, create pin, etc
 export default function HomeIndex() {
@@ -28,6 +29,7 @@ export default function HomeIndex() {
   );
 
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [pins, setPins] = useState<VisiblePin[] | undefined>();
 
   //Setup Maps
   useEffect(() => {
@@ -83,16 +85,16 @@ export default function HomeIndex() {
   //   console.log("handleRefresh");
   // }, []);
 
-  const renderItem = useCallback(({ item }: { item: PinPostProps }) => {
+  const renderItem = useCallback(({ item }: { item: VisiblePin }) => {
     return (
       <View style={{ marginBottom: 15 }}>
         <PinPost
-          distance={item.distance}
-          time={item.time}
+          distance={10}
+          time={new Date(Date.parse(item.createdAt)) ?? new Date()}
           text={item.text}
-          commentCount={item.commentCount}
-          karma={item.karma}
-          isFocused={item.isFocused}
+          commentCount={2}
+          karma={item.upvotes - item.downvotes}
+          isFocused={item.viewable}
         />
       </View>
     );
@@ -105,25 +107,24 @@ export default function HomeIndex() {
 
     if (!bounds) return;
     try {
-      const res = await axios.post(`${API_BASE_URL}/pin`, {
-        text: "Hi I'm at Google!",
+      const newlyVisible = await axios.post(`${API_BASE_URL}/pin/visible`, {
         latitude: location?.coords.latitude,
         longitude: location?.coords.longitude,
       });
 
-      const visible = await axios.post(`${API_BASE_URL}/pin/visible`, {
-        latitude: location?.coords.latitude,
-        longitude: location?.coords.longitude,
-      });
+      const final = await axios.post<PinLocationRangeData>(
+        `${API_BASE_URL}/pin/location`,
+        {
+          neLat: bounds.northEast.latitude,
+          neLong: bounds.northEast.longitude,
+          swLat: bounds.southWest.latitude,
+          swLong: bounds.southWest.longitude,
+        }
+      );
 
-      const final = await axios.post(`${API_BASE_URL}/pin/location/all`, {
-        neLat: bounds.northEast.latitude,
-        neLong: bounds.northEast.longitude,
-        swLat: bounds.southWest.latitude,
-        swLong: bounds.southWest.longitude,
-      });
-
+      //console.log(newlyVisible.data);
       console.log(final.data);
+      setPins(final.data.visible);
     } catch (e: any) {
       console.log(e);
     }
@@ -164,8 +165,8 @@ export default function HomeIndex() {
         </View>
 
         <BottomSheetFlatList
-          data={data}
-          keyExtractor={(item) => item.id}
+          data={pins}
+          keyExtractor={(item) => item.id + ""}
           renderItem={renderItem}
           contentContainerStyle={styles.flatlist}
           // refreshing={false}
