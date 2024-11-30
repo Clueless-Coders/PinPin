@@ -4,6 +4,7 @@ import axios from "axios";
 import { router } from "expo-router";
 import { jwtDecode } from "jwt-decode";
 
+
 export interface ITokens {
   access_token: string;
   refresh_token: string;
@@ -27,6 +28,13 @@ export interface IPins {
   latitude: number;
   createdAt: Date;
   updatedAt: Date;
+}
+
+export interface ICreatePin {
+  text: string;
+  imageURL?: string;
+  longitude: number;
+  latitude: number;
 }
 
 export class AuthService {
@@ -137,13 +145,52 @@ export class PinService {
   constructor() {
 
   }
-  async getPin(pinID: number): Promise<IPins> {
-    console.log("starting fetching")
-    const res = await axios.get<IPins>(`${API_BASE_URL}/pin/${pinID}`);
+  async getPin(pinID: number): Promise<IPins | undefined> {
+    console.log("starting fetching");
+    try {
+      const res = await axios.get<IPins>(`${API_BASE_URL}/pin/${pinID}`);
+      const pin = res.data;
+      console.log(pin);
+      return pin;
+    } catch (e) {
+      console.log("Failed to get pin");
+    }
 
-    var pin = res.data;
-    console.log(pin);
-    return pin;
+  }
 
+  async deletePin(pinID: number) {
+    console.log("deleting pin " + pinID);
+    try {
+      const res = await axios.delete<IPins>(`${API_BASE_URL}/pin/${pinID}`);
+      const pin = res.data;
+      console.log(pin);
+      return pin;
+    } catch (e) {
+      console.log("Failed to delete pin.");
+    }
+  }
+
+  async patchPin(pinID: number, text: string) {
+    console.log("updating pin " + pinID);
+    try {
+      const res = await axios.patch<IPins>(`${API_BASE_URL}/pin/${pinID}`, text);
+      const pin = res.data;
+      console.log(pin);
+      return pin;
+    } catch (e) {
+      console.log("failed to update pin");
+    }
+  }
+
+  async createPin(IPin: ICreatePin) {
+    console.log("creating pin ");
+    try {
+      const res = await axios.post<IPins>(`${API_BASE_URL}/pin`, IPin);
+      const pin = res.data;
+      console.log(pin);
+      return pin;
+    } catch (e) {
+      console.log("failed creating pin");
+    }
   }
 }
