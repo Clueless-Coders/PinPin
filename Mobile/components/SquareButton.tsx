@@ -9,7 +9,7 @@ export interface SquareButtonProps {
   height?: number;
   color?: string;
   icon?: any;
-  route?: string;
+  route: string;
   disabled?: boolean;
 }
 

@@ -64,10 +64,6 @@ export default function HomeIndex() {
   }, []);
   return (
     <GestureHandlerRootView style={styles.root}>
-      <SquareButton
-        icon={faGear}
-        route="/(home)/Filters"
-      />
       <Link href={"/(home)/Filters"}>Filters page</Link>
       <Link href={"/(home)/NewPin"}>New Pin page</Link>
       <Link href={"/(home)/Settings"}>Settings page</Link>
