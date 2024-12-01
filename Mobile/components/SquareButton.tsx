@@ -9,7 +9,7 @@ export interface SquareButtonProps {
   height?: number;
   color?: string;
   icon?: any;
-  route: string;
+  route?: string;
   disabled?: boolean;
 }
 
@@ -24,10 +24,10 @@ export default function SquareButton({
 }: SquareButtonProps) {
   const buttonWidth = width ?? size;
   const buttonHeight = height ?? size;
-  const buttonColor = disabled ? "#d3d3d3" : color;
+  const buttonColor = disabled ? "gray" : color;
 
   return (
-    <Link href={route}>
+    <Link href={disabled ? "#" : route}>
       <View>
         <View
           style={[
