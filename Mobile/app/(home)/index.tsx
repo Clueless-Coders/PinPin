@@ -1,5 +1,5 @@
 import { useCallback, useRef, useMemo } from "react";
-import { StyleSheet, View, Text } from "react-native";
+import { StyleSheet, View, Text, Platform } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import BottomSheet, {
   BottomSheetFlatList,
@@ -180,22 +180,15 @@ export default function HomeIndex() {
 
   return (
     <GestureHandlerRootView style={styles.root}>
-      {/* <Pressable onPress={() => router.replace("/")}>
-        <Text>Go to login.</Text>
-      </Pressable>
-      <Link href={"/(home)/Filters"}>Filters page</Link>
-      <Link href={"/(home)/NewPin"}>New Pin page</Link>
-      <Link href={"/(home)/Settings"}>Settings page</Link>
-      <Link href={"/(home)/0"}> PinDetail page</Link>
-
-      <Text>{JSON.stringify(location?.coords)}</Text>
- */}
       <MapView
         style={styles.map}
         ref={mapRef}
         onRegionChangeComplete={getCurrentBounds}
         showsUserLocation={true}
         onUserLocationChange={markNewVisiblePins}
+        mapType={Platform.OS === "ios" ? "mutedStandard" : "terrain"}
+        showsMyLocationButton={false}
+        pitchEnabled={false}
       >
         {pins?.invisible.map(renderMarker) ?? <></>}
         {pins?.visible.map(renderMarker) ?? <></>}
