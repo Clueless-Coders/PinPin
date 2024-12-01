@@ -16,7 +16,7 @@ import {
 
 @Injectable()
 export class PinsService {
-  constructor(private readonly databaseService: PrismaService) {}
+  constructor(private readonly databaseService: PrismaService) { }
 
   async create(createPin: CreatePinDTO, req: Request) {
     try {
