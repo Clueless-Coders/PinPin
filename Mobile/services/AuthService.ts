@@ -15,6 +15,8 @@ export interface IJWTPayload {
   iat: number;
   exp: number;
 }
+
+
 export class AuthService {
   private tokens?: ITokens;
   private currUser?: User;
@@ -117,3 +119,4 @@ export class AuthService {
     }, timeToExpireInMs - 1000);
   }
 }
+
