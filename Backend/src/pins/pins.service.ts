@@ -147,10 +147,10 @@ export class PinsService {
     const viewable = await this.getVisiblePinsByUserID(userId);
 
     return viewable.reduce((prev, curr) => {
-      const lat = curr.pin.latitude;
-      const long = curr.pin.longitude;
+      const lat = curr.latitude;
+      const long = curr.longitude;
       if (lat >= swLat && lat <= neLat && long <= neLong && long >= swLong)
-        prev.push({ ...curr.pin, viewable: true });
+        prev.push({ ...curr, viewable: true });
       return prev;
     }, [] as VisiblePin[]);
   }
@@ -257,7 +257,7 @@ export class PinsService {
    * @param userID
    * @returns
    */
-  async getVisiblePinsByUserID(userId: number) {
+  async getVisiblePinsByUserID(userId: number): Promise<Pin[]> {
     try {
       const res = await this.databaseService.viewable.findMany({
         where: {
@@ -267,7 +267,7 @@ export class PinsService {
           pin: true,
         },
       });
-      return res;
+      return res.map((pin) => pin.pin);
     } catch (e: any) {
       console.log(e);
       throw new InternalServerErrorException('Database query failed', e);

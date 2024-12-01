@@ -3,6 +3,7 @@ import { StyleSheet, View, Text } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import BottomSheet, {
   BottomSheetFlatList,
+  BottomSheetFlatListMethods,
   BottomSheetTextInput,
 } from "@gorhom/bottom-sheet";
 import PinPost from "@/components/PinPost";
@@ -10,7 +11,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { faFilter } from "@fortawesome/free-solid-svg-icons/faFilter";
 import React from "react";
 import { useState, useEffect } from "react";
-import MapView, { Callout, Marker } from "react-native-maps";
+import MapView, { Callout, Marker, MarkerPressEvent } from "react-native-maps";
 import * as Location from "expo-location";
 import axios from "axios";
 import { API_BASE_URL } from "@/environment";
@@ -40,8 +41,17 @@ export default function HomeIndex() {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [pins, setPins] = useState<PinLocationRangeData | undefined>();
   const [images, setImages] = useState<LocalImages | undefined>();
+  const [selectedPinIndex, setSelectedPinIndex] = useState<number>(0);
+  const [allViewablePins, setAllViewablePins] = useState<VisiblePin[]>([]);
+
   const sheetRef = useRef<BottomSheet>(null);
   const mapRef = useRef<MapView>(null);
+  const flatListRef = useRef<BottomSheetFlatListMethods>(null);
+
+  async function getAllViewablePins() {
+    const pins = await axios.get(`${API_BASE_URL}/pin/visible`);
+    setAllViewablePins(pins.data);
+  }
 
   //Setup Maps
   useEffect(() => {
@@ -62,6 +72,7 @@ export default function HomeIndex() {
       });
     }
 
+    getAllViewablePins();
     setImages({
       readablePin: require("@/assets/images/ReadablePin.png"),
       unreadablePin: require("@/assets/images/UnreadablePin.png"),
@@ -69,27 +80,33 @@ export default function HomeIndex() {
     getCurrentLocation();
   }, []);
 
+  useEffect(() => {
+    if (selectedPinIndex < allViewablePins.length)
+      flatListRef.current?.scrollToIndex({
+        index: selectedPinIndex,
+      });
+  }, [selectedPinIndex]);
+
   // removed 100% snap point while nested scrolling doesnt work
   const snapPoints = useMemo(() => ["12%", "75%"], []);
 
-  const handleSheetChange = useCallback((index: number) => {
-    console.log("handleSheetChange", index);
-  }, []);
-
-  const renderItem = useCallback(({ item }: { item: VisiblePin }) => {
-    return (
-      <View style={{ marginBottom: 15 }}>
-        <PinPost
-          distance={10}
-          time={new Date(Date.parse(item.createdAt)) ?? new Date()}
-          text={item.text}
-          commentCount={2}
-          karma={item.upvotes - item.downvotes}
-          isFocused={item.viewable}
-        />
-      </View>
-    );
-  }, []);
+  const renderItem = useCallback(
+    ({ item, index }: { item: VisiblePin; index: number }) => {
+      return (
+        <View style={{ marginBottom: 15 }}>
+          <PinPost
+            distance={10}
+            time={new Date(Date.parse(item.createdAt)) ?? new Date()}
+            text={item.text}
+            commentCount={2}
+            karma={item.upvotes - item.downvotes}
+            isFocused={index === selectedPinIndex}
+          />
+        </View>
+      );
+    },
+    [selectedPinIndex]
+  );
 
   async function getCurrentBounds() {
     const bounds = await mapRef.current?.getMapBoundaries();
@@ -115,6 +132,7 @@ export default function HomeIndex() {
   async function markNewVisiblePins() {
     const currLoc = await Location.getCurrentPositionAsync();
     setLocation(currLoc);
+
     const newlyVisible = await axios.post<VisiblePin[]>(
       `${API_BASE_URL}/pin/visible`,
       {
@@ -122,10 +140,22 @@ export default function HomeIndex() {
         longitude: currLoc.coords.longitude,
       }
     );
-    console.log(currLoc);
-    if (newlyVisible.data.length !== 0)
-      console.log(newlyVisible.data, "length: ", newlyVisible.data.length);
+    if (newlyVisible.data.length !== 0) getAllViewablePins();
+
     await getCurrentBounds();
+  }
+
+  function handleMarkerClick(event: MarkerPressEvent) {
+    // find pin based on location
+    if (!pins) return;
+    const pinIndex = allViewablePins.findIndex((pin) => {
+      return (
+        pin.latitude === event.nativeEvent.coordinate.latitude &&
+        pin.longitude === event.nativeEvent.coordinate.longitude
+      );
+    });
+
+    setSelectedPinIndex(pinIndex === -1 ? selectedPinIndex : pinIndex);
   }
 
   function renderMarker(pin: VisiblePin | InvisiblePin) {
@@ -133,7 +163,9 @@ export default function HomeIndex() {
       <Marker
         coordinate={{ latitude: pin.latitude, longitude: pin.longitude }}
         key={`${pin.id}`}
+        id={`${pin.id}`}
         image={pin.viewable ? images?.readablePin : images?.unreadablePin}
+        onPress={handleMarkerClick}
       >
         {pin.viewable ? (
           <></>
@@ -173,7 +205,6 @@ export default function HomeIndex() {
         ref={sheetRef}
         snapPoints={snapPoints}
         enableDynamicSizing={false}
-        onChange={handleSheetChange}
         enableHandlePanningGesture={true}
         enableOverDrag={false}
         backgroundStyle={{ backgroundColor: "#FFF9ED" }}
@@ -187,15 +218,11 @@ export default function HomeIndex() {
         <SquareButton icon={"gear"} onPress={handleButtonPress} />
 
         <BottomSheetFlatList
-          data={pins?.visible ?? []}
+          data={allViewablePins}
           keyExtractor={(item) => item.id + ""}
           renderItem={renderItem}
           contentContainerStyle={styles.flatlist}
-
-          // refreshing={false}
-          // onRefresh={handleRefresh}
-          // nestedScrollEnabled={true}  // should enable nested scrolling but it doesnt work :(
-          // keyboardShouldPersistTaps="handled"  // why are taps still being blocked :(
+          ref={flatListRef}
         />
       </BottomSheet>
     </GestureHandlerRootView>
