@@ -1,4 +1,5 @@
 import { API_BASE_URL } from "@/environment";
+import { InvisiblePin, VisiblePin } from "@/interfaces/pin.interface";
 import axios from "axios";
 
 
@@ -33,8 +34,7 @@ export class PinService {
             console.log(pin);
             return pin;
         } catch (e) {
-            console.log("Failed to get pin");
-            console.log(e);
+            console.log("Failed to get pin ", e);
         }
     }
 
@@ -46,7 +46,7 @@ export class PinService {
             console.log(pin);
             return pin;
         } catch (e) {
-            console.log("Failed to delete pin.");
+            console.log("Failed to delete pin, ", e);
         }
     }
 
@@ -58,7 +58,7 @@ export class PinService {
             console.log(pin);
             return pin;
         } catch (e) {
-            console.log("failed to update pin");
+            console.log("failed to update pin ", e);
         }
     }
 
@@ -70,7 +70,21 @@ export class PinService {
             console.log(pin);
             return pin;
         } catch (e) {
-            console.log("failed creating pin");
+            console.log("failed creating pin ", e);
         }
     }
+
+    async getAllViewable() {
+        console.log("getting viewable pins");
+        try {
+            const res = await axios.get<VisiblePin[]>(`${API_BASE_URL}/pin/visible`);
+            const pins = res.data;
+            console.log(pins);
+            return pins;
+        } catch (e) {
+            console.log("failed to get viewable pins ", e);
+        }
+    }
+
+
 }
