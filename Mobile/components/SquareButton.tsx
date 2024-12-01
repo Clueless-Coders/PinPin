@@ -1,7 +1,7 @@
 import React from "react";
 import { View, StyleSheet } from "react-native";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
-import { Link } from "expo-router";
+import { Link, Route } from "expo-router";
 
 export interface SquareButtonProps {
   size?: number;
@@ -27,7 +27,7 @@ export default function SquareButton({
   const buttonColor = disabled ? "gray" : color;
 
   return (
-    <Link href={disabled ? "#" : route}>
+    <Link href={disabled ? "/" : (route as Route)}>
       <View>
         <View
           style={[
@@ -50,7 +50,7 @@ export default function SquareButton({
         >
           {icon && (
             <FontAwesomeIcon
-              icon={icon}
+              icon={"face-smile-plus"}
               size={buttonWidth * 0.55}
               color="black"
             />
