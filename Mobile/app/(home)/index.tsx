@@ -11,10 +11,11 @@ import BottomSheet, {
 import PinPost, { PinPostProps } from "@/components/PinPost";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { faFilter } from "@fortawesome/free-solid-svg-icons/faFilter";
+import { faGear } from "@fortawesome/free-solid-svg-icons/faGear";
 import React from "react";
 import { useState, useEffect } from "react";
 import MapView, { Details, PROVIDER_GOOGLE, Region } from "react-native-maps";
-import { Link, useRouter } from "expo-router";
+import { useRouter } from "expo-router";
 import * as Location from "expo-location";
 import axios from "axios";
 import { API_BASE_URL } from "@/environment";
@@ -24,10 +25,13 @@ import SquareButton from "@/components/SquareButton";
 //Map, create pin, etc
 export default function HomeIndex() {
   const router = useRouter();
-
   const [location, setLocation] = useState<Location.LocationObject | null>(
     null
   );
+
+  const handleButtonPress = () => {
+    console.log("button button button");
+  };
 
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [pins, setPins] = useState<VisiblePin[] | undefined>();
@@ -164,7 +168,12 @@ export default function HomeIndex() {
           <BottomSheetTextInput style={styles.input} />
           <FontAwesomeIcon icon={faFilter} />
         </View>
-        <SquareButton route="/NewPin"></SquareButton>
+
+        <SquareButton
+          icon={faGear}
+          onPress={handleButtonPress}
+          // disabled={true}
+        />
 
         <BottomSheetFlatList
           data={pins}

@@ -1,16 +1,16 @@
 import React from "react";
-import { View, StyleSheet } from "react-native";
+import { View, StyleSheet, Pressable } from "react-native";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
-import { Link, Route } from "expo-router";
+import { IconDefinition } from "@fortawesome/fontawesome-svg-core";
 
 export interface SquareButtonProps {
   size?: number;
   width?: number;
   height?: number;
   color?: string;
-  icon?: any;
-  route: string;
+  icon?: IconDefinition;
   disabled?: boolean;
+  onPress: () => void;
 }
 
 export default function SquareButton({
@@ -19,15 +19,21 @@ export default function SquareButton({
   height,
   color = "#FFC900",
   icon,
-  route,
   disabled = false,
+  onPress,
 }: SquareButtonProps) {
   const buttonWidth = width ?? size;
   const buttonHeight = height ?? size;
   const buttonColor = disabled ? "gray" : color;
 
+  const handlePress = () => {
+    if (!disabled) {
+      onPress();
+    }
+  };
+
   return (
-    <Link href={disabled ? "/" : (route as Route)}>
+    <Pressable onPress={handlePress}>
       <View>
         <View
           style={[
@@ -50,14 +56,14 @@ export default function SquareButton({
         >
           {icon && (
             <FontAwesomeIcon
-              icon={"face-smile-plus"}
+              icon={icon}
               size={buttonWidth * 0.55}
               color="black"
             />
           )}
         </View>
       </View>
-    </Link>
+    </Pressable>
   );
 }
 
