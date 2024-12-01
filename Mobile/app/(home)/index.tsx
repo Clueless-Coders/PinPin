@@ -1,17 +1,17 @@
 import { useCallback, useRef, useMemo } from "react";
-import { StyleSheet, View, Text } from "react-native";
+import { StyleSheet, View, Text, SafeAreaView } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import BottomSheet, {
   BottomSheetFlatList,
   BottomSheetTextInput,
 } from "@gorhom/bottom-sheet";
 import PinPost, { PinPostProps } from "@/components/PinPost";
+import SquareButton from "@/components/SquareButton";
 import React from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { faFilter } from "@fortawesome/free-solid-svg-icons/faFilter";
 import { faGear } from "@fortawesome/free-solid-svg-icons/faGear";
 import { Link } from "expo-router";
-import SquareButton from "@/components/SquareButton";
 
 // TO DO
 // Finish search bar + filter button styling
@@ -63,39 +63,48 @@ export default function HomeIndex() {
     );
   }, []);
   return (
-    <GestureHandlerRootView style={styles.root}>
-      <Link href={"/(home)/Filters"}>Filters page</Link>
-      <Link href={"/(home)/NewPin"}>New Pin page</Link>
-      <Link href={"/(home)/Settings"}>Settings page</Link>
-      <Link href={"/(home)/0"}> PinDetail page</Link>
-
-      <BottomSheet
-        ref={sheetRef}
-        snapPoints={snapPoints}
-        enableDynamicSizing={false}
-        onChange={handleSheetChange}
-        enableHandlePanningGesture={true}
-        enableOverDrag={false}
-        backgroundStyle={{ backgroundColor: "#FFF9ED" }}
-        handleIndicatorStyle={{ backgroundColor: "#000000" }}
-      >
-        <View style={styles.search}>
-          <BottomSheetTextInput style={styles.input} />
-          <FontAwesomeIcon icon={faFilter} />
+    <SafeAreaView style={{ flex: 1 }}>
+      <GestureHandlerRootView style={styles.root}>
+        <View style={styles.topRightButton}>
+          <SquareButton
+            route={"/(home)/Settings"}
+            icon={faGear}
+            color="#FF6B6B"
+            
+          />
         </View>
+        <Link href={"/(home)/Filters"}>Filters page</Link>
+        <Link href={"/(home)/NewPin"}>New Pin page</Link>
+        <Link href={"/(home)/Settings"}>Settings page</Link>
+        <Link href={"/(home)/0"}> PinDetail page</Link>
+        <BottomSheet
+          ref={sheetRef}
+          snapPoints={snapPoints}
+          enableDynamicSizing={false}
+          onChange={handleSheetChange}
+          enableHandlePanningGesture={true}
+          enableOverDrag={false}
+          backgroundStyle={{ backgroundColor: "#FFF9ED" }}
+          handleIndicatorStyle={{ backgroundColor: "#000000" }}
+        >
+          <View style={styles.search}>
+            <BottomSheetTextInput style={styles.input} />
+            <FontAwesomeIcon icon={faFilter} />
+          </View>
 
-        <BottomSheetFlatList
-          data={data}
-          keyExtractor={(item) => item.id}
-          renderItem={renderItem}
-          contentContainerStyle={styles.flatlist}
-          // refreshing={false}
-          // onRefresh={handleRefresh}
-          // nestedScrollEnabled={true}  // should enable nested scrolling but it doesnt work :(
-          // keyboardShouldPersistTaps="handled"  // why are taps still being blocked :(
-        />
-      </BottomSheet>
-    </GestureHandlerRootView>
+          <BottomSheetFlatList
+            data={data}
+            keyExtractor={(item) => item.id}
+            renderItem={renderItem}
+            contentContainerStyle={styles.flatlist}
+            // refreshing={false}
+            // onRefresh={handleRefresh}
+            // nestedScrollEnabled={true}  // should enable nested scrolling but it doesnt work :(
+            // keyboardShouldPersistTaps="handled"  // why are taps still being blocked :(
+          />
+        </BottomSheet>
+      </GestureHandlerRootView>
+    </SafeAreaView>
   );
 }
 
@@ -103,6 +112,12 @@ const styles = StyleSheet.create({
   root: {
     flex: 1,
     paddingTop: 200,
+  },
+  topRightButton: {
+    position: "absolute",
+    top: 40, 
+    right: 10, 
+    zIndex: 1000, 
   },
   flatlist: {
     backgroundColor: "#FFF9ED",

@@ -1,10 +1,12 @@
+import Header from "@/components/Header";
 import React from "react";
-import { Text, View } from "react-native";
+import { SafeAreaView, Text, View } from "react-native";
 
 export default function Settings() {
   return (
-    <View>
+    <SafeAreaView>
+      <Header color="#FF6B6B" />
       <Text>Settings Page.</Text>
-    </View>
+    </SafeAreaView>
   );
 }

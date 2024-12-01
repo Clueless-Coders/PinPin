@@ -1,11 +1,11 @@
+import Header from "@/components/Header";
 import { API_BASE_URL } from "@/environment";
 import axios from "axios";
 import { Link } from "expo-router";
 import React from "react";
 import { useState } from "react";
-import { Button, Text, View, StyleSheet } from "react-native";
+import { Button, Text, View, StyleSheet, SafeAreaView } from "react-native";
 
-//Map, create pin, etc
 export default function Filters() {
   const [data, setData] = useState<any>();
   async function test() {
@@ -19,7 +19,8 @@ export default function Filters() {
   }
 
   return (
-    <View>
+    <SafeAreaView style={styles.container}>
+      <Header color="#87CEEB"/>
       <Text>Hello!</Text>
       <Link href={"/(home)/Filters"}>Filters page</Link>
       <Link href={"/(home)/NewPin"}>New Pin page</Link>
@@ -28,20 +29,12 @@ export default function Filters() {
 
       <Button onPress={test} title="bonk"></Button>
       {data ? <Text>{data.email}</Text> : undefined}
-    </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
-    // justifyContent: "center",
-    backgroundColor: "#FFF9ED",
-  },
-  contentContainer: {
-    flex: 1,
-    alignItems: "center",
-    backgroundColor: "#FFF9ED",
   },
 });
