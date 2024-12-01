@@ -2,16 +2,27 @@ import React from "react";
 import { View, StyleSheet, Pressable } from "react-native";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { IconDefinition } from "@fortawesome/fontawesome-svg-core";
+import { faGear } from "@fortawesome/free-solid-svg-icons/faGear";
+import { faPlus } from "@fortawesome/free-solid-svg-icons/faPlus";
+import { faLocationDot } from "@fortawesome/free-solid-svg-icons/faLocationDot";
+
+export type SquareButtonIcon = "gear" | "plus" | "pin";
 
 export interface SquareButtonProps {
   size?: number;
   width?: number;
   height?: number;
   color?: string;
-  icon?: IconDefinition;
+  icon?: IconDefinition | SquareButtonIcon;
   disabled?: boolean;
   onPress: () => void;
 }
+
+const icons = {
+  gear: faGear,
+  plus: faPlus,
+  pin: faLocationDot,
+};
 
 export default function SquareButton({
   size = 45,
@@ -56,7 +67,7 @@ export default function SquareButton({
         >
           {icon && (
             <FontAwesomeIcon
-              icon={icon}
+              icon={typeof icon === "string" ? icons[icon] : icon}
               size={buttonWidth * 0.55}
               color="black"
             />

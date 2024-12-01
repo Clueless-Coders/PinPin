@@ -8,7 +8,6 @@ import BottomSheet, {
 import PinPost from "@/components/PinPost";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { faFilter } from "@fortawesome/free-solid-svg-icons/faFilter";
-import { faGear } from "@fortawesome/free-solid-svg-icons/faGear";
 import React from "react";
 import { useState, useEffect } from "react";
 import MapView, { Callout, Marker } from "react-native-maps";
@@ -21,6 +20,7 @@ import {
   VisiblePin,
 } from "@/interfaces/pin.interface";
 import SquareButton from "@/components/SquareButton";
+import { router } from "expo-router";
 
 interface LocalImages {
   readablePin: number;
@@ -34,7 +34,7 @@ export default function HomeIndex() {
   );
 
   const handleButtonPress = () => {
-    console.log("button button button");
+    router.navigate("/Settings");
   };
 
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -184,11 +184,7 @@ export default function HomeIndex() {
           <FontAwesomeIcon icon={faFilter} />
         </View>
 
-        <SquareButton
-          icon={faGear}
-          onPress={handleButtonPress}
-          // disabled={true}
-        />
+        <SquareButton icon={"gear"} onPress={handleButtonPress} />
 
         <BottomSheetFlatList
           data={pins?.visible ?? []}
