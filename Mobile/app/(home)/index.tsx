@@ -19,6 +19,8 @@ import {
   PinLocationRangeData,
   VisiblePin,
 } from "@/interfaces/pin.interface";
+import SquareButton from "@/components/SquareButton";
+import { router } from "expo-router";
 
 interface LocalImages {
   readablePin: number;
@@ -30,6 +32,10 @@ export default function HomeIndex() {
   const [location, setLocation] = useState<Location.LocationObject | null>(
     null
   );
+
+  const handleButtonPress = () => {
+    router.navigate("/Settings");
+  };
 
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [pins, setPins] = useState<PinLocationRangeData | undefined>();
@@ -177,6 +183,8 @@ export default function HomeIndex() {
           <BottomSheetTextInput style={styles.input} />
           <FontAwesomeIcon icon={faFilter} />
         </View>
+
+        <SquareButton icon={"gear"} onPress={handleButtonPress} />
 
         <BottomSheetFlatList
           data={pins?.visible ?? []}
