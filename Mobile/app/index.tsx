@@ -1,3 +1,4 @@
+import PinPost from "@/components/PinPost";
 import { AuthService } from "@/services/AuthService";
 import { Link, router } from "expo-router";
 import { useEffect, useState } from "react";
@@ -50,6 +51,9 @@ export default function Index() {
         alignItems: "center",
       }}
     >
+
+      
+
       <Link href="/signup">Click here for signup</Link>
 
       <Button
