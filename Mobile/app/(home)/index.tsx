@@ -107,11 +107,18 @@ export default function HomeIndex() {
   }
 
   async function markNewVisiblePins() {
-    const newlyVisible = await axios.post(`${API_BASE_URL}/pin/visible`, {
-      latitude: location?.coords.latitude,
-      longitude: location?.coords.longitude,
-    });
-
+    const currLoc = await Location.getCurrentPositionAsync();
+    setLocation(currLoc);
+    const newlyVisible = await axios.post<VisiblePin[]>(
+      `${API_BASE_URL}/pin/visible`,
+      {
+        latitude: currLoc.coords.latitude,
+        longitude: currLoc.coords.longitude,
+      }
+    );
+    console.log(currLoc);
+    if (newlyVisible.data.length !== 0)
+      console.log(newlyVisible.data, "length: ", newlyVisible.data.length);
     await getCurrentBounds();
   }
 
