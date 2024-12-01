@@ -1,35 +1,41 @@
 import { useCallback, useRef, useMemo } from "react";
 import { StyleSheet, View, Text } from "react-native";
-import {
-  GestureHandlerRootView,
-  Pressable,
-} from "react-native-gesture-handler";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 import BottomSheet, {
   BottomSheetFlatList,
   BottomSheetTextInput,
 } from "@gorhom/bottom-sheet";
-import PinPost, { PinPostProps } from "@/components/PinPost";
+import PinPost from "@/components/PinPost";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { faFilter } from "@fortawesome/free-solid-svg-icons/faFilter";
 import React from "react";
 import { useState, useEffect } from "react";
-import MapView, { Details, PROVIDER_GOOGLE, Region } from "react-native-maps";
-import { Link, useRouter } from "expo-router";
+import MapView, { Callout, Marker } from "react-native-maps";
 import * as Location from "expo-location";
 import axios from "axios";
 import { API_BASE_URL } from "@/environment";
-import { PinLocationRangeData, VisiblePin } from "@/interfaces/pin.interface";
+import {
+  InvisiblePin,
+  PinLocationRangeData,
+  VisiblePin,
+} from "@/interfaces/pin.interface";
+
+interface LocalImages {
+  readablePin: number;
+  unreadablePin: number;
+}
 
 //Map, create pin, etc
 export default function HomeIndex() {
-  const router = useRouter();
-
   const [location, setLocation] = useState<Location.LocationObject | null>(
     null
   );
 
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const [pins, setPins] = useState<VisiblePin[] | undefined>();
+  const [pins, setPins] = useState<PinLocationRangeData | undefined>();
+  const [images, setImages] = useState<LocalImages | undefined>();
+  const sheetRef = useRef<BottomSheet>(null);
+  const mapRef = useRef<MapView>(null);
 
   //Setup Maps
   useEffect(() => {
@@ -42,48 +48,27 @@ export default function HomeIndex() {
 
       let location = await Location.getCurrentPositionAsync({});
       setLocation(location);
+      mapRef.current?.animateToRegion({
+        latitude: location.coords.latitude,
+        longitude: location.coords.longitude,
+        latitudeDelta: 0.01,
+        longitudeDelta: 0.01,
+      });
     }
 
+    setImages({
+      readablePin: require("@/assets/images/ReadablePin.png"),
+      unreadablePin: require("@/assets/images/UnreadablePin.png"),
+    });
     getCurrentLocation();
   }, []);
 
-  let display_location = "Waiting...";
-  if (errorMsg) {
-    display_location = errorMsg;
-  } else if (location) {
-    display_location = JSON.stringify(location);
-  }
-
-  const sheetRef = useRef<BottomSheet>(null);
-  const mapRef = useRef<MapView>(null);
-
-  // testing pin content rendering, need to connect to backend eek
-  const data = useMemo(
-    () =>
-      Array(25)
-        .fill(0)
-        .map((_, index): PinPostProps & { id: string } => ({
-          isFocused: index === 0,
-          id: `index-${index}`,
-          distance: index + 1,
-          time: new Date(Date.now() - 30000),
-          text: `test pin index ${index} asldkfjasdkl;jasdkljdflk;asjfl;adjfkl;asdjfklasdfjasdfjasdklfjasjklasdfjasdkl;jasdjajasdjasdfjasdl;fjasdkfjasdfjasd`,
-          commentCount: index + 3,
-          karma: index + 4,
-        })),
-    []
-  );
   // removed 100% snap point while nested scrolling doesnt work
   const snapPoints = useMemo(() => ["12%", "75%"], []);
 
   const handleSheetChange = useCallback((index: number) => {
     console.log("handleSheetChange", index);
   }, []);
-
-  // idk if we're gonna need this in the future
-  // const handleRefresh = useCallback(() => {
-  //   console.log("handleRefresh");
-  // }, []);
 
   const renderItem = useCallback(({ item }: { item: VisiblePin }) => {
     return (
@@ -100,18 +85,11 @@ export default function HomeIndex() {
     );
   }, []);
 
-  async function getCurrentBounds(region: Region, details: Details) {
+  async function getCurrentBounds() {
     const bounds = await mapRef.current?.getMapBoundaries();
-    console.log(bounds);
-    console.log(location?.coords);
 
     if (!bounds) return;
     try {
-      const newlyVisible = await axios.post(`${API_BASE_URL}/pin/visible`, {
-        latitude: location?.coords.latitude,
-        longitude: location?.coords.longitude,
-      });
-
       const final = await axios.post<PinLocationRangeData>(
         `${API_BASE_URL}/pin/location`,
         {
@@ -122,12 +100,37 @@ export default function HomeIndex() {
         }
       );
 
-      //console.log(newlyVisible.data);
-      console.log(final.data);
-      setPins(final.data.visible);
+      setPins(final.data);
     } catch (e: any) {
       console.log(e);
     }
+  }
+
+  async function markNewVisiblePins() {
+    const newlyVisible = await axios.post(`${API_BASE_URL}/pin/visible`, {
+      latitude: location?.coords.latitude,
+      longitude: location?.coords.longitude,
+    });
+
+    await getCurrentBounds();
+  }
+
+  function renderMarker(pin: VisiblePin | InvisiblePin) {
+    return (
+      <Marker
+        coordinate={{ latitude: pin.latitude, longitude: pin.longitude }}
+        key={`${pin.id}`}
+        image={pin.viewable ? images?.readablePin : images?.unreadablePin}
+      >
+        {pin.viewable ? (
+          <></>
+        ) : (
+          <Callout>
+            <Text>Travel to this location to view what this pin says!</Text>
+          </Callout>
+        )}
+      </Marker>
+    );
   }
 
   return (
@@ -147,7 +150,11 @@ export default function HomeIndex() {
         ref={mapRef}
         onRegionChangeComplete={getCurrentBounds}
         showsUserLocation={true}
-      />
+        onUserLocationChange={markNewVisiblePins}
+      >
+        {pins?.invisible.map(renderMarker) ?? <></>}
+        {pins?.visible.map(renderMarker) ?? <></>}
+      </MapView>
 
       <BottomSheet
         ref={sheetRef}
@@ -165,10 +172,11 @@ export default function HomeIndex() {
         </View>
 
         <BottomSheetFlatList
-          data={pins}
+          data={pins?.visible ?? []}
           keyExtractor={(item) => item.id + ""}
           renderItem={renderItem}
           contentContainerStyle={styles.flatlist}
+
           // refreshing={false}
           // onRefresh={handleRefresh}
           // nestedScrollEnabled={true}  // should enable nested scrolling but it doesnt work :(
