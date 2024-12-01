@@ -7,9 +7,11 @@ import { faImage } from "@fortawesome/free-solid-svg-icons/faImage";
 import { faCaretUp } from "@fortawesome/free-solid-svg-icons/faCaretUp";
 import { faCaretDown } from "@fortawesome/free-solid-svg-icons/faCaretDown";
 
-// shadow how???????!?!!!!??
 // CaretUp looks like it needs to be brought down some
+// Filter looks like it needs to be brought up some
 // pins will need to be pressable
+// add more padding?
+// try to fix comment icon
 
 export interface PinPostProps {
   distance: number;
@@ -78,7 +80,6 @@ const styles = StyleSheet.create({
     borderColor: "black",
     backgroundColor: "#FAEFDF",
     position: "relative",
-    //zIndex: 1,
   },
   pinContainerHighlight: {
     padding: 3,
@@ -95,20 +96,17 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "flex-start",
-    //backgroundColor: "gray",
   },
   topLeft: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "flex-start",
     marginHorizontal: 3,
-    //backgroundColor: "orange",
   },
   topRight: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "flex-start",
-    //backgroundColor: "orange",
     marginLeft: "auto",
     marginHorizontal: 3,
   },
@@ -121,13 +119,11 @@ const styles = StyleSheet.create({
     marginBottom: 5,
     padding: 1,
     fontSize: 16,
-    //backgroundColor: "orange",
   },
   bottom: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "flex-start",
-    //backgroundColor: "gray",
   },
   bottomText: {
     marginVertical: 5,
