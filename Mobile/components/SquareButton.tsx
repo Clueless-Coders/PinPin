@@ -16,6 +16,7 @@ export interface SquareButtonProps {
   icon?: IconDefinition | SquareButtonIcon;
   disabled?: boolean;
   text?: string
+  style?: any
   onPress: () => void;
 }
 
