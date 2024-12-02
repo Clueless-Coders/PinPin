@@ -14,12 +14,14 @@ datasource db {
 }
 
 model User {
-  email    String     @unique
-  id       Int        @id @default(autoincrement())
-  pwHash   String
-  comments Comment[]
-  pins     Pin[]
-  Viewable Viewable[]
+  email        String         @unique
+  id           Int            @id @default(autoincrement())
+  pwHash       String
+  comments     Comment[]
+  pins         Pin[]
+  Viewable     Viewable[]
+  pinVotes     pinVotes[]
+  commentVotes commentVotes[]
 }
 
 model Viewable {
@@ -45,15 +47,37 @@ model Pin {
   updatedAt DateTime   @updatedAt
   comments  Comment[]
   Viewable  Viewable[]
+  pinVotes  pinVotes[]
 }
 
 model Comment {
-  id        Int    @id @default(autoincrement())
+  id           Int            @id @default(autoincrement())
+  userID       Int
+  user         User           @relation(fields: [userID], references: [id])
+  pinID        Int
+  pin          Pin            @relation(fields: [pinID], references: [id])
+  text         String         @db.VarChar(300)
+  upvotes      Int
+  downvotes    Int
+  commentVotes commentVotes[]
+}
+
+model pinVotes {
+  userID Int
+  user   User @relation(fields: [userID], references: [id])
+  pinID  Int
+  pin    Pin  @relation(fields: [pinID], references: [id])
+  vote   Int
+
+  @@unique([userID, pinID])
+}
+
+model commentVotes {
   userID    Int
-  user      User   @relation(fields: [userID], references: [id])
-  pinID     Int
-  pin       Pin    @relation(fields: [pinID], references: [id])
-  text      String @db.VarChar(300)
-  upvotes   Int
-  downvotes Int
+  user      User    @relation(fields: [userID], references: [id])
+  commentID Int
+  comment   Comment @relation(fields: [commentID], references: [id])
+  vote      Int
+
+  @@unique([userID, commentID])
 }

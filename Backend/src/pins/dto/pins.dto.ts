@@ -48,3 +48,10 @@ export class LocationDTO {
   @IsNumber()
   longitude: number;
 }
+
+export class createVotesDTO {
+  @IsInt()
+  postID: number
+  @IsInt()
+  vote: number
+}

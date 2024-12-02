@@ -18,7 +18,7 @@ import {
 } from './dto/pins.dto';
 import { Request } from 'express';
 import { request } from 'http';
-
+import { createVotesDTO } from './dto/pins.dto';
 @Controller()
 export class PinsController {
     constructor(private readonly pinsService: PinsService) { }
@@ -51,7 +51,7 @@ export class PinsController {
 
 
     @Get(':id')
-    async getPin(@Param('id') id: String) {
+    async getPin(@Param('id') id: string) {
         return await this.pinsService.getPin(+id);
     }
 
@@ -65,19 +65,39 @@ export class PinsController {
         return await this.pinsService.markVisibleByLocation(loc, user.id);
     }
 
-    @Post(':id/upvotes')
-    patchUpvote(@Param('id') id: String, @Body() increment: UpdateVotes) {
-        return 'not implemented yet :(';
+    @Post(':id/votes')
+    async postPinVote(@Body() vote: createVotesDTO, @Req() request: Request) {
+        return await this.pinsService.postPinVote(vote, request);
     }
 
-    @Post(':id/downvotes')
-    patchDownvote(@Param('id') id: String, @Body() increment: UpdateVotes) {
-        return 'not implemented yet :(';
+    @Post('comment/:id/votes')
+    async postCommentVote(@Body() vote: createVotesDTO, @Req() request: Request) {
+        return await this.pinsService.postCommentVote(vote, request);
+    }
+
+    @Get(':id/votes')
+    async getPinVote(@Param('id') id: string) {
+        return await this.pinsService.getPinVotes(+id);
+    }
+
+    @Get('comment/:id/votes')
+    async getCommentVote(@Param('id') id: string) {
+        return await this.pinsService.getCommentVotes(+id);
+    }
+
+    @Delete(':id/votes')
+    async deletePinVote(@Param('id') id: string, @Req() req: Request) {
+        return await this.pinsService.deletePinVote(+id, req);
+    }
+
+    @Delete('comment/:id/votes')
+    async deleteCommentVote(@Param('id') id: string, @Req() req: Request) {
+        return await this.pinsService.deleteCommentVote(+id, req);
     }
 
     @Patch(':id')
     async updatePin(
-        @Param('id') id: String,
+        @Param('id') id: string,
         @Body() updatePinDTO: UpdatePinDTO,
         @Req() req: Request,
     ) {
