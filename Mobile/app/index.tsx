@@ -3,7 +3,8 @@ import { AuthService } from "@/services/AuthService";
 import { Link, Redirect, router } from "expo-router";
 import React from "react";
 import { useEffect, useState } from "react";
-import { Button, TextInput, View } from "react-native";
+import { Button, TextInput, View, Image } from "react-native";
+import PinPinTextArea from "@/components/PinPinTextArea";
 
 export const authService = new AuthService();
 
@@ -57,29 +58,36 @@ export default function Index() {
         alignItems: "center",
       }}
     >
-      <Link href="/signup">Click here for signup</Link>
-
       <Button
         title="Login"
         onPress={() => setIsLoggingIn(true)}
         disabled={isLoggingIn}
       ></Button>
-      <TextInput
-        style={{ height: 40, borderColor: "black", borderRadius: 3 }}
-        placeholder="Email"
-        onChangeText={(val) => setEmail(val)}
-      ></TextInput>
 
-      <TextInput
+      <PinPinTextArea
         style={{
-          paddingTop: 10,
-          height: 40,
-          borderColor: "black",
-          borderRadius: 3,
+          marginTop: 10,
+          marginBottom: 10,
         }}
-        placeholder="Password"
-        onChangeText={(val) => setPassword(val)}
-      ></TextInput>
+        onTextChange={(val) => setEmail(val)}
+      ></PinPinTextArea>
+
+      <PinPinTextArea
+        style={{
+          marginBottom: 10,
+        }}
+        onTextChange={(val) => setPassword(val)}
+      ></PinPinTextArea>
+      <Link
+        href="/signup"
+        style={{
+          top: 280,
+          textDecorationLine: "underline",
+          fontWeight: "bold",
+        }}
+      >
+        Don't have an account? Sign up!
+      </Link>
     </View>
   );
 }
