@@ -3,8 +3,9 @@ import { AuthService } from "@/services/AuthService";
 import { Link, Redirect, router } from "expo-router";
 import React from "react";
 import { useEffect, useState } from "react";
-import { Button, TextInput, View, Image } from "react-native";
+import { Button, TextInput, View, Image, Pressable, Text } from "react-native";
 import PinPinTextArea from "@/components/PinPinTextArea";
+import SquareButton from "@/components/SquareButton";
 
 
 export const authService = new AuthService();
@@ -13,7 +14,8 @@ export default function Index() {
   //TODO: Set up the authentication logic.
   //This is where the logic will be implemented to swap from Login/Sign Up pages to the main app.
   //Maybe use some kind of custom hook & context provider to help w/ global user state
-  const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const [isLoggingIn, setIsLoggingIn] = useState(true);
+  const [isProcessing, setIsProcessing] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loggedIn, setLoggedIn] = useState(false);
@@ -27,14 +29,18 @@ export default function Index() {
 
       //if email or pw not provided, don't attempt login
       if (email.length === 0 || password.length === 0) {
-        setIsLoggingIn(false);
+        setIsProcessing(false);
         return;
       }
 
       try {
-        const user = await authService.login(email, password);
-        console.log(user);
+        let ret;
+        if (isLoggingIn)
+          ret = await authService.login(email, password);
+        else
+          ret = await authService.signup({ email, password });
 
+        console.log(ret);
         if (authService.isLoggedIn()) {
           setEmail("");
           setPassword("");
@@ -43,11 +49,11 @@ export default function Index() {
       } catch (e) {
         console.log(e);
       }
-      setIsLoggingIn(false);
+      setIsProcessing(false);
     }
 
     login();
-  }, [isLoggingIn]);
+  }, [isProcessing]);
 
   if (loggedIn) return <Redirect href={"/home"}></Redirect>;
 
@@ -71,14 +77,14 @@ export default function Index() {
       />
 
       <PinPinTextArea
-      style={{
-        marginBottom: "5%",
-        height: 58,
-        width: 300
-      }}
-      textInputProps={{
-        placeholder: "Email"
-      }}
+        style={{
+          marginBottom: "5%",
+          height: 58,
+          width: 300
+        }}
+        textInputProps={{
+          placeholder: "Email"
+        }}
         onTextChange={(val) => setEmail(val)}
       ></PinPinTextArea>
 
@@ -95,21 +101,28 @@ export default function Index() {
         onTextChange={(val) => setPassword(val)}
       ></PinPinTextArea>
 
-      <Button
-        title="Login"
-        onPress={() => setIsLoggingIn(true)}
-        disabled={isLoggingIn}
-      ></Button>
+      <SquareButton
+        width={180}
+        height={60}
+        text={isLoggingIn ? "Login" : "Signup"}
+        onPress={() => setIsProcessing(true)}
+        disabled={isProcessing}
+      />
 
-      <Link 
-      href="/signup"
-      style={{
-        top: 100,
-        textDecorationLine: 'underline',
-        fontWeight: 'bold'
-      }}>
-      Don't have an account? Sign up!
-      </Link>
+      <Pressable
+        onPress={() => setIsLoggingIn(!isLoggingIn)}
+        style={{
+          top: 100,
+        }}>
+        <Text style={{
+          textDecorationLine: 'underline',
+          fontWeight: 'bold'
+        }}>
+          {
+            isLoggingIn ? "Don't have an account? Sign up!" : "Already have an account? Log in!"
+          }
+        </Text>
+      </Pressable>
     </View>
   );
 }
