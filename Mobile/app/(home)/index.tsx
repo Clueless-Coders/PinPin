@@ -117,6 +117,7 @@ export default function HomeIndex() {
             commentCount={2}
             karma={item.upvotes - item.downvotes}
             isFocused={index === selectedPinIndex}
+            pinId={item.id}
           />
         </View>
       );
@@ -165,7 +166,7 @@ export default function HomeIndex() {
 
   function handleMarkerClick(event: MarkerPressEvent) {
     // find pin based on location
-    if (!pins) return;
+    if (!allViewablePins) return;
     const pinIndex = allViewablePins.findIndex((pin) => {
       return (
         pin.latitude === event.nativeEvent.coordinate.latitude &&
@@ -173,6 +174,7 @@ export default function HomeIndex() {
       );
     });
 
+    if (pinIndex > -1) sheetRef.current?.expand();
     setSelectedPinIndex(pinIndex === -1 ? selectedPinIndex : pinIndex);
   }
 
