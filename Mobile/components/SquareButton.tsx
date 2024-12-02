@@ -1,5 +1,5 @@
 import React from "react";
-import { View, StyleSheet, Pressable } from "react-native";
+import { View, StyleSheet, Pressable, Text } from "react-native";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { IconDefinition } from "@fortawesome/fontawesome-svg-core";
 import { faGear } from "@fortawesome/free-solid-svg-icons/faGear";
@@ -15,6 +15,7 @@ export interface SquareButtonProps {
   color?: string;
   icon?: IconDefinition | SquareButtonIcon;
   disabled?: boolean;
+  text?: string
   style?: any
   onPress: () => void;
 }
@@ -32,6 +33,7 @@ export default function SquareButton({
   color = "#FFC900",
   icon,
   disabled = false,
+  text,
   onPress,
   style
 }: SquareButtonProps) {
@@ -67,13 +69,13 @@ export default function SquareButton({
             },
           ]}
         >
-          {icon && (
+          {text ? <Text style={{ color: 'white', fontSize: 22 }}>{text}</Text> : (icon && (
             <FontAwesomeIcon
               icon={typeof icon === "string" ? icons[icon] : icon}
               size={buttonWidth * 0.55}
               color="black"
             />
-          )}
+          ))}
         </View>
       </View>
     </Pressable>
