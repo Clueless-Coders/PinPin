@@ -57,8 +57,43 @@ export default function Index() {
         flex: 1,
         justifyContent: "center",
         alignItems: "center",
+        backgroundColor: "#FFF9ED"
       }}
     >
+
+      <Image
+        source={require('@/assets/images/PinPin_Logo.png')}
+        style={{
+          width: 225,
+          height: 306,
+          bottom: 50
+        }}
+      />
+
+      <PinPinTextArea
+      style={{
+        marginBottom: "5%",
+        height: 58,
+        width: 300
+      }}
+      textInputProps={{
+        placeholder: "Email"
+      }}
+        onTextChange={(val) => setEmail(val)}
+      ></PinPinTextArea>
+
+      <PinPinTextArea
+        style={{
+          marginBottom: "5%",
+          height: 58,
+          width: 300
+        }}
+        textInputProps={{
+          secureTextEntry: true,
+          placeholder: "Password"
+        }}
+        onTextChange={(val) => setPassword(val)}
+      ></PinPinTextArea>
 
       <Button
         title="Login"
@@ -66,24 +101,10 @@ export default function Index() {
         disabled={isLoggingIn}
       ></Button>
 
-      <PinPinTextArea
-      style={{
-        marginTop: 10 ,
-        marginBottom: 10,
-      }}
-        onTextChange={(val) => setEmail(val)}
-      ></PinPinTextArea>
-
-      <PinPinTextArea
-        style={{
-          marginBottom: 10
-        }}
-        onTextChange={(val) => setPassword(val)}
-      ></PinPinTextArea>
       <Link 
       href="/signup"
       style={{
-        top: 280,
+        top: 100,
         textDecorationLine: 'underline',
         fontWeight: 'bold'
       }}>

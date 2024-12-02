@@ -16,6 +16,15 @@ export interface IJWTPayload {
   exp: number;
 }
 
+export interface user {
+  email: string;
+  password: string;
+}
+export interface account {
+  email: string;
+  password: string;
+}
+
 
 export class AuthService {
   private tokens?: ITokens;
@@ -49,6 +58,19 @@ export class AuthService {
    * @param password
    * @returns
    */
+
+  async createUser(newUser: account) {
+    console.log("creating user ");
+    try {
+        const res = await axios.post(`${API_BASE_URL}/user`, newUser);
+        const account = res.data;
+        console.log(account);
+        return account;
+    } catch (e) {
+        console.log("failed creating user account ", e);
+    }
+}
+
   async login(email: string, password: string): Promise<User | undefined> {
     try {
       const res = await axios.post<ITokens>(`${API_BASE_URL}/auth/signin`, {
