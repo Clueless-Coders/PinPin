@@ -20,7 +20,7 @@ export interface user {
   email: string;
   password: string;
 }
-export interface account {
+export interface Account {
   email: string;
   password: string;
 }
@@ -59,17 +59,21 @@ export class AuthService {
    * @returns
    */
 
-  async createUser(newUser: account) {
+  async signup(newUser: Account) {
     console.log("creating user ");
     try {
-        const res = await axios.post(`${API_BASE_URL}/user`, newUser);
-        const account = res.data;
-        console.log(account);
-        return account;
-    } catch (e) {
-        console.log("failed creating user account ", e);
+      const res = await axios.post<User>(`${API_BASE_URL}/user`, newUser);
+      const account = res.data;
+      console.log(account);
+      const loginRes = await this.login(newUser.email, newUser.password)
+      console.log(loginRes);
+      console.log(this.tokens)
+      return account;
+    } catch (e: any) {
+      console.log("failed creating user account ", e);
+      throw new Error(e);
     }
-}
+  }
 
   async login(email: string, password: string): Promise<User | undefined> {
     try {
