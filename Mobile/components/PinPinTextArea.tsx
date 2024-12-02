@@ -39,7 +39,7 @@ export default function PinPinTextArea({
           {...textInputProps}
           style={styles.input}
           maxLength={300}
-          textAlignVertical="top"
+          textAlignVertical={textInputProps.multiline ? "top" : "center"}
           onChangeText={updateCounterThenPass}
         ></TextInput>
       </View>
