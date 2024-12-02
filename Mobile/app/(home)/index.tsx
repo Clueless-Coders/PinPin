@@ -186,10 +186,9 @@ export default function HomeIndex() {
         </View>
 
         <SquareButton
-          icon={faGear}
+          icon={"gear"}
           onPress={handleButtonPress}
           // disabled={true}
-          // navigateTo={"/(home)/Filters"}
         />
 
         <BottomSheetFlatList
