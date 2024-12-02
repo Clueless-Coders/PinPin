@@ -20,7 +20,7 @@ export default function Index() {
     async function login() {
       if (authService.isLoggedIn()) {
         console.log("Hi");
-        router.replace("/(home)/NewPin");
+        router.replace("/(home)");
       }
 
       //if email or pw not provided, don't attempt login
@@ -47,7 +47,7 @@ export default function Index() {
     login();
   }, [isLoggingIn]);
 
-  if (loggedIn) return <Redirect href={"/home/NewPin"}></Redirect>;
+  if (loggedIn) return <Redirect href={"/home/"}></Redirect>;
 
   return (
     <View
@@ -57,9 +57,6 @@ export default function Index() {
         alignItems: "center",
       }}
     >
-
-
-
       <Link href="/signup">Click here for signup</Link>
 
       <Button

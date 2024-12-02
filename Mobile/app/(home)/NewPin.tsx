@@ -1,15 +1,16 @@
-import { Text, View, StyleSheet } from "react-native";
+import { Text, View, StyleSheet, ActivityIndicator } from "react-native";
 import React, { useEffect, useState } from "react";
-import PinPinTextArea, { PinPinTextAreaProps } from "@/components/PinPinTextArea";
+import PinPinTextArea, {
+  PinPinTextAreaProps,
+} from "@/components/PinPinTextArea";
 import SquareButton, { SquareButtonIcon } from "@/components/SquareButton";
 import { PinService } from "@/services/PinService";
 import { ICreatePin } from "@/services/PinService";
 
 import * as Location from "expo-location";
+import { router } from "expo-router";
 
-
-const pinService = new PinService()
-
+const pinService = new PinService();
 
 export async function currentLocation() {
   let { status } = await Location.requestForegroundPermissionsAsync();
@@ -18,10 +19,11 @@ export async function currentLocation() {
     return;
   }
 
+  console.log("getting location...");
   let location = await Location.getCurrentPositionAsync({});
-  return [location.coords.latitude, location.coords.longitude]
+  console.log("done!");
+  return [location.coords.latitude, location.coords.longitude];
 }
-
 
 export default function NewPin() {
   const [pinText, setText] = useState("");
@@ -30,7 +32,6 @@ export default function NewPin() {
     async function createPin() {
       if (creating) {
         if (pinText != "") {
-
           let location = await currentLocation();
           if (location === undefined) {
             console.log("failure to get location");
@@ -52,6 +53,7 @@ export default function NewPin() {
           }
         }
         setCreating(false);
+        router.back();
       }
     }
 
@@ -59,11 +61,21 @@ export default function NewPin() {
   }, [creating]);
 
   return (
-    <View style={styles.container} >
-      <PinPinTextArea charsRemainingEnabled={true} textInputProps={textProp} onTextChange={(val) => setText(val)}>
-      </PinPinTextArea>
+    <View style={styles.container}>
+      {creating ? <ActivityIndicator></ActivityIndicator> : <></>}
+      <PinPinTextArea
+        charsRemainingEnabled={true}
+        textInputProps={textProp}
+        onTextChange={(val) => setText(val)}
+      ></PinPinTextArea>
       <View style={styles.contentContainer}>
-        <SquareButton onPress={() => { setCreating(true) }} icon="pin" color="#A7A6FF">
+        <SquareButton
+          onPress={() => {
+            setCreating(true);
+          }}
+          icon="pin"
+          color="#A7A6FF"
+        >
           {/*  */}
         </SquareButton>
       </View>
@@ -71,20 +83,20 @@ export default function NewPin() {
   );
 }
 
-const textProp = { placeholder: "Pin something!", multiline: true }
+const textProp = { placeholder: "Pin something!", multiline: true };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: 'center',
+    alignItems: "center",
     backgroundColor: "#FFF9ED",
-    padding: 30
+    padding: 30,
   },
   contentContainer: {
-    width: '100%',
+    width: "100%",
     // backgroundColor: 'black',
 
     marginTop: 30,
-    flexDirection: 'row-reverse'
+    flexDirection: "row-reverse",
   },
 });
