@@ -35,6 +35,7 @@ export default function PinPinTextArea({
         <View style={styles.shadow}></View>
         <TextInput
           placeholder="Textbox"
+          placeholderTextColor={"grey"}
           {...textInputProps}
           style={styles.input}
           maxLength={300}

@@ -47,7 +47,7 @@ export default function Index() {
     login();
   }, [isLoggingIn]);
 
-  if (loggedIn) return <Redirect href={"/home"}></Redirect>;
+  if (loggedIn) return <Redirect href={"/home/"}></Redirect>;
 
   return (
     <View
@@ -57,9 +57,6 @@ export default function Index() {
         alignItems: "center",
       }}
     >
-
-      
-
       <Link href="/signup">Click here for signup</Link>
 
       <Button
