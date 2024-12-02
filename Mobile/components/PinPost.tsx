@@ -6,6 +6,8 @@ import { faMessage } from "@fortawesome/free-solid-svg-icons/faMessage";
 import { faImage } from "@fortawesome/free-solid-svg-icons/faImage";
 import { faCaretUp } from "@fortawesome/free-solid-svg-icons/faCaretUp";
 import { faCaretDown } from "@fortawesome/free-solid-svg-icons/faCaretDown";
+import * as geolib from "geolib";
+import { LatLng } from "react-native-maps";
 
 // CaretUp looks like it needs to be brought down some
 // Filter looks like it needs to be brought up some
@@ -14,7 +16,7 @@ import { faCaretDown } from "@fortawesome/free-solid-svg-icons/faCaretDown";
 // try to fix comment icon
 
 export interface PinPostProps {
-  distance: number;
+  distanceInMiles?: number;
   time: Date;
   text: string;
   commentCount: number;
@@ -23,7 +25,7 @@ export interface PinPostProps {
 }
 
 export default function PinPost({
-  distance,
+  distanceInMiles,
   time,
   text,
   commentCount,
@@ -33,7 +35,6 @@ export default function PinPost({
   const timeSincePassed = new Date(Date.now() - time.getTime());
   const hours = timeSincePassed.getUTCHours();
   const minutes = timeSincePassed.getUTCMinutes();
-  const seconds = timeSincePassed.getUTCSeconds();
 
   return (
     <View style={{ marginHorizontal: 10 }}>
@@ -43,9 +44,11 @@ export default function PinPost({
       >
         <View style={styles.top}>
           <View style={styles.topLeft}>
-            <Text style={styles.topText}>{distance}mi</Text>
             <Text style={styles.topText}>
-              {hours}h {minutes}m {seconds}s
+              {distanceInMiles?.toFixed(1) ?? "Loading..."}mi
+            </Text>
+            <Text style={styles.topText}>
+              {hours}h {minutes}m
             </Text>
           </View>
           <View style={styles.topRight}>

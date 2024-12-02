@@ -22,6 +22,7 @@ import {
 } from "@/interfaces/pin.interface";
 import SquareButton from "@/components/SquareButton";
 import { router } from "expo-router";
+import * as geolib from "geolib";
 
 interface LocalImages {
   readablePin: number;
@@ -49,8 +50,23 @@ export default function HomeIndex() {
   const flatListRef = useRef<BottomSheetFlatListMethods>(null);
 
   async function getAllViewablePins() {
-    const pins = await axios.get(`${API_BASE_URL}/pin/visible`);
-    setAllViewablePins(pins.data);
+    const pins = await axios.get<VisiblePin[]>(`${API_BASE_URL}/pin/visible`);
+    let data = pins.data;
+    if (location) {
+      const distanceAdded = data.map((pin) => {
+        const distanceInMiles =
+          geolib.getDistance(location.coords, {
+            latitude: pin.latitude,
+            longitude: pin.longitude,
+          }) * 0.000621371;
+        return { ...pin, distanceInMiles };
+      });
+      distanceAdded.sort(
+        (pin, other) => pin.distanceInMiles - other.distanceInMiles
+      );
+      data = distanceAdded;
+    }
+    setAllViewablePins(data);
   }
 
   //Setup Maps
@@ -73,11 +89,11 @@ export default function HomeIndex() {
     }
 
     getAllViewablePins();
+    getCurrentLocation();
     setImages({
       readablePin: require("@/assets/images/ReadablePin.png"),
       unreadablePin: require("@/assets/images/UnreadablePin.png"),
     });
-    getCurrentLocation();
   }, []);
 
   useEffect(() => {
@@ -95,7 +111,7 @@ export default function HomeIndex() {
       return (
         <View style={{ marginBottom: 15 }}>
           <PinPost
-            distance={10}
+            distanceInMiles={item.distanceInMiles}
             time={new Date(Date.parse(item.createdAt)) ?? new Date()}
             text={item.text}
             commentCount={2}
@@ -105,7 +121,7 @@ export default function HomeIndex() {
         </View>
       );
     },
-    [selectedPinIndex]
+    [selectedPinIndex, allViewablePins]
   );
 
   async function getCurrentBounds() {
@@ -143,6 +159,7 @@ export default function HomeIndex() {
     if (newlyVisible.data.length !== 0) getAllViewablePins();
 
     setLocation(currLoc);
+    await getAllViewablePins();
     await getCurrentBounds();
   }
 
