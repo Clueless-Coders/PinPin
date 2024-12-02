@@ -35,7 +35,7 @@ export default function HomeIndex() {
   );
 
   const handleButtonPress = () => {
-    router.navigate("/Settings");
+    router.push("/NewPin");
   };
 
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -123,6 +123,7 @@ export default function HomeIndex() {
         }
       );
 
+      console.log(final.data);
       setPins(final.data);
     } catch (e: any) {
       console.log(e);
@@ -131,7 +132,6 @@ export default function HomeIndex() {
 
   async function markNewVisiblePins() {
     const currLoc = await Location.getCurrentPositionAsync();
-    setLocation(currLoc);
 
     const newlyVisible = await axios.post<VisiblePin[]>(
       `${API_BASE_URL}/pin/visible`,
@@ -142,6 +142,7 @@ export default function HomeIndex() {
     );
     if (newlyVisible.data.length !== 0) getAllViewablePins();
 
+    setLocation(currLoc);
     await getCurrentBounds();
   }
 
@@ -216,6 +217,9 @@ export default function HomeIndex() {
           renderItem={renderItem}
           contentContainerStyle={styles.flatlist}
           ref={flatListRef}
+          onScrollToIndexFailed={(info) => {
+            console.log(info);
+          }}
         />
       </BottomSheet>
     </GestureHandlerRootView>

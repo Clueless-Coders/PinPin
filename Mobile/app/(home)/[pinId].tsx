@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, Button } from "react-native";
-import { PinService } from "@/services/PinService"; // Assume this is the service that provides getPin
+import { PinService } from "@/services/PinService";
 import { TextInput } from "react-native";
 import { IPins, ICreatePin } from "@/services/PinService";
 import { useLocalSearchParams } from "expo-router";
@@ -49,23 +49,8 @@ export default function PinDetail() {
 
     updatePin(); // Invoke the async function
     console.log("inside useEffects");
-  }, [requesting]); // Empty dependency array to run this effect only once
+  }, [requesting]);
 
-  useEffect(() => {
-    async function getPin() {
-      const res = await pinService.getPin(+pinId);
-      console.log(res);
-
-      if (!res) {
-        console.log("Pin load fail");
-        return;
-      }
-
-      setPin(res);
-    }
-
-    getPin();
-  }, []);
 
   return (
     <View>

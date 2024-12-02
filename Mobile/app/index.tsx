@@ -55,7 +55,7 @@ export default function Index() {
     login();
   }, [isProcessing]);
 
-  if (loggedIn) return <Redirect href={"/home"}></Redirect>;
+  if (loggedIn) return <Redirect href={"/home/"}></Redirect>;
 
   return (
     <View

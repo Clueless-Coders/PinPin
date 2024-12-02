@@ -34,6 +34,7 @@ export default function SquareButton({
   disabled = false,
   text,
   onPress,
+  style
 }: SquareButtonProps) {
   const buttonWidth = width ?? size;
   const buttonHeight = height ?? size;
@@ -46,7 +47,7 @@ export default function SquareButton({
   };
 
   return (
-    <Pressable onPress={handlePress}>
+    <Pressable onPress={handlePress} style={style}>
       <View>
         <View
           style={[
