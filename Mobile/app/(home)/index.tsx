@@ -35,7 +35,7 @@ export default function HomeIndex() {
 
   const handleButtonPress = () => {
     console.log("button button button");
-    router.push("/(home)/Filters");
+    router.push("/(home)/Settings");
   };
 
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
