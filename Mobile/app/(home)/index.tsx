@@ -31,6 +31,7 @@ export default function HomeIndex() {
 
   const handleButtonPress = () => {
     console.log("button button button");
+    router.push("/(home)/Filters");
   };
 
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -173,6 +174,7 @@ export default function HomeIndex() {
           icon={faGear}
           onPress={handleButtonPress}
           // disabled={true}
+          // navigateTo={"/(home)/Filters"}
         />
 
         <BottomSheetFlatList
