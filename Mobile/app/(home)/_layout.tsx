@@ -3,7 +3,7 @@ import React from "react";
 
 export default function HomeLayout() {
   return (
-    <Stack>
+    <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen name="index" />
       <Stack.Screen name="Filters" />
       <Stack.Screen name="NewPin" />
