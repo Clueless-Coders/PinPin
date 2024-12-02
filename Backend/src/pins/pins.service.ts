@@ -5,7 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { Pin } from '@prisma/client';
-import { CreatePinDTO, UpdatePinDTO } from './dto/pins.dto';
+import { CreatePinDTO, UpdatePinDTO, CreateCommentDTO } from './dto/pins.dto';
 import { Request } from 'express';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { computeDestinationPoint } from 'geolib';
@@ -329,5 +329,50 @@ export class PinsService {
     }
 
     return pinsToMakeVisible;
+  }
+
+  async createComment(CommentDTO: CreateCommentDTO, req: Request) {
+    try {
+      return await this.databaseService.comment.create({
+        data: {
+          pinID: CommentDTO.pinID,
+          userID: req['user'].id,
+          text: CommentDTO.text,
+          upvotes: 0,
+          downvotes: 0,
+        },
+      });
+    } catch (e) {
+      console.log(e);
+      throw new InternalServerErrorException("Comment create failed. ", e);
+    }
+  }
+
+  async getComments(pinID: number) {
+    try {
+      return await this.databaseService.comment.findMany(
+        {
+          where: {
+            pinID: pinID,
+          },
+        }
+      );
+    } catch (e) {
+      throw new InternalServerErrorException("Comment create failed. ", e);
+    }
+  }
+
+  async getComment(commentID: number) {
+    try {
+      return await this.databaseService.comment.findUnique(
+        {
+          where: {
+            id: commentID,
+          },
+        }
+      );
+    } catch (e) {
+      throw new InternalServerErrorException("Comment create failed. ", e);
+    }
   }
 }

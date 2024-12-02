@@ -10,6 +10,7 @@ import {
 } from '@nestjs/common';
 import { PinsService } from './pins.service';
 import {
+    CreateCommentDTO,
     CreatePinDTO,
     LocationDTO,
     LocationRangeDTO,
@@ -88,5 +89,20 @@ export class PinsController {
     @Delete(':id')
     async deletePin(@Param('id') id: String, @Req() request: Request) {
         return await this.pinsService.removePin(+id, request);
+    }
+
+    @Post('comments')
+    async postComment(@Body() commentDTO: CreateCommentDTO, @Req() request: Request) {
+        return await this.pinsService.createComment(commentDTO, request);
+    }
+
+    @Get('comments/:id')
+    async getComment(@Param('id') commentID: String) {
+        return await this.pinsService.getComment(+commentID);
+    }
+
+    @Get(':id/comments')
+    async getComments(@Param('id') pinID: String) {
+        return await this.pinsService.getComments(+pinID);
     }
 }
