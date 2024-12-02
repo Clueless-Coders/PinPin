@@ -15,6 +15,7 @@ export interface SquareButtonProps {
   color?: string;
   icon?: IconDefinition | SquareButtonIcon;
   disabled?: boolean;
+  style?: any
   onPress: () => void;
 }
 
@@ -32,6 +33,7 @@ export default function SquareButton({
   icon,
   disabled = false,
   onPress,
+  style
 }: SquareButtonProps) {
   const buttonWidth = width ?? size;
   const buttonHeight = height ?? size;
@@ -44,7 +46,7 @@ export default function SquareButton({
   };
 
   return (
-    <Pressable onPress={handlePress}>
+    <Pressable onPress={handlePress} style={style}>
       <View>
         <View
           style={[
