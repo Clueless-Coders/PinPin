@@ -48,12 +48,14 @@ model Pin {
 }
 
 model Comment {
-  id        Int    @id @default(autoincrement())
+  id        Int      @id @default(autoincrement())
   userID    Int
-  user      User   @relation(fields: [userID], references: [id])
+  user      User     @relation(fields: [userID], references: [id])
   pinID     Int
-  pin       Pin    @relation(fields: [pinID], references: [id])
-  text      String @db.VarChar(300)
+  pin       Pin      @relation(fields: [pinID], references: [id])
+  text      String   @db.VarChar(300)
   upvotes   Int
   downvotes Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

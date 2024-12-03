@@ -29,6 +29,7 @@ import Animated, {
   useSharedValue,
 } from "react-native-reanimated";
 import * as geolib from "geolib";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 
 interface LocalImages {
   readablePin: number;
@@ -42,7 +43,7 @@ export default function HomeIndex() {
   );
 
   const handleButtonPress = () => {
-    router.push("/(home)/0");
+    router.push("/(home)/NewPin");
   };
 
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -110,7 +111,7 @@ export default function HomeIndex() {
   }, [selectedPinIndex]);
 
   // removed 100% snap point while nested scrolling doesnt work
-  const snapPoints = useMemo(() => ["12%", "70%"], []);
+  const snapPoints = useMemo(() => ["10%", "70%"], []);
 
   const renderItem = useCallback(
     ({ item, index }: { item: VisiblePin; index: number }) => {
@@ -208,85 +209,86 @@ export default function HomeIndex() {
   const buttonPosition = useSharedValue({ x: 0, y: 0 });
 
   const handleSheetChanges = useCallback((index: number) => {
-    setButtonOffset(index === 1 ? -530 : -85);
+    setButtonOffset(index === 1 ? -585 : -75);
   }, []);
 
   return (
-    <GestureHandlerRootView style={styles.root}>
-      <View style={styles.topRightButton}>
-        <SquareButton
-          onPress={handleButtonPress}
-          icon={"gear"}
-          color="#FF6B6B"
-        />
-      </View>
-      <MapView
-        style={styles.map}
-        ref={mapRef}
-        onRegionChangeComplete={getCurrentBounds}
-        showsUserLocation={true}
-        onUserLocationChange={markNewVisiblePins}
-        mapType={Platform.OS === "ios" ? "mutedStandard" : "terrain"}
-        showsMyLocationButton={false}
-        pitchEnabled={false}
-      >
-        {pins?.invisible.map(renderMarker) ?? <></>}
-        {pins?.visible.map(renderMarker) ?? <></>}
-      </MapView>
-
-      <View
-        style={[
-          styles.buttonContainer,
-          { transform: [{ translateY: buttonOffset }] },
-        ]}
-      >
-        <SquareButton
-          icon={"pin"}
-          color={"#A7A6FF"}
-          onPress={handleButtonPress}
-        />
-      </View>
-
-      <BottomSheet
-        ref={sheetRef}
-        snapPoints={snapPoints}
-        onChange={handleSheetChanges}
-        enableDynamicSizing={false}
-        enableHandlePanningGesture={true}
-        enableOverDrag={false}
-        backgroundStyle={{ backgroundColor: "#FFF9ED" }}
-        style={{
-          backgroundColor: "#FFF9ED",
-          borderRadius: 10,
-          shadowColor: "#000",
-          shadowOffset: {
-            width: 0,
-            height: 6,
-          },
-          shadowOpacity: 0.58,
-          shadowRadius: 16.0,
-
-          elevation: 24,
-        }}
-        handleIndicatorStyle={{ backgroundColor: "#000000" }}
-      >
-        <View style={styles.search}>
-          <BottomSheetTextInput style={styles.input} />
-          <FontAwesomeIcon icon={faFilter} />
+    <SafeAreaProvider style={{ position: "relative" }}>
+      <GestureHandlerRootView style={styles.root}>
+        <View style={styles.topRightButton}>
+          <SquareButton
+            onPress={handleButtonPress}
+            icon={"gear"}
+            color="#FF6B6B"
+          />
         </View>
-        <SquareButton icon={"gear"} onPress={handleButtonPress} />
-        <BottomSheetFlatList
-          data={allViewablePins}
-          keyExtractor={(item) => item.id + ""}
-          renderItem={renderItem}
-          contentContainerStyle={styles.flatlist}
-          ref={flatListRef}
-          onScrollToIndexFailed={(info) => {
-            console.log(info);
+        <MapView
+          style={styles.map}
+          ref={mapRef}
+          onRegionChangeComplete={getCurrentBounds}
+          showsUserLocation={true}
+          onUserLocationChange={markNewVisiblePins}
+          mapType={Platform.OS === "ios" ? "mutedStandard" : "terrain"}
+          showsMyLocationButton={false}
+          pitchEnabled={false}
+        >
+          {pins?.invisible.map(renderMarker) ?? <></>}
+          {pins?.visible.map(renderMarker) ?? <></>}
+        </MapView>
+
+        <View
+          style={[
+            styles.buttonContainer,
+            { transform: [{ translateY: buttonOffset }] },
+          ]}
+        >
+          <SquareButton
+            icon={"pin"}
+            color={"#A7A6FF"}
+            onPress={handleButtonPress}
+          />
+        </View>
+
+        <BottomSheet
+          ref={sheetRef}
+          snapPoints={snapPoints}
+          onChange={handleSheetChanges}
+          enableDynamicSizing={false}
+          enableHandlePanningGesture={true}
+          enableOverDrag={false}
+          backgroundStyle={{ backgroundColor: "#FFF9ED" }}
+          style={{
+            backgroundColor: "#FFF9ED",
+            borderRadius: 10,
+            shadowColor: "#000",
+            shadowOffset: {
+              width: 0,
+              height: 6,
+            },
+            shadowOpacity: 0.58,
+            shadowRadius: 16.0,
+
+            elevation: 24,
           }}
-        />
-      </BottomSheet>
-    </GestureHandlerRootView>
+          handleIndicatorStyle={{ backgroundColor: "#000000" }}
+        >
+          <View style={styles.search}>
+            <BottomSheetTextInput style={styles.input} />
+            <FontAwesomeIcon icon={faFilter} />
+          </View>
+          <BottomSheetFlatList
+            data={allViewablePins}
+            keyExtractor={(item) => item.id + ""}
+            renderItem={renderItem}
+            contentContainerStyle={styles.flatlist}
+            ref={flatListRef}
+            onScrollToIndexFailed={(info) => {
+              console.log(info);
+            }}
+          />
+        </BottomSheet>
+      </GestureHandlerRootView>
+    </SafeAreaProvider>
   );
 }
 const styles = StyleSheet.create({
@@ -301,8 +303,8 @@ const styles = StyleSheet.create({
   },
   topRightButton: {
     position: "absolute",
-    top: 30,
-    right: 10,
+    top: 45,
+    right: 15,
     zIndex: 1000,
   },
   flatlist: {
