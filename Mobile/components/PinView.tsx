@@ -13,7 +13,7 @@ export interface PinPostProps {
   karma: number;
 }
 
-export default function PinPost({
+export default function PinView({
   distance,
   time,
   text,
@@ -93,7 +93,7 @@ const styles = StyleSheet.create({
   },
   text: {
     marginLeft: 10,
-    marginBottom: 5,
+    marginVertical: 10,
     padding: 1,
     fontSize: 20,
   },

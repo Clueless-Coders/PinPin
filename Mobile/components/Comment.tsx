@@ -11,11 +11,7 @@ export interface PinPostProps {
   karma: number;
 }
 
-export default function Comment({
-  time,
-  text,
-  karma,
-}: PinPostProps) {
+export default function Comment({ time, text, karma }: PinPostProps) {
   const timeSincePassed = new Date(Date.now() - time.getTime());
   const hours = timeSincePassed.getUTCHours();
   const minutes = timeSincePassed.getUTCMinutes();
@@ -23,9 +19,7 @@ export default function Comment({
 
   return (
     <View>
-      <View
-        style={styles.pinContainer}
-      >
+      <View style={styles.pinContainer}>
         <View style={styles.top}>
           <View style={styles.topLeft}>
             <Text style={styles.topText}>

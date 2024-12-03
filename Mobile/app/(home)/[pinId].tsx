@@ -1,118 +1,72 @@
-import React, { useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import PinView, { PinPostProps } from "@/components/PinView";
 import Comment from "@/components/Comment";
-import { FlatList, GestureHandlerRootView } from "react-native-gesture-handler";
+import {
+  FlatList,
+  GestureHandlerRootView,
+  Pressable,
+} from "react-native-gesture-handler";
 import { TextInput, View, StyleSheet } from "react-native";
+import { useLocalSearchParams } from "expo-router";
+import { IComment, IPin, PinService } from "@/services/PinService";
+import { faPaperPlane } from "@fortawesome/free-solid-svg-icons/faPaperPlane";
+import * as geolib from "geolib";
+import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 
+const pinService = new PinService();
 export default function PinDetail() {
-  // const [allViewablePins, setAllViewablePins] = useState<VisiblePin[]>([]);
+  const { pinId } = useLocalSearchParams();
+  const [pin, setPin] = useState<IPin | undefined>();
+  const [comments, setComments] = useState<IComment[]>([]);
+  const [isSubmittingComment, setIsSubmittingComment] = useState(false);
+  const [commentInput, setCommentInput] = useState("");
+  async function getComments() {
+    try {
+      const res = await pinService.getCommentsByPin(+pinId);
+      setComments(res ?? []);
+    } catch (e: any) {
+      console.log(e);
+    }
+  }
 
-  // temporary data for testing
-  const allViewablePins: PinPostProps[] = [
-    {
-      time: new Date(2024, 11, 1),
-      distance: 1,
-      text: "First Comment",
-      commentCount: 10,
-      karma: 20,
-    },
-    {
-      time: new Date(2024, 11, 2),
-      distance: 5,
-      text: "Second Comment",
-      commentCount: 5,
-      karma: 15,
-    },
-    {
-      time: new Date(2024, 11, 3),
-      distance: 10,
-      text: "Third Comment",
-      commentCount: 3,
-      karma: 12,
-    },
-    {
-      time: new Date(2024, 11, 4),
-      distance: 3,
-      text: "Fourth Comment",
-      commentCount: 5,
-      karma: 15,
-    },
-    {
-      time: new Date(2024, 11, 5),
-      distance: 7,
-      text: "Fifth Comment",
-      commentCount: 3,
-      karma: 12,
-    },
-    {
-      time: new Date(2024, 11, 6),
-      distance: 2,
-      text: "Sixth Comment",
-      commentCount: 8,
-      karma: 18,
-    },
-    {
-      time: new Date(2024, 11, 7),
-      distance: 4,
-      text: "Seventh Comment",
-      commentCount: 2,
-      karma: 10,
-    },
-    {
-      time: new Date(2024, 11, 8),
-      distance: 12,
-      text: "Eighth Comment",
-      commentCount: 6,
-      karma: 25,
-    },
-    {
-      time: new Date(2024, 11, 9),
-      distance: 8,
-      text: "Ninth Comment",
-      commentCount: 4,
-      karma: 13,
-    },
-    {
-      time: new Date(2024, 11, 10),
-      distance: 9,
-      text: "Tenth Comment",
-      commentCount: 7,
-      karma: 17,
-    },
-    {
-      time: new Date(2024, 11, 11),
-      distance: 6,
-      text: "Eleventh Comment",
-      commentCount: 9,
-      karma: 22,
-    },
-    {
-      time: new Date(2024, 11, 12),
-      distance: 15,
-      text: "Twelfth Comment",
-      commentCount: 11,
-      karma: 30,
-    },
-    {
-      time: new Date(2024, 11, 13),
-      distance: 20,
-      text: "Thirteenth Comment",
-      commentCount: 13,
-      karma: 35,
-    },
-    {
-      time: new Date(2024, 11, 14),
-      distance: 25,
-      text: "Fourteenth Comment",
-      commentCount: 14,
-      karma: 40,
-    },
-  ];
+  useEffect(() => {
+    async function getPin() {
+      try {
+        const res = await pinService.getPin(+pinId);
+        setPin(res);
+      } catch (e: any) {
+        console.log(e);
+      }
+    }
+
+    getPin();
+    getComments();
+  }, [pinId]);
+
+  useEffect(() => {
+    async function submit() {
+      try {
+        const res = await pinService.createComment({
+          pinID: +pinId,
+          text: commentInput,
+        });
+        setIsSubmittingComment(false);
+      } catch (e: any) {
+        console.log(e);
+      }
+      await getComments();
+    }
+    submit();
+  }, [isSubmittingComment]);
 
   const flatListRef = useRef<FlatList>(null);
 
-  const renderItem = ({ item }: { item: PinPostProps }) => (
-    <Comment time={item.time} text={item.text} karma={item.karma} />
+  const renderItem = ({ item }: { item: IComment }) => (
+    <Comment
+      time={new Date(item.createdAt)}
+      text={item.text}
+      karma={item.upvotes - item.downvotes}
+    />
   );
 
   //to be used with the above? :3
@@ -124,19 +78,44 @@ export default function PinDetail() {
 
   return (
     <GestureHandlerRootView>
-      {/* <PinView/> // render in nearby pins from database*/}
+      {pin ? (
+        <PinView
+          distance={10}
+          time={new Date(pin.createdAt)}
+          text={pin.text}
+          commentCount={comments.length}
+          karma={pin.upvotes - pin.downvotes}
+        />
+      ) : (
+        <></>
+      )}
 
       <FlatList
-        data={allViewablePins}
+        data={comments}
         keyExtractor={(item, index) => index.toString()}
         renderItem={renderItem}
         ref={flatListRef}
         onScrollToIndexFailed={(info) => {
           console.log(info);
         }}
+        style={{
+          maxHeight: "74%",
+          backgroundColor: "#FFF9ED",
+        }}
       />
       <View style={styles.textBoxContainer}>
-        <TextInput style={styles.textInput} placeholder="Leave a comment..." />
+        <TextInput
+          style={styles.textInput}
+          placeholder="Leave a comment..."
+          onChangeText={(text) => setCommentInput(text)}
+        />
+        <Pressable
+          style={styles.submitButton}
+          onPress={() => setIsSubmittingComment(true)}
+          disabled={isSubmittingComment}
+        >
+          <FontAwesomeIcon icon={faPaperPlane} size={25} />
+        </Pressable>
       </View>
     </GestureHandlerRootView>
   );
@@ -147,27 +126,35 @@ const styles = StyleSheet.create({
     paddingBottom: 70,
   },
   textBoxContainer: {
+    display: "flex",
+    flexDirection: "row",
     position: "absolute",
     bottom: 0,
     left: 0,
     right: 0,
-    backgroundColor: "#FFF9ED",
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
+    backgroundColor: "#FFC900",
     paddingHorizontal: 10,
     paddingVertical: 10,
     zIndex: 1,
     borderColor: "black",
     borderWidth: 1.5,
-    borderRadius: 5,
+    alignItems: "center",
+    justifyContent: "center",
   },
   textInput: {
+    flex: 11,
     height: 40,
-    backgroundColor: "white",
+    backgroundColor: "#FFF9ED",
     borderColor: "black",
     borderWidth: 1,
     borderRadius: 5,
     paddingHorizontal: 10,
     marginVertical: 15,
+    marginLeft: 10,
+  },
+  submitButton: {
+    flex: 1,
+    margin: 10,
+    marginBottom: 16,
   },
 });
