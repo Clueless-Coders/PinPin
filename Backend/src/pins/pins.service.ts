@@ -5,7 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { Pin } from '@prisma/client';
-import { CreatePinDTO, UpdatePinDTO } from './dto/pins.dto';
+import { CreatePinDTO, UpdatePinDTO, createVotesDTO } from './dto/pins.dto';
 import { Request } from 'express';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { computeDestinationPoint } from 'geolib';
@@ -33,6 +33,139 @@ export class PinsService {
       });
     } catch (e) {
       throw new InternalServerErrorException('Pin create failed.', e);
+    }
+  }
+  async postPinVote(voteDTO: createVotesDTO, req: Request) {
+    try {
+
+      const vote = await this.databaseService.pinVotes.findUnique({
+        where: {
+          userID_pinID: {
+            userID: req['user'].id,
+            pinID: voteDTO.postID,
+          },
+        }
+      });
+
+      if (vote === null) {
+        return await this.databaseService.pinVotes.create({
+          data: {
+            vote: voteDTO.vote,
+            pinID: voteDTO.postID,
+            userID: req['user'].id
+          },
+        });
+      } else {
+        return await this.deletePinVote(voteDTO.postID, req);
+      }
+
+
+    } catch (e) {
+      throw new InternalServerErrorException("Pin vote failed. ", e);
+    }
+  }
+
+  async postCommentVote(voteDTO: createVotesDTO, req: Request) {
+    try {
+
+      const vote = await this.databaseService.commentVotes.findUnique({
+        where: {
+          userID_commentID: {
+            userID: req['user'].id,
+            commentID: voteDTO.postID,
+          },
+        }
+      });
+
+      if (vote === null) {
+        return await this.databaseService.commentVotes.create({
+          data: {
+            vote: voteDTO.vote,
+            commentID: voteDTO.postID,
+            userID: req['user'].id
+          },
+        });
+      } else {
+        return await this.deleteCommentVote(voteDTO.postID, req);
+      }
+
+
+    } catch (e) {
+      throw new InternalServerErrorException("Pin vote failed. ", e);
+    }
+  }
+
+  async getPinVotes(pinID: number) {
+    try {
+      console.log("getting votes for pin");
+      const res = await this.databaseService.pinVotes.aggregate({
+        _sum: {
+          vote: true
+        },
+        where: {
+          pinID: pinID,
+        }
+      });
+
+      return res._sum.vote
+    } catch (e) {
+      // throw new InternalServerErrorException("Error getting upvotes ", e);
+      console.log("no votes found");
+      return 0;
+    }
+  }
+
+  async getCommentVotes(commentID: number) {
+    try {
+      console.log("getting votes for comment");
+      const res = await this.databaseService.commentVotes.aggregate({
+        _sum: {
+          vote: true
+        },
+        where: {
+          commentID: commentID
+        }
+      });
+
+      return res._sum.vote
+    } catch (e) {
+      // throw new InternalServerErrorException("Error getting upvotes ", e);
+      console.log("no votes found");
+      return 0;
+    }
+  }
+
+  async deletePinVote(pinID: number, req: Request) {
+    try {
+      console.log("deleting pin vote");
+      console.log(pinID);
+      console.log(req['user'].id);
+      return await this.databaseService.pinVotes.delete({
+        where: {
+          userID_pinID: {
+            userID: req['user'].id,
+            pinID: pinID,
+          },
+        }
+      });
+    } catch (e) {
+      throw new InternalServerErrorException("Error deleting vote");
+    }
+  }
+
+  async deleteCommentVote(commentID: number, req: Request) {
+    try {
+      console.log("deleting pin vote");
+      return await this.databaseService.commentVotes.delete({
+        where: {
+          userID_commentID: {
+            userID: req['user'].id,
+            commentID: commentID,
+          },
+        }
+      });
+    } catch (e) {
+      throw new InternalServerErrorException("Error deleting vote");
     }
   }
 
@@ -69,23 +202,7 @@ export class PinsService {
     });
   }
 
-  async patchUpvote(pinID: number, increment: number) {
-    // return this.databaseService.pin.update({
-    //     where: {
-    //         id: pinID,
-    //     },
-    //     data: { upvotes: { increment: increment } },
-    // });
-  }
 
-  async patchDownvote(pinID: number, increment: number) {
-    // return this.databaseService.pin.update({
-    //     where: {
-    //         id: pinID,
-    //     },
-    //     data: { downvotes: { increment: increment } },
-    // });
-  }
 
   async removePin(pinID: number, req?: Request) {
     const currUser = req['user'];
