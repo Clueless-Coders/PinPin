@@ -25,7 +25,6 @@ export interface Account {
   password: string;
 }
 
-
 export class AuthService {
   private tokens?: ITokens;
   private currUser?: User;
@@ -65,9 +64,9 @@ export class AuthService {
       const res = await axios.post<User>(`${API_BASE_URL}/user`, newUser);
       const account = res.data;
       console.log(account);
-      const loginRes = await this.login(newUser.email, newUser.password)
+      const loginRes = await this.login(newUser.email, newUser.password);
       console.log(loginRes);
-      console.log(this.tokens)
+      console.log(this.tokens);
       return account;
     } catch (e: any) {
       console.log("failed creating user account ", e);
@@ -145,4 +144,3 @@ export class AuthService {
     }, timeToExpireInMs - 1000);
   }
 }
-

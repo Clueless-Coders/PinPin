@@ -7,7 +7,6 @@ import { Button, TextInput, View, Image, Pressable, Text } from "react-native";
 import PinPinTextArea from "@/components/PinPinTextArea";
 import SquareButton from "@/components/SquareButton";
 
-
 export const authService = new AuthService();
 
 export default function Index() {
@@ -35,10 +34,8 @@ export default function Index() {
 
       try {
         let ret;
-        if (isLoggingIn)
-          ret = await authService.login(email, password);
-        else
-          ret = await authService.signup({ email, password });
+        if (isLoggingIn) ret = await authService.login(email, password);
+        else ret = await authService.signup({ email, password });
 
         console.log(ret);
         if (authService.isLoggedIn()) {
@@ -63,16 +60,15 @@ export default function Index() {
         flex: 1,
         justifyContent: "center",
         alignItems: "center",
-        backgroundColor: "#FFF9ED"
+        backgroundColor: "#FFF9ED",
       }}
     >
-
       <Image
-        source={require('@/assets/images/PinPin_Logo.png')}
+        source={require("@/assets/images/PinPin_Logo.png")}
         style={{
           width: 225,
           height: 306,
-          bottom: 50
+          bottom: 50,
         }}
       />
 
@@ -80,10 +76,11 @@ export default function Index() {
         style={{
           marginBottom: "5%",
           height: 58,
-          width: 300
+          width: 300,
         }}
         textInputProps={{
-          placeholder: "Email"
+          placeholder: "Email",
+          autoCapitalize: "none",
         }}
         onTextChange={(val) => setEmail(val)}
       ></PinPinTextArea>
@@ -92,11 +89,12 @@ export default function Index() {
         style={{
           marginBottom: "5%",
           height: 58,
-          width: 300
+          width: 300,
         }}
         textInputProps={{
           secureTextEntry: true,
-          placeholder: "Password"
+          placeholder: "Password",
+          autoCapitalize: "none",
         }}
         onTextChange={(val) => setPassword(val)}
       ></PinPinTextArea>
@@ -113,14 +111,17 @@ export default function Index() {
         onPress={() => setIsLoggingIn(!isLoggingIn)}
         style={{
           top: 100,
-        }}>
-        <Text style={{
-          textDecorationLine: 'underline',
-          fontWeight: 'bold'
-        }}>
-          {
-            isLoggingIn ? "Don't have an account? Sign up!" : "Already have an account? Log in!"
-          }
+        }}
+      >
+        <Text
+          style={{
+            textDecorationLine: "underline",
+            fontWeight: "bold",
+          }}
+        >
+          {isLoggingIn
+            ? "Don't have an account? Sign up!"
+            : "Already have an account? Log in!"}
         </Text>
       </Pressable>
     </View>

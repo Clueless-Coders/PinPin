@@ -15,8 +15,8 @@ export interface SquareButtonProps {
   color?: string;
   icon?: IconDefinition | SquareButtonIcon;
   disabled?: boolean;
-  text?: string
-  style?: any
+  text?: string;
+  style?: any;
   onPress: () => void;
 }
 
@@ -35,7 +35,7 @@ export default function SquareButton({
   disabled = false,
   text,
   onPress,
-  style
+  style,
 }: SquareButtonProps) {
   const buttonWidth = width ?? size;
   const buttonHeight = height ?? size;
@@ -69,13 +69,17 @@ export default function SquareButton({
             },
           ]}
         >
-          {text ? <Text style={{ color: 'white', fontSize: 22 }}>{text}</Text> : (icon && (
-            <FontAwesomeIcon
-              icon={typeof icon === "string" ? icons[icon] : icon}
-              size={buttonWidth * 0.55}
-              color="black"
-            />
-          ))}
+          {text ? (
+            <Text style={{ color: "white", fontSize: 22 }}>{text}</Text>
+          ) : (
+            icon && (
+              <FontAwesomeIcon
+                icon={typeof icon === "string" ? icons[icon] : icon}
+                size={buttonWidth * 0.55}
+                color="black"
+              />
+            )
+          )}
         </View>
       </View>
     </Pressable>
