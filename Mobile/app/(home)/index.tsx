@@ -41,7 +41,7 @@ export default function HomeIndex() {
   );
 
   const handleButtonPress = () => {
-    router.push("/(home)/0");
+    router.push("/NewPin");
   };
 
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
