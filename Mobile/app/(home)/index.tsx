@@ -246,6 +246,7 @@ export default function HomeIndex() {
         enableDynamicSizing={false}
         enableHandlePanningGesture={true}
         enableOverDrag={false}
+        backgroundStyle={{ backgroundColor: "#FFF9ED" }}
         style={{
           backgroundColor: "#FFF9ED",
           borderRadius: 10,
@@ -255,8 +256,8 @@ export default function HomeIndex() {
             height: 6,
           },
           shadowOpacity: 0.58,
-          shadowRadius: 16.00,
-          
+          shadowRadius: 16.0,
+
           elevation: 24,
         }}
         handleIndicatorStyle={{ backgroundColor: "#000000" }}
