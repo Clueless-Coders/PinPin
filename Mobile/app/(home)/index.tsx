@@ -23,6 +23,12 @@ import {
 import SquareButton from "@/components/SquareButton";
 import { router } from "expo-router";
 import Comment from "@/components/Comment";
+import Animated, {
+  useAnimatedStyle,
+  withSpring,
+  useSharedValue,
+} from "react-native-reanimated";
+import * as geolib from "geolib";
 
 interface LocalImages {
   readablePin: number;
@@ -50,8 +56,23 @@ export default function HomeIndex() {
   const flatListRef = useRef<BottomSheetFlatListMethods>(null);
 
   async function getAllViewablePins() {
-    const pins = await axios.get(`${API_BASE_URL}/pin/visible`);
-    setAllViewablePins(pins.data);
+    const pins = await axios.get<VisiblePin[]>(`${API_BASE_URL}/pin/visible`);
+    let data = pins.data;
+    if (location) {
+      const distanceAdded = data.map((pin) => {
+        const distanceInMiles =
+          geolib.getDistance(location.coords, {
+            latitude: pin.latitude,
+            longitude: pin.longitude,
+          }) * 0.000621371;
+        return { ...pin, distanceInMiles };
+      });
+      distanceAdded.sort(
+        (pin, other) => pin.distanceInMiles - other.distanceInMiles
+      );
+      data = distanceAdded;
+    }
+    setAllViewablePins(data);
   }
 
   //Setup Maps
@@ -74,11 +95,11 @@ export default function HomeIndex() {
     }
 
     getAllViewablePins();
+    getCurrentLocation();
     setImages({
       readablePin: require("@/assets/images/ReadablePin.png"),
       unreadablePin: require("@/assets/images/UnreadablePin.png"),
     });
-    getCurrentLocation();
   }, []);
 
   useEffect(() => {
@@ -89,24 +110,25 @@ export default function HomeIndex() {
   }, [selectedPinIndex]);
 
   // removed 100% snap point while nested scrolling doesnt work
-  const snapPoints = useMemo(() => ["12%", "75%"], []);
+  const snapPoints = useMemo(() => ["12%", "70%"], []);
 
   const renderItem = useCallback(
     ({ item, index }: { item: VisiblePin; index: number }) => {
       return (
         <View style={{ marginBottom: 15 }}>
           <PinPost
-            distance={10}
+            distanceInMiles={item.distanceInMiles}
             time={new Date(Date.parse(item.createdAt)) ?? new Date()}
             text={item.text}
             commentCount={2}
             karma={item.upvotes - item.downvotes}
             isFocused={index === selectedPinIndex}
+            pinId={item.id}
           />
         </View>
       );
     },
-    [selectedPinIndex]
+    [selectedPinIndex, allViewablePins]
   );
 
   async function getCurrentBounds() {
@@ -144,12 +166,13 @@ export default function HomeIndex() {
     if (newlyVisible.data.length !== 0) getAllViewablePins();
 
     setLocation(currLoc);
+    await getAllViewablePins();
     await getCurrentBounds();
   }
 
   function handleMarkerClick(event: MarkerPressEvent) {
     // find pin based on location
-    if (!pins) return;
+    if (!allViewablePins) return;
     const pinIndex = allViewablePins.findIndex((pin) => {
       return (
         pin.latitude === event.nativeEvent.coordinate.latitude &&
@@ -157,6 +180,7 @@ export default function HomeIndex() {
       );
     });
 
+    if (pinIndex > -1) sheetRef.current?.expand();
     setSelectedPinIndex(pinIndex === -1 ? selectedPinIndex : pinIndex);
   }
 
@@ -180,6 +204,13 @@ export default function HomeIndex() {
     );
   }
 
+  const [buttonOffset, setButtonOffset] = useState(0);
+  const buttonPosition = useSharedValue({ x: 0, y: 0 });
+
+  const handleSheetChanges = useCallback((index: number) => {
+    setButtonOffset(index === 1 ? -530 : -85);
+  }, []);
+
   return (
     <GestureHandlerRootView style={styles.root}>
       <MapView
@@ -196,13 +227,40 @@ export default function HomeIndex() {
         {pins?.visible.map(renderMarker) ?? <></>}
       </MapView>
 
+      <View
+        style={[
+          styles.buttonContainer,
+          { transform: [{ translateY: buttonOffset }] },
+        ]}
+      >
+        <SquareButton
+          icon={"pin"}
+          color={"#A7A6FF"}
+          onPress={handleButtonPress}
+        />
+      </View>
+
       <BottomSheet
         ref={sheetRef}
         snapPoints={snapPoints}
+        onChange={handleSheetChanges}
         enableDynamicSizing={false}
         enableHandlePanningGesture={true}
         enableOverDrag={false}
         backgroundStyle={{ backgroundColor: "#FFF9ED" }}
+        style={{
+          backgroundColor: "#FFF9ED",
+          borderRadius: 10,
+          shadowColor: "#000",
+          shadowOffset: {
+            width: 0,
+            height: 6,
+          },
+          shadowOpacity: 0.58,
+          shadowRadius: 16.0,
+
+          elevation: 24,
+        }}
         handleIndicatorStyle={{ backgroundColor: "#000000" }}
       >
         <View style={styles.search}>
@@ -224,11 +282,15 @@ export default function HomeIndex() {
     </GestureHandlerRootView>
   );
 }
-
 const styles = StyleSheet.create({
   root: {
     flex: 1,
     //paddingTop: 200,
+  },
+  buttonContainer: {
+    position: "absolute",
+    bottom: 20,
+    right: 15,
   },
   flatlist: {
     backgroundColor: "#FFF9ED",

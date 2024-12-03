@@ -10,6 +10,7 @@ export interface VisiblePin {
   createdAt: string;
   updatedAt: string;
   viewable: boolean;
+  distanceInMiles?: number;
 }
 
 export interface InvisiblePin {

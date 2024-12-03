@@ -16,7 +16,7 @@ import {
 
 @Injectable()
 export class PinsService {
-  constructor(private readonly databaseService: PrismaService) { }
+  constructor(private readonly databaseService: PrismaService) {}
 
   async create(createPin: CreatePinDTO, req: Request) {
     try {
@@ -285,7 +285,7 @@ export class PinsService {
     //Gets upper left and bottom right location bounds for pins to be marked as visible
     const swBearingInDegs = 225;
     const neBearningInDegs = 45;
-    const radiusToMarkVisibleInMeters = 5;
+    const radiusToMarkVisibleInMeters = 200;
     const swLoc = computeDestinationPoint(
       location,
       radiusToMarkVisibleInMeters,
