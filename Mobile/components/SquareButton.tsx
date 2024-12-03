@@ -1,17 +1,30 @@
 import React from "react";
-import { View, StyleSheet } from "react-native";
+import { View, StyleSheet, Pressable, Text } from "react-native";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
-import { Link } from "expo-router";
+import { IconDefinition } from "@fortawesome/fontawesome-svg-core";
+import { faGear } from "@fortawesome/free-solid-svg-icons/faGear";
+import { faPlus } from "@fortawesome/free-solid-svg-icons/faPlus";
+import { faLocationDot } from "@fortawesome/free-solid-svg-icons/faLocationDot";
+
+export type SquareButtonIcon = "gear" | "plus" | "pin";
 
 export interface SquareButtonProps {
   size?: number;
   width?: number;
   height?: number;
   color?: string;
-  icon?: any;
-  route: string;
+  icon?: IconDefinition | SquareButtonIcon;
   disabled?: boolean;
+  text?: string;
+  style?: any;
+  onPress: () => void;
 }
+
+const icons = {
+  gear: faGear,
+  plus: faPlus,
+  pin: faLocationDot,
+};
 
 export default function SquareButton({
   size = 45,
@@ -19,15 +32,23 @@ export default function SquareButton({
   height,
   color = "#FFC900",
   icon,
-  route,
   disabled = false,
+  text,
+  onPress,
+  style,
 }: SquareButtonProps) {
   const buttonWidth = width ?? size;
   const buttonHeight = height ?? size;
   const buttonColor = disabled ? "gray" : color;
 
+  const handlePress = () => {
+    if (!disabled) {
+      onPress();
+    }
+  };
+
   return (
-    <Link href={disabled ? "#" : route}>
+    <Pressable onPress={handlePress} style={style}>
       <View>
         <View
           style={[
@@ -48,16 +69,20 @@ export default function SquareButton({
             },
           ]}
         >
-          {icon && (
-            <FontAwesomeIcon
-              icon={icon}
-              size={buttonWidth * 0.55}
-              color="black"
-            />
+          {text ? (
+            <Text style={{ color: "white", fontSize: 22 }}>{text}</Text>
+          ) : (
+            icon && (
+              <FontAwesomeIcon
+                icon={typeof icon === "string" ? icons[icon] : icon}
+                size={buttonWidth * 0.55}
+                color="black"
+              />
+            )
           )}
         </View>
       </View>
-    </Link>
+    </Pressable>
   );
 }
 
