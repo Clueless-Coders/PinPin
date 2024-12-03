@@ -23,6 +23,20 @@ export interface ICreatePin {
     latitude: number;
 }
 
+export interface ICreateComment {
+    pinID: number;
+    text: string;
+}
+
+export interface IComment {
+    id: number;
+    userID: number;
+    pinID: number;
+    text: string;
+    upvotes: number;
+    downvotes: number;
+}
+
 export class PinService {
     // private pins: IPins[];
     constructor() { }
@@ -86,5 +100,27 @@ export class PinService {
         }
     }
 
+    async createComment(IComment: ICreateComment) {
+        console.log("creating comment ");
+        try {
+            const res = await axios.post<IComment>(`${API_BASE_URL}/comments`, IComment);
+            const comment = res.data;
+            console.log(comment);
+            return comment;
+        } catch (e) {
+            console.log("failed creating comment ", e);
+        }
+    }
 
+    async getCommentsByPin(pinID: number) {
+        console.log("starting fetching comments");
+        try {
+            const res = await axios.get<IComment[]>(`${API_BASE_URL}/${pinID}/comments`);
+            const comments = res.data;
+            console.log(comments);
+            return comments;
+        } catch (e) {
+            console.log("Failed to get comments ", e);
+        }
+    }
 }
