@@ -147,7 +147,6 @@ export default function HomeIndex() {
         }
       );
 
-      console.log(final.data);
       setPins(final.data);
     } catch (e: any) {
       console.log(e);

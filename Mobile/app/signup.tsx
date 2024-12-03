@@ -16,7 +16,6 @@ export default function SignupScreen() {
 
   const signup = () => {
     async function signup() {
-
       //if email or pw not provided, don't attempt login
       if (email.length === 0 || password.length === 0) {
         setIsSigningUp(false);
@@ -25,13 +24,12 @@ export default function SignupScreen() {
 
       try {
         const user = await authService.signup({ email, password });
-        console.log(user);
 
         if (authService.isLoggedIn()) {
           setEmail("");
           setPassword("");
           setSignedUp(true);
-          router.replace("/home/")
+          router.replace("/home/");
         }
       } catch (e) {
         console.log(e);
@@ -40,7 +38,7 @@ export default function SignupScreen() {
     }
 
     signup();
-  }
+  };
 
   //if (SignedUp) return <Redirect href={"/home"}></Redirect>;
 
@@ -50,16 +48,15 @@ export default function SignupScreen() {
         flex: 1,
         justifyContent: "center",
         alignItems: "center",
-        backgroundColor: "#FFF9ED"
+        backgroundColor: "#FFF9ED",
       }}
     >
-
       <Image
-        source={require('@/assets/images/PinPin_Logo.png')}
+        source={require("@/assets/images/PinPin_Logo.png")}
         style={{
           width: 225,
           height: 306,
-          bottom: 50
+          bottom: 50,
         }}
       />
 
@@ -67,10 +64,10 @@ export default function SignupScreen() {
         style={{
           marginBottom: "5%",
           height: 58,
-          width: 300
+          width: 300,
         }}
         textInputProps={{
-          placeholder: "Email"
+          placeholder: "Email",
         }}
         onTextChange={(val) => setEmail(val)}
       ></PinPinTextArea>
@@ -79,18 +76,21 @@ export default function SignupScreen() {
         style={{
           marginBottom: "5%",
           height: 58,
-          width: 300
+          width: 300,
         }}
         textInputProps={{
           secureTextEntry: true,
-          placeholder: "Password"
+          placeholder: "Password",
         }}
         onTextChange={(val) => setPassword(val)}
       ></PinPinTextArea>
 
       <Button
         title="Signup"
-        onPress={() => { setIsSigningUp(true); signup(); }}
+        onPress={() => {
+          setIsSigningUp(true);
+          signup();
+        }}
         disabled={isSigningUp}
       ></Button>
 
@@ -98,12 +98,12 @@ export default function SignupScreen() {
         href="/"
         style={{
           top: 100,
-          textDecorationLine: 'underline',
-          fontWeight: 'bold'
-        }}>
+          textDecorationLine: "underline",
+          fontWeight: "bold",
+        }}
+      >
         Already have an account? Login!
       </Link>
     </View>
   );
 }
-

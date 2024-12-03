@@ -13,7 +13,6 @@ export interface PinPostProps {
 
 export default function Comment({ time, text, karma }: PinPostProps) {
   const timeSincePassed = new Date(Date.now() - time.getTime());
-  console.log(timeSincePassed);
   const hours = timeSincePassed.getUTCHours();
   const minutes = timeSincePassed.getUTCMinutes();
 

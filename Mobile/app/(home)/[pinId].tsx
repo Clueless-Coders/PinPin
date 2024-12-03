@@ -51,6 +51,7 @@ export default function PinDetail() {
   }, [pinId]);
 
   useEffect(() => {
+    let cancel = false;
     async function submit() {
       try {
         const res = await pinService.createComment({
@@ -64,6 +65,9 @@ export default function PinDetail() {
       await getComments();
     }
     submit();
+    return () => {
+      cancel = true;
+    };
   }, [isSubmittingComment]);
 
   const flatListRef = useRef<FlatList>(null);
@@ -77,13 +81,6 @@ export default function PinDetail() {
       />
     );
   };
-
-  //to be used with the above? :3
-
-  // async function getAllViewablePins() {
-  //   const pins = await axios.get(`${API_BASE_URL}/pin/visible`);
-  //   setAllViewablePins(pins.data);
-  // }
 
   return (
     <GestureHandlerRootView>

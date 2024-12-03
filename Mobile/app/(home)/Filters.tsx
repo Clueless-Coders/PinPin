@@ -10,7 +10,6 @@ export default function Filters() {
   async function test() {
     try {
       const res = await axios.get(`${API_BASE_URL}/user/me`);
-      console.log(res.data);
       setData(res.data);
     } catch (e) {
       console.log(e);

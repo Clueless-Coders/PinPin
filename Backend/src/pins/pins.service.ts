@@ -355,7 +355,6 @@ export class PinsService {
           pinID: pinID,
         },
       });
-      console.log(res);
       return res;
     } catch (e) {
       throw new InternalServerErrorException('Comment create failed. ', e);
