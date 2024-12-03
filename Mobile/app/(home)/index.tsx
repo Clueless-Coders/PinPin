@@ -1,5 +1,5 @@
 import { useCallback, useRef, useMemo } from "react";
-import { StyleSheet, View, Text, SafeAreaView } from "react-native";
+import { StyleSheet, View, SafeAreaView } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import BottomSheet, {
   BottomSheetFlatList,
@@ -37,7 +37,7 @@ export default function HomeIndex() {
     []
   );
   // removed 100% snap point while nested scrolling doesnt work
-  const snapPoints = useMemo(() => ["12%", "75%"], []);
+  const snapPoints = useMemo(() => ["12%", "70%"], []);
 
   const handleSheetChange = useCallback((index: number) => {
     console.log("handleSheetChange", index);
@@ -70,7 +70,6 @@ export default function HomeIndex() {
             route={"/(home)/Settings"}
             icon={faGear}
             color="#FF6B6B"
-            
           />
         </View>
         <Link href={"/(home)/Filters"}>Filters page</Link>
@@ -115,9 +114,9 @@ const styles = StyleSheet.create({
   },
   topRightButton: {
     position: "absolute",
-    top: 40, 
-    right: 10, 
-    zIndex: 1000, 
+    top: 30,
+    right: 10,
+    zIndex: 1000,
   },
   flatlist: {
     backgroundColor: "#FFF9ED",

@@ -1,4 +1,3 @@
-import Header from "@/components/Header";
 import { API_BASE_URL } from "@/environment";
 import axios from "axios";
 import { Link } from "expo-router";
@@ -20,7 +19,6 @@ export default function Filters() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <Header color="#87CEEB"/>
       <Text>Hello!</Text>
       <Link href={"/(home)/Filters"}>Filters page</Link>
       <Link href={"/(home)/NewPin"}>New Pin page</Link>
