@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import PinView, { PinPostProps } from "@/components/PinView";
 import Comment from "@/components/Comment";
 import {
@@ -13,6 +13,7 @@ import { faPaperPlane } from "@fortawesome/free-solid-svg-icons/faPaperPlane";
 import * as geolib from "geolib";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import * as Location from "expo-location";
+import { LocationContext } from "./_layout";
 
 const pinService = new PinService();
 export default function PinDetail() {
@@ -21,7 +22,7 @@ export default function PinDetail() {
   const [comments, setComments] = useState<IComment[]>([]);
   const [isSubmittingComment, setIsSubmittingComment] = useState(false);
   const [commentInput, setCommentInput] = useState("");
-  const [currLoc, setCurrLoc] = useState<Location.LocationObject | undefined>();
+  const locationContext = useContext(LocationContext);
 
   async function getComments() {
     try {
@@ -35,11 +36,7 @@ export default function PinDetail() {
   useEffect(() => {
     async function getPin() {
       try {
-        const [res, location] = await Promise.all([
-          await pinService.getPin(+pinId),
-          await Location.getCurrentPositionAsync({}),
-        ]);
-        setCurrLoc(location);
+        const [res] = await Promise.all([await pinService.getPin(+pinId)]);
         setPin(res);
       } catch (e: any) {
         console.log(e);
@@ -87,9 +84,9 @@ export default function PinDetail() {
       {pin ? (
         <PinView
           distance={
-            currLoc
+            locationContext?.location
               ? +(
-                  geolib.getDistance(currLoc.coords, {
+                  geolib.getDistance(locationContext.location.coords, {
                     latitude: pin.latitude,
                     longitude: pin.longitude,
                   }) * 0.000621371
