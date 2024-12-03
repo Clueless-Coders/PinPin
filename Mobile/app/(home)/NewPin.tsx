@@ -19,9 +19,7 @@ export async function currentLocation() {
     return;
   }
 
-  console.log("getting location...");
   let location = await Location.getCurrentPositionAsync({});
-  console.log("done!");
   return [location.coords.latitude, location.coords.longitude];
 }
 
@@ -43,13 +41,10 @@ export default function NewPin() {
             longitude: location[1],
           };
           const res = await pinService.createPin(newPin);
-          console.log(res);
 
           if (!res) {
             console.log("Pin load fail");
             return;
-          } else {
-            console.log("Pin creation completed!");
           }
         }
         setCreating(false);

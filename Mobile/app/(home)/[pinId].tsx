@@ -12,6 +12,7 @@ import { IComment, IPin, PinService } from "@/services/PinService";
 import { faPaperPlane } from "@fortawesome/free-solid-svg-icons/faPaperPlane";
 import * as geolib from "geolib";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
+import * as Location from "expo-location";
 
 const pinService = new PinService();
 export default function PinDetail() {
@@ -20,6 +21,8 @@ export default function PinDetail() {
   const [comments, setComments] = useState<IComment[]>([]);
   const [isSubmittingComment, setIsSubmittingComment] = useState(false);
   const [commentInput, setCommentInput] = useState("");
+  const [currLoc, setCurrLoc] = useState<Location.LocationObject | undefined>();
+
   async function getComments() {
     try {
       const res = await pinService.getCommentsByPin(+pinId);
@@ -32,7 +35,11 @@ export default function PinDetail() {
   useEffect(() => {
     async function getPin() {
       try {
-        const res = await pinService.getPin(+pinId);
+        const [res, location] = await Promise.all([
+          await pinService.getPin(+pinId),
+          await Location.getCurrentPositionAsync({}),
+        ]);
+        setCurrLoc(location);
         setPin(res);
       } catch (e: any) {
         console.log(e);
@@ -44,6 +51,7 @@ export default function PinDetail() {
   }, [pinId]);
 
   useEffect(() => {
+    let cancel = false;
     async function submit() {
       try {
         const res = await pinService.createComment({
@@ -57,30 +65,37 @@ export default function PinDetail() {
       await getComments();
     }
     submit();
+    return () => {
+      cancel = true;
+    };
   }, [isSubmittingComment]);
 
   const flatListRef = useRef<FlatList>(null);
 
-  const renderItem = ({ item }: { item: IComment }) => (
-    <Comment
-      time={new Date(item.createdAt)}
-      text={item.text}
-      karma={item.upvotes - item.downvotes}
-    />
-  );
-
-  //to be used with the above? :3
-
-  // async function getAllViewablePins() {
-  //   const pins = await axios.get(`${API_BASE_URL}/pin/visible`);
-  //   setAllViewablePins(pins.data);
-  // }
+  const renderItem = ({ item }: { item: IComment }) => {
+    return (
+      <Comment
+        time={new Date(item.createdAt)}
+        text={item.text}
+        karma={item.upvotes - item.downvotes}
+      />
+    );
+  };
 
   return (
     <GestureHandlerRootView>
       {pin ? (
         <PinView
-          distance={10}
+          distance={
+            currLoc
+              ? +(
+                  geolib.getDistance(currLoc.coords, {
+                    latitude: pin.latitude,
+                    longitude: pin.longitude,
+                  }) * 0.000621371
+                ).toFixed(1)
+              : -1
+          }
           time={new Date(pin.createdAt)}
           text={pin.text}
           commentCount={comments.length}

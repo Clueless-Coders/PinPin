@@ -22,7 +22,6 @@ export default function Index() {
   useEffect(() => {
     async function login() {
       if (authService.isLoggedIn()) {
-        console.log("Hi");
         router.replace("/(home)");
       }
 
@@ -37,7 +36,6 @@ export default function Index() {
         if (isLoggingIn) ret = await authService.login(email, password);
         else ret = await authService.signup({ email, password });
 
-        console.log(ret);
         if (authService.isLoggedIn()) {
           setEmail("");
           setPassword("");

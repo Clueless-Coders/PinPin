@@ -15,7 +15,6 @@ export default function Comment({ time, text, karma }: PinPostProps) {
   const timeSincePassed = new Date(Date.now() - time.getTime());
   const hours = timeSincePassed.getUTCHours();
   const minutes = timeSincePassed.getUTCMinutes();
-  const seconds = timeSincePassed.getUTCSeconds();
 
   return (
     <View>
@@ -23,7 +22,7 @@ export default function Comment({ time, text, karma }: PinPostProps) {
         <View style={styles.top}>
           <View style={styles.topLeft}>
             <Text style={styles.topText}>
-              {hours}h {minutes}m {seconds}s
+              {hours}h {minutes}m
             </Text>
           </View>
           <View style={styles.topRight}>

@@ -41,11 +41,9 @@ export class PinService {
   // private pins: IPins[];
   constructor() {}
   async getPin(pinID: number): Promise<IPin> {
-    console.log("starting fetching");
     try {
       const res = await axios.get<IPin>(`${API_BASE_URL}/pin/${pinID}`);
       const pin = res.data;
-      console.log(pin);
       return pin;
     } catch (e: any) {
       console.log("Failed to get pin ", e);
@@ -54,11 +52,9 @@ export class PinService {
   }
 
   async deletePin(pinID: number) {
-    console.log("deleting pin " + pinID);
     try {
       const res = await axios.delete<IPin>(`${API_BASE_URL}/pin/${pinID}`);
       const pin = res.data;
-      console.log(pin);
       return pin;
     } catch (e) {
       console.log("Failed to delete pin, ", e);
@@ -72,7 +68,6 @@ export class PinService {
         text,
       });
       const pin = res.data;
-      console.log(pin);
       return pin;
     } catch (e) {
       console.log("failed to update pin ", e);
@@ -80,11 +75,9 @@ export class PinService {
   }
 
   async createPin(IPin: ICreatePin) {
-    console.log("creating pin ");
     try {
       const res = await axios.post<IPin>(`${API_BASE_URL}/pin`, IPin);
       const pin = res.data;
-      console.log(pin);
       return pin;
     } catch (e) {
       console.log("failed creating pin ", e);
@@ -92,11 +85,9 @@ export class PinService {
   }
 
   async getAllViewable() {
-    console.log("getting viewable pins");
     try {
       const res = await axios.get<VisiblePin[]>(`${API_BASE_URL}/pin/visible`);
       const pins = res.data;
-      console.log(pins);
       return pins;
     } catch (e) {
       console.log("failed to get viewable pins ", e);
@@ -104,14 +95,12 @@ export class PinService {
   }
 
   async createComment(IComment: ICreateComment) {
-    console.log("creating comment ");
     try {
       const res = await axios.post<IComment>(
         `${API_BASE_URL}/pin/comments`,
         IComment
       );
       const comment = res.data;
-      console.log(comment);
       return comment;
     } catch (e) {
       console.log("failed creating comment ", e);
@@ -119,13 +108,11 @@ export class PinService {
   }
 
   async getCommentsByPin(pinID: number) {
-    console.log("starting fetching comments");
     try {
       const res = await axios.get<IComment[]>(
         `${API_BASE_URL}/pin/comments/${pinID}`
       );
       const comments = res.data;
-      console.log(comments);
       return comments;
     } catch (e) {
       console.log("Failed to get comments ", e);

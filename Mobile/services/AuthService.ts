@@ -59,14 +59,10 @@ export class AuthService {
    */
 
   async signup(newUser: Account) {
-    console.log("creating user ");
     try {
       const res = await axios.post<User>(`${API_BASE_URL}/user`, newUser);
       const account = res.data;
-      console.log(account);
       const loginRes = await this.login(newUser.email, newUser.password);
-      console.log(loginRes);
-      console.log(this.tokens);
       return account;
     } catch (e: any) {
       console.log("failed creating user account ", e);

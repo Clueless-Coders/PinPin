@@ -344,36 +344,32 @@ export class PinsService {
       });
     } catch (e) {
       console.log(e);
-      throw new InternalServerErrorException("Comment create failed. ", e);
+      throw new InternalServerErrorException('Comment create failed. ', e);
     }
   }
 
   async getComments(pinID: number) {
     try {
-      return await this.databaseService.comment.findMany(
-        {
-          where: {
-            pinID: pinID,
-          },
-        }
-      );
+      const res = await this.databaseService.comment.findMany({
+        where: {
+          pinID: pinID,
+        },
+      });
+      return res;
     } catch (e) {
-      throw new InternalServerErrorException("Comment create failed. ", e);
+      throw new InternalServerErrorException('Comment create failed. ', e);
     }
   }
 
   async getComment(commentID: number) {
     try {
-      return await this.databaseService.comment.findUnique(
-        {
-          where: {
-            id: commentID,
-          },
-        }
-      );
+      return await this.databaseService.comment.findUnique({
+        where: {
+          id: commentID,
+        },
+      });
     } catch (e) {
-      throw new InternalServerErrorException("Comment create failed. ", e);
+      throw new InternalServerErrorException('Comment create failed. ', e);
     }
   }
-
 }
