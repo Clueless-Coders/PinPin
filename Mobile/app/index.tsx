@@ -80,6 +80,7 @@ export default function Index() {
         }}
         textInputProps={{
           placeholder: "Email",
+          autoCapitalize: "none",
         }}
         onTextChange={(val) => setEmail(val)}
       ></PinPinTextArea>
@@ -93,6 +94,7 @@ export default function Index() {
         textInputProps={{
           secureTextEntry: true,
           placeholder: "Password",
+          autoCapitalize: "none",
         }}
         onTextChange={(val) => setPassword(val)}
       ></PinPinTextArea>
