@@ -22,6 +22,11 @@ import {
 } from "@/interfaces/pin.interface";
 import SquareButton from "@/components/SquareButton";
 import { router } from "expo-router";
+import Animated, {
+  useAnimatedStyle,
+  withSpring,
+  useSharedValue,
+} from "react-native-reanimated";
 import * as geolib from "geolib";
 
 interface LocalImages {
@@ -36,7 +41,7 @@ export default function HomeIndex() {
   );
 
   const handleButtonPress = () => {
-    router.push("/NewPin");
+    router.push("/(home)/0");
   };
 
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -104,7 +109,7 @@ export default function HomeIndex() {
   }, [selectedPinIndex]);
 
   // removed 100% snap point while nested scrolling doesnt work
-  const snapPoints = useMemo(() => ["12%", "75%"], []);
+  const snapPoints = useMemo(() => ["12%", "70%"], []);
 
   const renderItem = useCallback(
     ({ item, index }: { item: VisiblePin; index: number }) => {
@@ -198,6 +203,13 @@ export default function HomeIndex() {
     );
   }
 
+  const [buttonOffset, setButtonOffset] = useState(0);
+  const buttonPosition = useSharedValue({ x: 0, y: 0 });
+
+  const handleSheetChanges = useCallback((index: number) => {
+    setButtonOffset(index === 1 ? -530 : -85);
+  }, []);
+
   return (
     <GestureHandlerRootView style={styles.root}>
       <MapView
@@ -214,22 +226,46 @@ export default function HomeIndex() {
         {pins?.visible.map(renderMarker) ?? <></>}
       </MapView>
 
+      <View
+        style={[
+          styles.buttonContainer,
+          { transform: [{ translateY: buttonOffset }] },
+        ]}
+      >
+        <SquareButton
+          icon={"pin"}
+          color={"#A7A6FF"}
+          onPress={handleButtonPress}
+        />
+      </View>
+
       <BottomSheet
         ref={sheetRef}
         snapPoints={snapPoints}
+        onChange={handleSheetChanges}
         enableDynamicSizing={false}
         enableHandlePanningGesture={true}
         enableOverDrag={false}
         backgroundStyle={{ backgroundColor: "#FFF9ED" }}
+        style={{
+          backgroundColor: "#FFF9ED",
+          borderRadius: 10,
+          shadowColor: "#000",
+          shadowOffset: {
+            width: 0,
+            height: 6,
+          },
+          shadowOpacity: 0.58,
+          shadowRadius: 16.0,
+
+          elevation: 24,
+        }}
         handleIndicatorStyle={{ backgroundColor: "#000000" }}
       >
         <View style={styles.search}>
           <BottomSheetTextInput style={styles.input} />
           <FontAwesomeIcon icon={faFilter} />
         </View>
-
-        <SquareButton icon={"gear"} onPress={handleButtonPress} />
-
         <BottomSheetFlatList
           data={allViewablePins}
           keyExtractor={(item) => item.id + ""}
@@ -244,11 +280,15 @@ export default function HomeIndex() {
     </GestureHandlerRootView>
   );
 }
-
 const styles = StyleSheet.create({
   root: {
     flex: 1,
     //paddingTop: 200,
+  },
+  buttonContainer: {
+    position: "absolute",
+    bottom: 20,
+    right: 15,
   },
   flatlist: {
     backgroundColor: "#FFF9ED",

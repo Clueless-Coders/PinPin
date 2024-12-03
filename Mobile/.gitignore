@@ -22,3 +22,4 @@ expo-env.d.ts
 
 ios
 package-lock.json
+environment.ts
