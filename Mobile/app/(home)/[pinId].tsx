@@ -9,22 +9,110 @@ export default function PinDetail() {
 
   // temporary data for testing
   const allViewablePins: PinPostProps[] = [
-    { distance: 1, text: "First Comment", commentCount: 10, karma: 20 },
-    { distance: 5, text: "Second Comment", commentCount: 5, karma: 15 },
-    { distance: 10, text: "Thrd Comment", commentCount: 3, karma: 12 },
-    { distance: 5, text: "Seond Comment", commentCount: 5, karma: 15 },
-    { distance: 10, text: "hird Comment", commentCount: 3, karma: 12 },
+    {
+      time: new Date(2024, 11, 1),
+      distance: 1,
+      text: "First Comment",
+      commentCount: 10,
+      karma: 20,
+    },
+    {
+      time: new Date(2024, 11, 2),
+      distance: 5,
+      text: "Second Comment",
+      commentCount: 5,
+      karma: 15,
+    },
+    {
+      time: new Date(2024, 11, 3),
+      distance: 10,
+      text: "Third Comment",
+      commentCount: 3,
+      karma: 12,
+    },
+    {
+      time: new Date(2024, 11, 4),
+      distance: 3,
+      text: "Fourth Comment",
+      commentCount: 5,
+      karma: 15,
+    },
+    {
+      time: new Date(2024, 11, 5),
+      distance: 7,
+      text: "Fifth Comment",
+      commentCount: 3,
+      karma: 12,
+    },
+    {
+      time: new Date(2024, 11, 6),
+      distance: 2,
+      text: "Sixth Comment",
+      commentCount: 8,
+      karma: 18,
+    },
+    {
+      time: new Date(2024, 11, 7),
+      distance: 4,
+      text: "Seventh Comment",
+      commentCount: 2,
+      karma: 10,
+    },
+    {
+      time: new Date(2024, 11, 8),
+      distance: 12,
+      text: "Eighth Comment",
+      commentCount: 6,
+      karma: 25,
+    },
+    {
+      time: new Date(2024, 11, 9),
+      distance: 8,
+      text: "Ninth Comment",
+      commentCount: 4,
+      karma: 13,
+    },
+    {
+      time: new Date(2024, 11, 10),
+      distance: 9,
+      text: "Tenth Comment",
+      commentCount: 7,
+      karma: 17,
+    },
+    {
+      time: new Date(2024, 11, 11),
+      distance: 6,
+      text: "Eleventh Comment",
+      commentCount: 9,
+      karma: 22,
+    },
+    {
+      time: new Date(2024, 11, 12),
+      distance: 15,
+      text: "Twelfth Comment",
+      commentCount: 11,
+      karma: 30,
+    },
+    {
+      time: new Date(2024, 11, 13),
+      distance: 20,
+      text: "Thirteenth Comment",
+      commentCount: 13,
+      karma: 35,
+    },
+    {
+      time: new Date(2024, 11, 14),
+      distance: 25,
+      text: "Fourteenth Comment",
+      commentCount: 14,
+      karma: 40,
+    },
   ];
 
   const flatListRef = useRef<FlatList>(null);
 
   const renderItem = ({ item }: { item: PinPostProps }) => (
-    <Comment
-      distance={item.distance}
-      text={item.text}
-      commentCount={item.commentCount}
-      karma={item.karma}
-    />
+    <Comment time={item.time} text={item.text} karma={item.karma} />
   );
 
   //to be used with the above? :3
@@ -36,14 +124,7 @@ export default function PinDetail() {
 
   return (
     <GestureHandlerRootView>
-      <PinView
-        distance={0}
-        text={
-          "I am a pin hello shdisj shdkjas dhashd skhidhbsd dhbshdashdiasud sjdhsak dbskjf bsbf"
-        }
-        commentCount={0}
-        karma={0}
-      />
+      {/* <PinView/> // render in nearby pins from database*/}
 
       <FlatList
         data={allViewablePins}
@@ -67,22 +148,26 @@ const styles = StyleSheet.create({
   },
   textBoxContainer: {
     position: "absolute",
-    bottom: 0, 
+    bottom: 0,
     left: 0,
     right: 0,
-    backgroundColor: "orange", 
-    borderTopLeftRadius: 20, 
-    borderTopRightRadius: 20, 
+    backgroundColor: "#FFF9ED",
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
     paddingHorizontal: 10,
     paddingVertical: 10,
-    zIndex: 1, 
+    zIndex: 1,
+    borderColor: "black",
+    borderWidth: 1.5,
+    borderRadius: 5,
   },
   textInput: {
     height: 40,
+    backgroundColor: "white",
     borderColor: "black",
     borderWidth: 1,
     borderRadius: 5,
     paddingHorizontal: 10,
-    marginVertical: 10,
+    marginVertical: 15,
   },
 });

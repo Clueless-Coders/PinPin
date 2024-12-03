@@ -2,49 +2,37 @@ import React from "react";
 import { View, Text, StyleSheet } from "react-native";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { faEllipsis } from "@fortawesome/free-solid-svg-icons/faEllipsis";
-import { faMessage } from "@fortawesome/free-solid-svg-icons/faMessage";
-import { faImage } from "@fortawesome/free-solid-svg-icons/faImage";
 import { faCaretUp } from "@fortawesome/free-solid-svg-icons/faCaretUp";
 import { faCaretDown } from "@fortawesome/free-solid-svg-icons/faCaretDown";
 
-// CaretUp looks like it needs to be brought down some
-// Filter looks like it needs to be brought up some
-// pins will need to be pressable
-// add more padding?
-// try to fix comment icon
-
 export interface PinPostProps {
   distance: number;
-  // time: Date;
+  time: Date;
   text: string;
   commentCount: number;
   karma: number;
-  isFocused?: boolean;
 }
 
 export default function PinPost({
   distance,
-  // time,
+  time,
   text,
   commentCount,
   karma,
-  isFocused,
 }: PinPostProps) {
-  // const timeSincePassed = new Date(Date.now() - time.getTime());
-  // const hours = timeSincePassed.getUTCHours();
-  // const minutes = timeSincePassed.getUTCMinutes();
-  // const seconds = timeSincePassed.getUTCSeconds();
+  const timeSincePassed = new Date(Date.now() - time.getTime());
+  const hours = timeSincePassed.getUTCHours();
+  const minutes = timeSincePassed.getUTCMinutes();
+  const seconds = timeSincePassed.getUTCSeconds();
 
   return (
     <View>
-      <View
-        style={styles.pinContainer}
-      >
+      <View style={styles.pinContainer}>
         <View style={styles.top}>
           <View style={styles.topLeft}>
             <Text style={styles.topText}>{distance}mi</Text>
             <Text style={styles.topText}>
-              {/* {hours}h {minutes}m {seconds}s */}
+              {hours}h {minutes}m {seconds}s
             </Text>
           </View>
           <View style={styles.topRight}>

@@ -209,15 +209,6 @@ export default function HomeIndex() {
           <BottomSheetTextInput style={styles.input} />
           <FontAwesomeIcon icon={faFilter} />
         </View>
-        
-        <Comment
-          distance={0}
-          text={
-            "I am a pin comment shdisj shdkjas dhashd skhidhbsd dhbshdashdiasud sjdhsak dbskjf bsbf"
-          }
-          commentCount={0}
-          karma={0}
-        />
         <SquareButton icon={"gear"} onPress={handleButtonPress} />
         <BottomSheetFlatList
           data={allViewablePins}

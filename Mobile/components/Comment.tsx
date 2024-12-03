@@ -6,26 +6,20 @@ import { faCaretUp } from "@fortawesome/free-solid-svg-icons/faCaretUp";
 import { faCaretDown } from "@fortawesome/free-solid-svg-icons/faCaretDown";
 
 export interface PinPostProps {
-  distance: number;
-  // time: Date;
+  time: Date;
   text: string;
-  commentCount: number;
   karma: number;
-  isFocused?: boolean;
 }
 
 export default function Comment({
-  distance,
-  // time,
+  time,
   text,
-  commentCount,
   karma,
-  isFocused,
 }: PinPostProps) {
-  // const timeSincePassed = new Date(Date.now() - time.getTime());
-  // const hours = timeSincePassed.getUTCHours();
-  // const minutes = timeSincePassed.getUTCMinutes();
-  // const seconds = timeSincePassed.getUTCSeconds();
+  const timeSincePassed = new Date(Date.now() - time.getTime());
+  const hours = timeSincePassed.getUTCHours();
+  const minutes = timeSincePassed.getUTCMinutes();
+  const seconds = timeSincePassed.getUTCSeconds();
 
   return (
     <View>
@@ -34,9 +28,8 @@ export default function Comment({
       >
         <View style={styles.top}>
           <View style={styles.topLeft}>
-            <Text style={styles.topText}>{distance}mi</Text>
             <Text style={styles.topText}>
-              {/* {hours}h {minutes}m {seconds}s */}
+              {hours}h {minutes}m {seconds}s
             </Text>
           </View>
           <View style={styles.topRight}>
