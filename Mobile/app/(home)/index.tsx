@@ -276,7 +276,10 @@ export default function HomeIndex() {
           handleIndicatorStyle={{ backgroundColor: "#000000" }}
         >
           <View style={styles.search}>
-            <BottomSheetTextInput style={styles.input} />
+            <BottomSheetTextInput
+              style={styles.input}
+              placeholder="Search Pins"
+            />
             <FontAwesomeIcon icon={faFilter} />
           </View>
           <BottomSheetFlatList
@@ -324,7 +327,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     lineHeight: 20,
     padding: 5,
-    color: "#FFF9ED",
+    color: "black",
     width: 350, //not sure why this is stretching beyond the screen, must fix to be dynamic
   },
   search: {
