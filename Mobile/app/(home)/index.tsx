@@ -22,6 +22,8 @@ import {
 } from "@/interfaces/pin.interface";
 import SquareButton from "@/components/SquareButton";
 import { router } from "expo-router";
+import Comment from "@/components/Comment";
+import PinView from "@/components/PinView";
 
 interface LocalImages {
   readablePin: number;
@@ -208,9 +210,23 @@ export default function HomeIndex() {
           <BottomSheetTextInput style={styles.input} />
           <FontAwesomeIcon icon={faFilter} />
         </View>
-
+        <PinView
+          distance={0}
+          text={
+            "I am a pin hello shdisj shdkjas dhashd skhidhbsd dhbshdashdiasud sjdhsak dbskjf bsbf"
+          }
+          commentCount={0}
+          karma={0}
+        />
+        <Comment
+          distance={0}
+          text={
+            "I am a pin comment shdisj shdkjas dhashd skhidhbsd dhbshdashdiasud sjdhsak dbskjf bsbf"
+          }
+          commentCount={0}
+          karma={0}
+        />
         <SquareButton icon={"gear"} onPress={handleButtonPress} />
-
         <BottomSheetFlatList
           data={allViewablePins}
           keyExtractor={(item) => item.id + ""}

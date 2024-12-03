@@ -51,7 +51,6 @@ export default function PinDetail() {
     console.log("inside useEffects");
   }, [requesting]);
 
-
   return (
     <View>
       <Text>Pin Detail Page</Text>
