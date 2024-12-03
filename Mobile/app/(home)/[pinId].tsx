@@ -19,38 +19,16 @@ export default function PinDetail() {
   // const []
 
   useEffect(() => {
-    const updatePin = async () => {
-      try {
-        console.log(buttonValue);
-        let fetchedPin: IPins | undefined;
-        if (buttonValue == 0) {
-          return;
-        } else if (buttonValue == 1) {
-          fetchedPin = await pinService.deletePin(+pinId);
-        } else if (buttonValue == 2) {
-          fetchedPin = await pinService.getPin(+pinId); // Call the async function
-        } else if (buttonValue == 3) {
-          fetchedPin = await pinService.patchPin(+pinId, pinText);
-        } else if (buttonValue == 4) {
-          let newPin: ICreatePin = {
-            text: pinText,
-            latitude: +latitude,
-            longitude: +longitude,
-          };
-          fetchedPin = await pinService.createPin(newPin);
-        }
-        setPin(fetchedPin !== undefined ? fetchedPin : null); // Update state with fetched pin
-        setButton(0);
-        isRequesting(false);
-      } catch (error) {
-        console.error("Error updating pin info", error);
-      }
-    };
+    const pinService = new PinService();
+    async function fetchPin() {
+      console.log(pinId);
+      const pin = await pinService.getPin(+pinId);
+      console.log(pin);
+      setPin(pin);
+    }
 
-    updatePin(); // Invoke the async function
-    console.log("inside useEffects");
-  }, [requesting]);
-
+    fetchPin();
+  }, []);
 
   return (
     <View>

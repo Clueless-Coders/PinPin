@@ -1,11 +1,12 @@
 import React from "react";
-import { View, Text, StyleSheet } from "react-native";
+import { View, Text, StyleSheet, Pressable } from "react-native";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { faEllipsis } from "@fortawesome/free-solid-svg-icons/faEllipsis";
 import { faMessage } from "@fortawesome/free-solid-svg-icons/faMessage";
 import { faImage } from "@fortawesome/free-solid-svg-icons/faImage";
 import { faCaretUp } from "@fortawesome/free-solid-svg-icons/faCaretUp";
 import { faCaretDown } from "@fortawesome/free-solid-svg-icons/faCaretDown";
+import { router } from "expo-router";
 
 // CaretUp looks like it needs to be brought down some
 // Filter looks like it needs to be brought up some
@@ -14,61 +15,66 @@ import { faCaretDown } from "@fortawesome/free-solid-svg-icons/faCaretDown";
 // try to fix comment icon
 
 export interface PinPostProps {
-  distance: number;
+  distanceInMiles?: number;
   time: Date;
   text: string;
   commentCount: number;
   karma: number;
+  pinId: number;
   isFocused?: boolean;
 }
 
 export default function PinPost({
-  distance,
+  distanceInMiles,
   time,
   text,
   commentCount,
   karma,
+  pinId,
   isFocused,
 }: PinPostProps) {
   const timeSincePassed = new Date(Date.now() - time.getTime());
   const hours = timeSincePassed.getUTCHours();
   const minutes = timeSincePassed.getUTCMinutes();
-  const seconds = timeSincePassed.getUTCSeconds();
 
   return (
-    <View style={{ marginHorizontal: 10 }}>
-      <View style={styles.shadow} />
-      <View
-        style={isFocused ? styles.pinContainerHighlight : styles.pinContainer}
-      >
-        <View style={styles.top}>
-          <View style={styles.topLeft}>
-            <Text style={styles.topText}>{distance}mi</Text>
-            <Text style={styles.topText}>
-              {hours}h {minutes}m {seconds}s
-            </Text>
+    <Pressable onPress={() => router.push(`/${pinId}`)}>
+      <View style={{ marginHorizontal: 10 }}>
+        <View style={styles.shadow} />
+        <View
+          style={isFocused ? styles.pinContainerHighlight : styles.pinContainer}
+        >
+          <View style={styles.top}>
+            <View style={styles.topLeft}>
+              <Text style={styles.topText}>
+                {distanceInMiles?.toFixed(1) ?? "Loading..."}mi
+              </Text>
+              <Text style={styles.topText}>
+                {hours}h {minutes}m
+              </Text>
+            </View>
+            <View style={styles.topRight}>
+              <FontAwesomeIcon icon={faEllipsis} size={20} />
+            </View>
           </View>
-          <View style={styles.topRight}>
-            <FontAwesomeIcon icon={faEllipsis} size={20} />
-          </View>
-        </View>
 
-        <Text style={styles.text}>{text}</Text>
+          <Text style={styles.text}>{text}</Text>
 
-        <View style={styles.bottom}>
-          <View style={styles.topLeft}>
-            <FontAwesomeIcon icon={faImage} size={14} style={styles.icon} />
-            <FontAwesomeIcon icon={faMessage} size={14} style={styles.icon} />
-            <Text style={styles.bottomText}>{`${commentCount}`}</Text>
-          </View>
-          <View style={styles.topRight}>
-            <FontAwesomeIcon icon={faCaretUp} />
-            <Text style={styles.bottomText}>{karma}</Text>
-            <FontAwesomeIcon icon={faCaretDown} />
+          <View style={styles.bottom}>
+            <View style={styles.topLeft}>
+              <FontAwesomeIcon icon={faImage} size={14} style={styles.icon} />
+              <FontAwesomeIcon icon={faMessage} size={14} style={styles.icon} />
+              <Text style={styles.bottomText}>{`${commentCount}`}</Text>
+            </View>
+            <View style={styles.topRight}>
+              <FontAwesomeIcon icon={faCaretUp} />
+              <Text style={styles.bottomText}>{karma}</Text>
+              <FontAwesomeIcon icon={faCaretDown} />
+            </View>
           </View>
         </View>
       </View>
-    </View>
+    </Pressable>
   );
 }
 
