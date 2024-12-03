@@ -285,7 +285,7 @@ export class PinsService {
     //Gets upper left and bottom right location bounds for pins to be marked as visible
     const swBearingInDegs = 225;
     const neBearningInDegs = 45;
-    const radiusToMarkVisibleInMeters = 50;
+    const radiusToMarkVisibleInMeters = 200;
     const swLoc = computeDestinationPoint(
       location,
       radiusToMarkVisibleInMeters,
