@@ -23,7 +23,6 @@ import {
 import SquareButton from "@/components/SquareButton";
 import { router } from "expo-router";
 import Comment from "@/components/Comment";
-import PinView from "@/components/PinView";
 
 interface LocalImages {
   readablePin: number;
@@ -37,7 +36,7 @@ export default function HomeIndex() {
   );
 
   const handleButtonPress = () => {
-    router.push("/NewPin");
+    router.push("/(home)/0");
   };
 
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -210,14 +209,7 @@ export default function HomeIndex() {
           <BottomSheetTextInput style={styles.input} />
           <FontAwesomeIcon icon={faFilter} />
         </View>
-        <PinView
-          distance={0}
-          text={
-            "I am a pin hello shdisj shdkjas dhashd skhidhbsd dhbshdashdiasud sjdhsak dbskjf bsbf"
-          }
-          commentCount={0}
-          karma={0}
-        />
+        
         <Comment
           distance={0}
           text={
