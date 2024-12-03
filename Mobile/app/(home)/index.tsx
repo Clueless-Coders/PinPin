@@ -22,6 +22,7 @@ import {
 } from "@/interfaces/pin.interface";
 import SquareButton from "@/components/SquareButton";
 import { router } from "expo-router";
+import Comment from "@/components/Comment";
 import Animated, {
   useAnimatedStyle,
   withSpring,
@@ -266,6 +267,7 @@ export default function HomeIndex() {
           <BottomSheetTextInput style={styles.input} />
           <FontAwesomeIcon icon={faFilter} />
         </View>
+        <SquareButton icon={"gear"} onPress={handleButtonPress} />
         <BottomSheetFlatList
           data={allViewablePins}
           keyExtractor={(item) => item.id + ""}

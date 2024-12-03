@@ -1,114 +1,160 @@
-import React, { useState, useEffect } from "react";
-import { View, Text, Button } from "react-native";
-import { PinService } from "@/services/PinService";
-import { TextInput } from "react-native";
-import { IPins, ICreatePin } from "@/services/PinService";
+import React, { useEffect, useRef, useState } from "react";
+import PinView, { PinPostProps } from "@/components/PinView";
+import Comment from "@/components/Comment";
+import {
+  FlatList,
+  GestureHandlerRootView,
+  Pressable,
+} from "react-native-gesture-handler";
+import { TextInput, View, StyleSheet } from "react-native";
 import { useLocalSearchParams } from "expo-router";
+import { IComment, IPin, PinService } from "@/services/PinService";
+import { faPaperPlane } from "@fortawesome/free-solid-svg-icons/faPaperPlane";
+import * as geolib from "geolib";
+import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 
 const pinService = new PinService();
-
 export default function PinDetail() {
-  const [pin, setPin] = useState<IPins | null>(null); // State to store pin data
-  const [pinText, setText] = useState("");
-  const [pinID, setID] = useState("");
-  const [latitude, setLatitude] = useState("");
-  const [longitude, setLongitude] = useState("");
-  const [buttonValue, setButton] = useState(0);
-  const [requesting, isRequesting] = useState(false);
   const { pinId } = useLocalSearchParams();
-  // const []
+  const [pin, setPin] = useState<IPin | undefined>();
+  const [comments, setComments] = useState<IComment[]>([]);
+  const [isSubmittingComment, setIsSubmittingComment] = useState(false);
+  const [commentInput, setCommentInput] = useState("");
+  async function getComments() {
+    try {
+      const res = await pinService.getCommentsByPin(+pinId);
+      setComments(res ?? []);
+    } catch (e: any) {
+      console.log(e);
+    }
+  }
 
   useEffect(() => {
-    const pinService = new PinService();
-    async function fetchPin() {
-      console.log(pinId);
-      const pin = await pinService.getPin(+pinId);
-      console.log(pin);
-      setPin(pin);
+    async function getPin() {
+      try {
+        const res = await pinService.getPin(+pinId);
+        setPin(res);
+      } catch (e: any) {
+        console.log(e);
+      }
     }
 
-    fetchPin();
-  }, []);
+    getPin();
+    getComments();
+  }, [pinId]);
+
+  useEffect(() => {
+    async function submit() {
+      try {
+        const res = await pinService.createComment({
+          pinID: +pinId,
+          text: commentInput,
+        });
+        setIsSubmittingComment(false);
+      } catch (e: any) {
+        console.log(e);
+      }
+      await getComments();
+    }
+    submit();
+  }, [isSubmittingComment]);
+
+  const flatListRef = useRef<FlatList>(null);
+
+  const renderItem = ({ item }: { item: IComment }) => (
+    <Comment
+      time={new Date(item.createdAt)}
+      text={item.text}
+      karma={item.upvotes - item.downvotes}
+    />
+  );
+
+  //to be used with the above? :3
+
+  // async function getAllViewablePins() {
+  //   const pins = await axios.get(`${API_BASE_URL}/pin/visible`);
+  //   setAllViewablePins(pins.data);
+  // }
 
   return (
-    <View>
-      <Text>Pin Detail Page</Text>
-      {pin ? <Text>Pin: {JSON.stringify(pin)}</Text> : <Text>Loading...</Text>}
+    <GestureHandlerRootView>
+      {pin ? (
+        <PinView
+          distance={10}
+          time={new Date(pin.createdAt)}
+          text={pin.text}
+          commentCount={comments.length}
+          karma={pin.upvotes - pin.downvotes}
+        />
+      ) : (
+        <></>
+      )}
 
-      <TextInput
+      <FlatList
+        data={comments}
+        keyExtractor={(item, index) => index.toString()}
+        renderItem={renderItem}
+        ref={flatListRef}
+        onScrollToIndexFailed={(info) => {
+          console.log(info);
+        }}
         style={{
-          paddingTop: 10,
-          height: 40,
-          borderColor: "black",
-          borderRadius: 3,
+          maxHeight: "74%",
+          backgroundColor: "#FFF9ED",
         }}
-        placeholder="pinID"
-        onChangeText={(val) => setID(val)}
-      ></TextInput>
-
-      <Button
-        title="Delete"
-        onPress={() => {
-          setButton(1);
-          isRequesting(true);
-        }}
-        disabled={!isRequesting}
-      ></Button>
-
-      <Button
-        title="Get"
-        onPress={() => {
-          setButton(2);
-          isRequesting(true);
-        }}
-        disabled={!isRequesting}
-      ></Button>
-
-      <TextInput
-        style={{ height: 40, borderColor: "black", borderRadius: 3 }}
-        placeholder="pin text"
-        onChangeText={(val) => setText(val)}
-      ></TextInput>
-
-      <TextInput
-        style={{
-          paddingTop: 10,
-          height: 40,
-          borderColor: "black",
-          borderRadius: 3,
-        }}
-        placeholder="latitude"
-        onChangeText={(val) => setLatitude(val)}
-      ></TextInput>
-
-      <TextInput
-        style={{
-          paddingTop: 10,
-          height: 40,
-          borderColor: "black",
-          borderRadius: 3,
-        }}
-        placeholder="longitude"
-        onChangeText={(val) => setLongitude(val)}
-      ></TextInput>
-
-      <Button
-        title="Patch"
-        onPress={() => {
-          setButton(3);
-          isRequesting(true);
-        }}
-        disabled={!isRequesting}
-      ></Button>
-
-      <Button
-        title="Create"
-        onPress={() => {
-          setButton(4);
-          isRequesting(true);
-        }}
-        disabled={!isRequesting}
-      ></Button>
-    </View>
+      />
+      <View style={styles.textBoxContainer}>
+        <TextInput
+          style={styles.textInput}
+          placeholder="Leave a comment..."
+          onChangeText={(text) => setCommentInput(text)}
+        />
+        <Pressable
+          style={styles.submitButton}
+          onPress={() => setIsSubmittingComment(true)}
+          disabled={isSubmittingComment}
+        >
+          <FontAwesomeIcon icon={faPaperPlane} size={25} />
+        </Pressable>
+      </View>
+    </GestureHandlerRootView>
   );
 }
+
+const styles = StyleSheet.create({
+  flatListContainer: {
+    paddingBottom: 70,
+  },
+  textBoxContainer: {
+    display: "flex",
+    flexDirection: "row",
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: "#FFC900",
+    paddingHorizontal: 10,
+    paddingVertical: 10,
+    zIndex: 1,
+    borderColor: "black",
+    borderWidth: 1.5,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  textInput: {
+    flex: 11,
+    height: 40,
+    backgroundColor: "#FFF9ED",
+    borderColor: "black",
+    borderWidth: 1,
+    borderRadius: 5,
+    paddingHorizontal: 10,
+    marginVertical: 15,
+    marginLeft: 10,
+  },
+  submitButton: {
+    flex: 1,
+    margin: 10,
+    marginBottom: 16,
+  },
+});

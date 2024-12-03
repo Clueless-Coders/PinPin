@@ -16,6 +16,14 @@ export class CreatePinDTO {
   latitude: number;
 }
 
+export class CreateCommentDTO {
+  @IsInt()
+  pinID: number;
+  @IsString()
+  @Length(1, 300)
+  text: string;
+}
+
 export class UpdatePinDTO {
   @IsString()
   @Length(1, 300)
