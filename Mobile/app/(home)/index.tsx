@@ -42,8 +42,12 @@ export default function HomeIndex() {
     null
   );
 
-  const handleButtonPress = () => {
+  const handlePinPress = () => {
     router.push("/(home)/NewPin");
+  };
+
+  const handleSettingsPress = () => {
+    router.push("/(home)/Settings");
   };
 
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -216,7 +220,7 @@ export default function HomeIndex() {
       <GestureHandlerRootView style={styles.root}>
         <View style={styles.topRightButton}>
           <SquareButton
-            onPress={handleButtonPress}
+            onPress={handleSettingsPress}
             icon={"gear"}
             color="#FF6B6B"
           />
@@ -244,7 +248,7 @@ export default function HomeIndex() {
           <SquareButton
             icon={"pin"}
             color={"#A7A6FF"}
-            onPress={handleButtonPress}
+            onPress={handlePinPress}
           />
         </View>
 
