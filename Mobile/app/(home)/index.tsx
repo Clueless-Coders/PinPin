@@ -1,4 +1,4 @@
-import { useCallback, useRef, useMemo } from "react";
+import { useCallback, useRef, useMemo, createContext, useContext } from "react";
 import { StyleSheet, View, Text, Platform } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import BottomSheet, {
@@ -22,21 +22,18 @@ import {
 } from "@/interfaces/pin.interface";
 import SquareButton from "@/components/SquareButton";
 import { router } from "expo-router";
-import Comment from "@/components/Comment";
-import Animated, {
-  useAnimatedStyle,
-  withSpring,
-  useSharedValue,
-} from "react-native-reanimated";
+import Animated, { useSharedValue } from "react-native-reanimated";
 import * as geolib from "geolib";
 import { SafeAreaProvider } from "react-native-safe-area-context";
+import { LocationContext } from "./_layout";
+
+export const metersToMilesConversionFactor = 0.000621371;
 
 interface LocalImages {
   readablePin: number;
   unreadablePin: number;
 }
 
-//Map, create pin, etc
 export default function HomeIndex() {
   const [location, setLocation] = useState<Location.LocationObject | null>(
     null
@@ -50,6 +47,7 @@ export default function HomeIndex() {
     router.push("/(home)/Settings");
   };
 
+  const locationContext = useContext(LocationContext);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [pins, setPins] = useState<PinLocationRangeData | undefined>();
   const [images, setImages] = useState<LocalImages | undefined>();
@@ -60,18 +58,23 @@ export default function HomeIndex() {
   const mapRef = useRef<MapView>(null);
   const flatListRef = useRef<BottomSheetFlatListMethods>(null);
 
+  // Asks backend for all viewable pins from this user
   async function getAllViewablePins() {
     const pins = await axios.get<VisiblePin[]>(`${API_BASE_URL}/pin/visible`);
     let data = pins.data;
     if (location) {
       const distanceAdded = data.map((pin) => {
+        // Add current distance data to pins provided
         const distanceInMiles =
           geolib.getDistance(location.coords, {
             latitude: pin.latitude,
             longitude: pin.longitude,
-          }) * 0.000621371;
+          }) * metersToMilesConversionFactor;
         return { ...pin, distanceInMiles };
       });
+
+      // Sort the pins by current distance for most relevant pins
+      // to be viewed first
       distanceAdded.sort(
         (pin, other) => pin.distanceInMiles - other.distanceInMiles
       );
@@ -80,7 +83,7 @@ export default function HomeIndex() {
     setAllViewablePins(data);
   }
 
-  //Setup Maps
+  // Asks user for location permissions then renders the map if enabled
   useEffect(() => {
     async function getCurrentLocation() {
       let { status } = await Location.requestForegroundPermissionsAsync();
@@ -91,6 +94,8 @@ export default function HomeIndex() {
 
       let location = await Location.getCurrentPositionAsync({});
       setLocation(location);
+      locationContext?.setLocation(location);
+      getAllViewablePins();
       mapRef.current?.animateToRegion({
         latitude: location.coords.latitude,
         longitude: location.coords.longitude,
@@ -99,7 +104,6 @@ export default function HomeIndex() {
       });
     }
 
-    getAllViewablePins();
     getCurrentLocation();
     setImages({
       readablePin: require("@/assets/images/ReadablePin.png"),
@@ -107,6 +111,8 @@ export default function HomeIndex() {
     });
   }, []);
 
+  // Goes to the pin listed in the scroll list of the bottom sheet
+  // when clicked on map
   useEffect(() => {
     if (selectedPinIndex < allViewablePins.length)
       flatListRef.current?.scrollToIndex({
@@ -114,9 +120,9 @@ export default function HomeIndex() {
       });
   }, [selectedPinIndex]);
 
-  // removed 100% snap point while nested scrolling doesnt work
   const snapPoints = useMemo(() => ["10%", "70%"], []);
 
+  // Renders each Pin card in the bottom sheet scroll view
   const renderItem = useCallback(
     ({ item, index }: { item: VisiblePin; index: number }) => {
       return (
@@ -136,6 +142,7 @@ export default function HomeIndex() {
     [selectedPinIndex, allViewablePins]
   );
 
+  // Gets all pins within the current viewable map area
   async function getCurrentBounds() {
     const bounds = await mapRef.current?.getMapBoundaries();
 
@@ -157,9 +164,12 @@ export default function HomeIndex() {
     }
   }
 
+  // On any update of the location, tell the backend to mark
+  // new pins visible based on the current location
   async function markNewVisiblePins() {
     const currLoc = await Location.getCurrentPositionAsync();
 
+    locationContext?.setLocation(currLoc);
     const newlyVisible = await axios.post<VisiblePin[]>(
       `${API_BASE_URL}/pin/visible`,
       {
@@ -188,6 +198,7 @@ export default function HomeIndex() {
     setSelectedPinIndex(pinIndex === -1 ? selectedPinIndex : pinIndex);
   }
 
+  // Show currently visible markers within the map rendering area
   function renderMarker(pin: VisiblePin | InvisiblePin) {
     return (
       <Marker
@@ -211,6 +222,7 @@ export default function HomeIndex() {
   const [buttonOffset, setButtonOffset] = useState(0);
   const buttonPosition = useSharedValue({ x: 0, y: 0 });
 
+  // Move new pin button icon based on state of bottom sheet. JANKKK :(
   const handleSheetChanges = useCallback((index: number) => {
     setButtonOffset(index === 1 ? -585 : -75);
   }, []);
@@ -300,7 +312,6 @@ export default function HomeIndex() {
 const styles = StyleSheet.create({
   root: {
     flex: 1,
-    //paddingTop: 200,
   },
   buttonContainer: {
     position: "absolute",
@@ -328,7 +339,7 @@ const styles = StyleSheet.create({
     lineHeight: 20,
     padding: 5,
     color: "black",
-    width: 350, //not sure why this is stretching beyond the screen, must fix to be dynamic
+    width: 350,
   },
   search: {
     flexDirection: "row",

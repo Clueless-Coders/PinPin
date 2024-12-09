@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import PinView, { PinPostProps } from "@/components/PinView";
 import Comment from "@/components/Comment";
 import {
@@ -13,6 +13,8 @@ import { faPaperPlane } from "@fortawesome/free-solid-svg-icons/faPaperPlane";
 import * as geolib from "geolib";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import * as Location from "expo-location";
+import { LocationContext } from "./_layout";
+import { metersToMilesConversionFactor } from ".";
 
 const pinService = new PinService();
 export default function PinDetail() {
@@ -21,7 +23,7 @@ export default function PinDetail() {
   const [comments, setComments] = useState<IComment[]>([]);
   const [isSubmittingComment, setIsSubmittingComment] = useState(false);
   const [commentInput, setCommentInput] = useState("");
-  const [currLoc, setCurrLoc] = useState<Location.LocationObject | undefined>();
+  const locationContext = useContext(LocationContext);
 
   async function getComments() {
     try {
@@ -35,11 +37,7 @@ export default function PinDetail() {
   useEffect(() => {
     async function getPin() {
       try {
-        const [res, location] = await Promise.all([
-          await pinService.getPin(+pinId),
-          await Location.getCurrentPositionAsync({}),
-        ]);
-        setCurrLoc(location);
+        const [res] = await Promise.all([await pinService.getPin(+pinId)]);
         setPin(res);
       } catch (e: any) {
         console.log(e);
@@ -50,25 +48,19 @@ export default function PinDetail() {
     getComments();
   }, [pinId]);
 
-  useEffect(() => {
-    let cancel = false;
-    async function submit() {
-      try {
-        const res = await pinService.createComment({
-          pinID: +pinId,
-          text: commentInput,
-        });
-        setIsSubmittingComment(false);
-      } catch (e: any) {
-        console.log(e);
-      }
-      await getComments();
+  async function submit() {
+    setIsSubmittingComment(true);
+    try {
+      const res = await pinService.createComment({
+        pinID: +pinId,
+        text: commentInput,
+      });
+      setIsSubmittingComment(false);
+    } catch (e: any) {
+      console.log(e);
     }
-    submit();
-    return () => {
-      cancel = true;
-    };
-  }, [isSubmittingComment]);
+    await getComments();
+  }
 
   const flatListRef = useRef<FlatList>(null);
 
@@ -87,12 +79,15 @@ export default function PinDetail() {
       {pin ? (
         <PinView
           distance={
-            currLoc
-              ? +(
-                  geolib.getDistance(currLoc.coords, {
+            locationContext?.location
+              ? // Gets the distance between user's current location and
+                // the pin's location, converted to miles then formatted
+                // to 1 decimal place
+                +(
+                  geolib.getDistance(locationContext.location.coords, {
                     latitude: pin.latitude,
                     longitude: pin.longitude,
-                  }) * 0.000621371
+                  }) * metersToMilesConversionFactor
                 ).toFixed(1)
               : -1
           }
@@ -126,7 +121,7 @@ export default function PinDetail() {
         />
         <Pressable
           style={styles.submitButton}
-          onPress={() => setIsSubmittingComment(true)}
+          onPress={submit}
           disabled={isSubmittingComment}
         >
           <FontAwesomeIcon icon={faPaperPlane} size={25} />

@@ -1,5 +1,5 @@
 import React from "react";
-import { View, StyleSheet, Pressable, Text } from "react-native";
+import { StyleSheet, Pressable, Text } from "react-native";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { IconDefinition } from "@fortawesome/fontawesome-svg-core";
 import { faBell } from "@fortawesome/free-solid-svg-icons/faBell";

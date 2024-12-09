@@ -138,6 +138,15 @@ export class PinsService {
     };
   }
 
+  /**
+   * Based on provided user ID, gets all pins marked as viewable within the provided boundary box
+   * @param neLat
+   * @param neLong
+   * @param swLat
+   * @param swLong
+   * @param userId
+   * @returns
+   */
   async getViewablePinsInLocationRange(
     neLat: number,
     neLong: number,
@@ -150,12 +159,23 @@ export class PinsService {
     return viewable.reduce((prev, curr) => {
       const lat = curr.latitude;
       const long = curr.longitude;
+      //Checks if the current visible pin is within the provided boundary box
       if (lat >= swLat && lat <= neLat && long <= neLong && long >= swLong)
+        //Add to returned array if so
         prev.push({ ...curr, viewable: true });
       return prev;
     }, [] as VisiblePin[]);
   }
 
+  /**
+   * Based on provided user ID, gets all pins marked as invisible within the provided boundary box
+   * @param neLat
+   * @param neLong
+   * @param swLat
+   * @param swLong
+   * @param userId
+   * @returns
+   */
   async getInvisiblePinsInLocationRange(
     neLat: number,
     neLong: number,
@@ -213,6 +233,14 @@ export class PinsService {
     }
   }
 
+  /**
+   * Gets all pins in a location range. Should be admin only.
+   * @param neLat
+   * @param neLong
+   * @param swLat
+   * @param swLong
+   * @returns
+   */
   async getAllPinsInLocationRange(
     neLat: number,
     neLong: number,
@@ -275,6 +303,12 @@ export class PinsService {
     }
   }
 
+  /**
+   * Given the provided location, calculate new pins to be marked visible then update the user accordingly
+   * @param location
+   * @param userID
+   * @returns
+   */
   async markVisibleByLocation(
     location: {
       latitude: number;

@@ -8,12 +8,6 @@ import { faCaretUp } from "@fortawesome/free-solid-svg-icons/faCaretUp";
 import { faCaretDown } from "@fortawesome/free-solid-svg-icons/faCaretDown";
 import { router } from "expo-router";
 
-// CaretUp looks like it needs to be brought down some
-// Filter looks like it needs to be brought up some
-// pins will need to be pressable
-// add more padding?
-// try to fix comment icon
-
 export interface PinPostProps {
   distanceInMiles?: number;
   time: Date;
