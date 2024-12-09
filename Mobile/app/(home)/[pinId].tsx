@@ -14,6 +14,7 @@ import * as geolib from "geolib";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import * as Location from "expo-location";
 import { LocationContext } from "./_layout";
+import { metersToMilesConversionFactor } from ".";
 
 const pinService = new PinService();
 export default function PinDetail() {
@@ -79,11 +80,14 @@ export default function PinDetail() {
         <PinView
           distance={
             locationContext?.location
-              ? +(
+              ? // Gets the distance between user's current location and
+                // the pin's location, converted to miles then formatted
+                // to 1 decimal place
+                +(
                   geolib.getDistance(locationContext.location.coords, {
                     latitude: pin.latitude,
                     longitude: pin.longitude,
-                  }) * 0.000621371
+                  }) * metersToMilesConversionFactor
                 ).toFixed(1)
               : -1
           }

@@ -27,11 +27,11 @@ export default function Index() {
       }
 
       try {
-        let ret;
         // Take appropriate action depending on login/signup state
-        if (isLoggingIn) ret = await authService.login(email, password);
-        else ret = await authService.signup({ email, password });
+        if (isLoggingIn) await authService.login(email, password);
+        else await authService.signup({ email, password });
 
+        // Redirect to Home page if login success
         if (authService.isLoggedIn()) {
           setEmail("");
           setPassword("");

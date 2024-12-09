@@ -1,5 +1,5 @@
 import { View, StyleSheet, ActivityIndicator } from "react-native";
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import PinPinTextArea from "@/components/PinPinTextArea";
 import SquareButton from "@/components/SquareButton";
 import { PinService } from "@/services/PinService";
@@ -7,36 +7,29 @@ import { ICreatePin } from "@/services/PinService";
 
 import * as Location from "expo-location";
 import { router } from "expo-router";
+import { LocationContext } from "./_layout";
 
 const pinService = new PinService();
-
-export async function currentLocation() {
-  let { status } = await Location.requestForegroundPermissionsAsync();
-  if (status !== "granted") {
-    console.log("Permission to access location was denied");
-    return;
-  }
-
-  let location = await Location.getCurrentPositionAsync({});
-  return [location.coords.latitude, location.coords.longitude];
-}
 
 export default function NewPin() {
   const [pinText, setText] = useState("");
   const [creating, setCreating] = useState(false);
+  const loc = useContext(LocationContext);
+
+  // Creates the new Pin at the current location when pin button is pressed
   useEffect(() => {
     async function createPin() {
       if (creating) {
         if (pinText != "") {
-          let location = await currentLocation();
+          let location = loc?.location?.coords;
           if (location === undefined) {
             console.log("failure to get location");
             return;
           }
           let newPin: ICreatePin = {
             text: pinText,
-            latitude: location[0],
-            longitude: location[1],
+            latitude: location.latitude,
+            longitude: location.longitude,
           };
           const res = await pinService.createPin(newPin);
 
