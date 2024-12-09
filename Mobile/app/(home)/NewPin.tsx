@@ -1,9 +1,7 @@
-import { Text, View, StyleSheet, ActivityIndicator } from "react-native";
+import { View, StyleSheet, ActivityIndicator } from "react-native";
 import React, { useEffect, useState } from "react";
-import PinPinTextArea, {
-  PinPinTextAreaProps,
-} from "@/components/PinPinTextArea";
-import SquareButton, { SquareButtonIcon } from "@/components/SquareButton";
+import PinPinTextArea from "@/components/PinPinTextArea";
+import SquareButton from "@/components/SquareButton";
 import { PinService } from "@/services/PinService";
 import { ICreatePin } from "@/services/PinService";
 
@@ -89,8 +87,6 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     width: "100%",
-    // backgroundColor: 'black',
-
     marginTop: 30,
     flexDirection: "row-reverse",
   },

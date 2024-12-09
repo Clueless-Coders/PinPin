@@ -3,7 +3,7 @@ import axios from "axios";
 import { Link } from "expo-router";
 import React from "react";
 import { useState } from "react";
-import { Button, Text, View, StyleSheet, SafeAreaView } from "react-native";
+import { Button, Text, StyleSheet, SafeAreaView } from "react-native";
 
 export default function Filters() {
   const [data, setData] = useState<any>();

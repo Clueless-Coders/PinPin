@@ -1,18 +1,14 @@
-import PinPost from "@/components/PinPost";
 import { AuthService } from "@/services/AuthService";
-import { Link, Redirect, router } from "expo-router";
+import { Redirect, router } from "expo-router";
 import React from "react";
 import { useEffect, useState } from "react";
-import { Button, TextInput, View, Image, Pressable, Text } from "react-native";
+import { View, Image, Pressable, Text } from "react-native";
 import PinPinTextArea from "@/components/PinPinTextArea";
 import SquareButton from "@/components/SquareButton";
 
 export const authService = new AuthService();
 
 export default function Index() {
-  //TODO: Set up the authentication logic.
-  //This is where the logic will be implemented to swap from Login/Sign Up pages to the main app.
-  //Maybe use some kind of custom hook & context provider to help w/ global user state
   const [isLoggingIn, setIsLoggingIn] = useState(true);
   const [isProcessing, setIsProcessing] = useState(false);
   const [email, setEmail] = useState("");
@@ -25,7 +21,6 @@ export default function Index() {
         router.replace("/(home)");
       }
 
-      //if email or pw not provided, don't attempt login
       if (email.length === 0 || password.length === 0) {
         setIsProcessing(false);
         return;

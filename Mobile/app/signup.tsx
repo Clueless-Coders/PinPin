@@ -1,9 +1,8 @@
-import PinPost from "@/components/PinPost";
 import { AuthService } from "@/services/AuthService";
-import { Link, Redirect, router } from "expo-router";
+import { Link,  router } from "expo-router";
 import React from "react";
-import { useEffect, useState } from "react";
-import { Button, TextInput, View, Image } from "react-native";
+import { useState } from "react";
+import { Button, View, Image } from "react-native";
 import PinPinTextArea from "@/components/PinPinTextArea";
 
 export const authService = new AuthService();
@@ -39,8 +38,6 @@ export default function SignupScreen() {
 
     signup();
   };
-
-  //if (SignedUp) return <Redirect href={"/home"}></Redirect>;
 
   return (
     <View

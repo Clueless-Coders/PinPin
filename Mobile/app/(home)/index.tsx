@@ -22,12 +22,7 @@ import {
 } from "@/interfaces/pin.interface";
 import SquareButton from "@/components/SquareButton";
 import { router } from "expo-router";
-import Comment from "@/components/Comment";
-import Animated, {
-  useAnimatedStyle,
-  withSpring,
-  useSharedValue,
-} from "react-native-reanimated";
+import Animated, { useSharedValue } from "react-native-reanimated";
 import * as geolib from "geolib";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
@@ -114,7 +109,6 @@ export default function HomeIndex() {
       });
   }, [selectedPinIndex]);
 
-  // removed 100% snap point while nested scrolling doesnt work
   const snapPoints = useMemo(() => ["10%", "70%"], []);
 
   const renderItem = useCallback(
@@ -300,7 +294,6 @@ export default function HomeIndex() {
 const styles = StyleSheet.create({
   root: {
     flex: 1,
-    //paddingTop: 200,
   },
   buttonContainer: {
     position: "absolute",
@@ -328,7 +321,7 @@ const styles = StyleSheet.create({
     lineHeight: 20,
     padding: 5,
     color: "black",
-    width: 350, //not sure why this is stretching beyond the screen, must fix to be dynamic
+    width: 350, 
   },
   search: {
     flexDirection: "row",

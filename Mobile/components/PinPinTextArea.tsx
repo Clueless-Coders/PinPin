@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { StyleProp, StyleSheet, Text, TextInput, View } from "react-native";
+import { StyleSheet, Text, TextInput, View } from "react-native";
 
 export interface PinPinTextAreaProps {
   charsRemainingEnabled?: boolean;
