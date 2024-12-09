@@ -17,6 +17,12 @@ export class AuthGuard implements CanActivate {
     private readonly reflector: Reflector,
   ) {}
 
+  /**
+   * Validates the JWT token in the request. Sends 401 error code
+   * if the token is invalid.
+   * @param context
+   * @returns
+   */
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC, [
       context.getHandler(),

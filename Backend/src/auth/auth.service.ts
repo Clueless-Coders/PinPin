@@ -59,6 +59,11 @@ export class AuthService {
     };
   }
 
+  /**
+   * Returns a new validated JWT access token for the provided user
+   * @param user The user from the HTTP request
+   * @returns
+   */
   async refresh(user: User) {
     return {
       access_token: await this.jwtService.signAsync({

@@ -50,25 +50,19 @@ export default function PinDetail() {
     getComments();
   }, [pinId]);
 
-  useEffect(() => {
-    let cancel = false;
-    async function submit() {
-      try {
-        const res = await pinService.createComment({
-          pinID: +pinId,
-          text: commentInput,
-        });
-        setIsSubmittingComment(false);
-      } catch (e: any) {
-        console.log(e);
-      }
-      await getComments();
+  async function submit() {
+    setIsSubmittingComment(true);
+    try {
+      const res = await pinService.createComment({
+        pinID: +pinId,
+        text: commentInput,
+      });
+      setIsSubmittingComment(false);
+    } catch (e: any) {
+      console.log(e);
     }
-    submit();
-    return () => {
-      cancel = true;
-    };
-  }, [isSubmittingComment]);
+    await getComments();
+  }
 
   const flatListRef = useRef<FlatList>(null);
 
@@ -126,7 +120,7 @@ export default function PinDetail() {
         />
         <Pressable
           style={styles.submitButton}
-          onPress={() => setIsSubmittingComment(true)}
+          onPress={submit}
           disabled={isSubmittingComment}
         >
           <FontAwesomeIcon icon={faPaperPlane} size={25} />

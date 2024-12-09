@@ -28,6 +28,7 @@ export default function Index() {
 
       try {
         let ret;
+        // Take appropriate action depending on login/signup state
         if (isLoggingIn) ret = await authService.login(email, password);
         else ret = await authService.signup({ email, password });
 
@@ -100,6 +101,9 @@ export default function Index() {
         disabled={isProcessing}
       />
 
+      {
+        // Swap state between signing up or signing in
+      }
       <Pressable
         onPress={() => setIsLoggingIn(!isLoggingIn)}
         style={{
