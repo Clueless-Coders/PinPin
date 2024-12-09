@@ -1,4 +1,4 @@
-import { useCallback, useRef, useMemo } from "react";
+import { useCallback, useRef, useMemo, createContext, useContext } from "react";
 import { StyleSheet, View, Text, Platform } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import BottomSheet, {
@@ -25,6 +25,7 @@ import { router } from "expo-router";
 import Animated, { useSharedValue } from "react-native-reanimated";
 import * as geolib from "geolib";
 import { SafeAreaProvider } from "react-native-safe-area-context";
+import { LocationContext } from "./_layout";
 
 interface LocalImages {
   readablePin: number;
@@ -45,6 +46,7 @@ export default function HomeIndex() {
     router.push("/(home)/Settings");
   };
 
+  const locationContext = useContext(LocationContext);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [pins, setPins] = useState<PinLocationRangeData | undefined>();
   const [images, setImages] = useState<LocalImages | undefined>();
@@ -86,6 +88,8 @@ export default function HomeIndex() {
 
       let location = await Location.getCurrentPositionAsync({});
       setLocation(location);
+      locationContext?.setLocation(location);
+      getAllViewablePins();
       mapRef.current?.animateToRegion({
         latitude: location.coords.latitude,
         longitude: location.coords.longitude,
@@ -94,7 +98,6 @@ export default function HomeIndex() {
       });
     }
 
-    getAllViewablePins();
     getCurrentLocation();
     setImages({
       readablePin: require("@/assets/images/ReadablePin.png"),
@@ -154,6 +157,7 @@ export default function HomeIndex() {
   async function markNewVisiblePins() {
     const currLoc = await Location.getCurrentPositionAsync();
 
+    locationContext?.setLocation(currLoc);
     const newlyVisible = await axios.post<VisiblePin[]>(
       `${API_BASE_URL}/pin/visible`,
       {
