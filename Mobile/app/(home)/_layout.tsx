@@ -20,12 +20,6 @@ export default function HomeLayout() {
       <Stack>
         <Stack.Screen name="index" options={{ headerShown: false }} />
         <Stack.Screen
-          name="Filters"
-          options={{
-            header: () => <Header color="#87CEEB" />,
-          }}
-        />
-        <Stack.Screen
           name="NewPin"
           options={{
             header: () => <Header color="#FFC900" />,

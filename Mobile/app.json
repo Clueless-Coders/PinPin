@@ -1,10 +1,10 @@
 {
   "expo": {
-    "name": "pinpin",
-    "slug": "pinpin",
+    "name": "PinPin",
+    "slug": "PinPin-Preview",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/images/PinPin_Logo.png",
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
     "splash": {
@@ -15,7 +15,8 @@
     "ios": {
       "infoPlist": {
         "NSLocationWhenInUseUsageDescription": "We need your location to show location-based pins.",
-        "NSLocationAlwaysUsageDescription": "We need your location to enable background location updates for pins."
+        "NSLocationAlwaysUsageDescription": "We need your location to enable background location updates for pins.",
+        "ITSAppUsesNonExemptEncryption": false
       },
       "supportsTablet": true,
       "bundleIdentifier": "com.clueless.pinpin"
@@ -30,7 +31,11 @@
           "apiKey": "AIzaSyDaz7bRt1Pk1z-ALmXm3ipdzmHKOw47fB8"
         }
       },
-      "package": "com.clueless.pinpin"
+      "package": "com.clueless.pinpin",
+      "permissions": [
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_FINE_LOCATION"
+      ]
     },
     "web": {
       "bundler": "metro",
@@ -51,6 +56,15 @@
     ],
     "experiments": {
       "typedRoutes": true
-    }
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "c59ddd48-4b87-4922-b36a-32895dfe2386"
+      }
+    },
+    "owner": "tristand0703"
   }
 }
