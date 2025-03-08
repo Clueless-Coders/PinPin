@@ -68,6 +68,7 @@ const styles = StyleSheet.create({
     width: "100%",
     height: "100%",
     padding: 10,
+    fontFamily: "OverpassMono-Light",
   },
   shadow: {
     backgroundColor: "black",

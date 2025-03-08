@@ -224,7 +224,7 @@ export default function HomeIndex() {
 
   // Move new pin button icon based on state of bottom sheet. JANKKK :(
   const handleSheetChanges = useCallback((index: number) => {
-    setButtonOffset(index === 1 ? -585 : -75);
+    setButtonOffset(index === 1 ? -600 : -75);
   }, []);
 
   return (

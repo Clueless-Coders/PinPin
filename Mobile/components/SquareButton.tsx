@@ -70,7 +70,15 @@ export default function SquareButton({
           ]}
         >
           {text ? (
-            <Text style={{ color: "white", fontSize: 22 }}>{text}</Text>
+            <Text
+              style={{
+                color: "white",
+                fontSize: 22,
+                fontFamily: "VisbyRoundCF-Bold",
+              }}
+            >
+              {text}
+            </Text>
           ) : (
             icon && (
               <FontAwesomeIcon
