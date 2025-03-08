@@ -9,7 +9,6 @@ import {
   Text,
   KeyboardAvoidingView,
   Platform,
-  SafeAreaView,
 } from "react-native";
 import PinPinTextArea from "@/components/PinPinTextArea";
 import SquareButton from "@/components/SquareButton";
@@ -97,6 +96,7 @@ export default function Index() {
           textInputProps={{
             placeholder: "Email",
             autoCapitalize: "none",
+            inputMode: "email",
           }}
           onTextChange={(val) => setEmail(val)}
         ></PinPinTextArea>
@@ -121,6 +121,7 @@ export default function Index() {
           text={isLoggingIn ? "Login" : "Signup"}
           onPress={() => setIsProcessing(true)}
           disabled={isProcessing}
+          color={!isLoggingIn ? "#A7A6FF" : undefined}
         />
 
         {

@@ -39,7 +39,7 @@ export default function SquareButton({
 }: SquareButtonProps) {
   const buttonWidth = width ?? size;
   const buttonHeight = height ?? size;
-  const buttonColor = disabled ? "gray" : color;
+  const buttonColor = disabled ? "light-gray" : color;
 
   const handlePress = () => {
     if (!disabled) {
@@ -70,7 +70,15 @@ export default function SquareButton({
           ]}
         >
           {text ? (
-            <Text style={{ color: "white", fontSize: 22 }}>{text}</Text>
+            <Text
+              style={{
+                color: "white",
+                fontSize: 22,
+                fontFamily: "VisbyRoundCF-Bold",
+              }}
+            >
+              {text}
+            </Text>
           ) : (
             icon && (
               <FontAwesomeIcon
