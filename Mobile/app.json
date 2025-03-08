@@ -44,7 +44,15 @@
     },
     "plugins": [
       "expo-router",
-      "expo-font",
+      [
+        "expo-font",
+        {
+          "fonts": [
+            "./assets/fonts/VisbyRoundCF-Bold.otf",
+            "./assets/fonts/OverpassMono-Light.otf"
+          ]
+        }
+      ],
       [
         "expo-location",
         {

@@ -80,6 +80,7 @@ const styles = StyleSheet.create({
     borderColor: "black",
     backgroundColor: "#FAEFDF",
     position: "relative",
+    fontFamily: "OverpassMono-Light",
   },
   pinContainerHighlight: {
     padding: 3,
@@ -88,6 +89,7 @@ const styles = StyleSheet.create({
     borderColor: "black",
     backgroundColor: "#FFC900",
     position: "relative",
+    fontFamily: "OverpassMono-Light",
   },
   icon: {
     margin: 5,
@@ -113,12 +115,14 @@ const styles = StyleSheet.create({
   topText: {
     margin: 5,
     fontSize: 12,
+    fontFamily: "OverpassMono-Light",
   },
   text: {
     marginLeft: 10,
     marginBottom: 5,
     padding: 1,
     fontSize: 16,
+    fontFamily: "OverpassMono-Light",
   },
   bottom: {
     flexDirection: "row",

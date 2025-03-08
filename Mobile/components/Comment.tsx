@@ -76,12 +76,14 @@ const styles = StyleSheet.create({
   topText: {
     margin: 5,
     fontSize: 12,
+    fontFamily: "OverpassMono-Light",
   },
   text: {
     marginLeft: 10,
     marginBottom: 5,
     padding: 1,
     fontSize: 16,
+    fontFamily: "OverpassMono-Light",
   },
   bottom: {
     flexDirection: "row",
@@ -92,5 +94,6 @@ const styles = StyleSheet.create({
     marginVertical: 5,
     marginHorizontal: 1,
     fontSize: 12,
+    fontFamily: "OverpassMono-Light",
   },
 });

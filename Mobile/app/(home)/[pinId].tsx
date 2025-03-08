@@ -152,6 +152,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   textInput: {
+    fontFamily: "OverpassMono-Light",
     flex: 11,
     height: 40,
     backgroundColor: "#FFF9ED",
