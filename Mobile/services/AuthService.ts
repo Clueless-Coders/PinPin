@@ -1,6 +1,6 @@
 import { API_BASE_URL } from "@/environment";
 import { User } from "@/interfaces/user.interface";
-import axios from "axios";
+import axios, { AxiosError, AxiosResponse } from "axios";
 import { router } from "expo-router";
 import { jwtDecode } from "jwt-decode";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -44,7 +44,7 @@ export class AuthService {
     });
 
     axios.interceptors.response.use((value) => {
-      if (value.status === 401) router.replace("/");
+      if (value.status === 401) console.log("unauthorized");
       return value;
     });
   }
@@ -115,8 +115,7 @@ export class AuthService {
       const loginRes = await this.login(newUser.email, newUser.password);
       return account;
     } catch (e: any) {
-      console.log("failed creating user account ", e);
-      throw new Error(e);
+      throw new Error(e.response.data.message);
     }
   }
 
@@ -144,7 +143,7 @@ export class AuthService {
       //Convert expiration time to ms then calc time to expiration
       this.scheduleNextRefresh(payload.exp);
     } catch (e: any) {
-      console.log(e);
+      throw new Error(e.response.data.message);
     }
 
     if (rememberMe && this.tokens?.refresh_token)
