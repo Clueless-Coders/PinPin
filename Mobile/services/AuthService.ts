@@ -3,6 +3,7 @@ import { User } from "@/interfaces/user.interface";
 import axios from "axios";
 import { router } from "expo-router";
 import { jwtDecode } from "jwt-decode";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export interface ITokens {
   access_token: string;
@@ -16,10 +17,6 @@ export interface IJWTPayload {
   exp: number;
 }
 
-export interface user {
-  email: string;
-  password: string;
-}
 export interface Account {
   email: string;
   password: string;
@@ -28,6 +25,8 @@ export interface Account {
 export class AuthService {
   private tokens?: ITokens;
   private currUser?: User;
+
+  private authChangeListeners: (((user?: User) => void) | undefined)[] = [];
 
   constructor() {
     //Set up axios to intercept each HTTP message
@@ -50,6 +49,57 @@ export class AuthService {
     });
   }
 
+  callAuthChangeListeners() {
+    for (const fun of this.authChangeListeners) if (fun) fun(this.currUser);
+  }
+
+  addListener(callback: (user?: User) => void): number {
+    this.authChangeListeners.push(callback);
+    return this.authChangeListeners.length - 1;
+  }
+
+  removeListener(id: number): boolean {
+    if (id < 0 || id > this.authChangeListeners.length) return false;
+    this.authChangeListeners[id] = undefined;
+    return true;
+  }
+
+  async restoreSavedRefreshToken(): Promise<string | null> {
+    const data = await AsyncStorage.getItem("token");
+    if (!data) return null;
+
+    this.tokens = { refresh_token: data, access_token: "" };
+    return data;
+  }
+
+  async removeSavedToken() {
+    await AsyncStorage.removeItem("token");
+  }
+
+  async saveRefreshToken(token: string) {
+    await AsyncStorage.setItem("token", token);
+  }
+
+  async logout() {
+    this.currUser = undefined;
+    this.tokens = undefined;
+
+    this.removeSavedToken();
+    this.callAuthChangeListeners();
+  }
+
+  async loginUsingSavedToken(): Promise<boolean> {
+    await this.restoreSavedRefreshToken();
+    if (!this.tokens?.refresh_token) return false;
+
+    console.log(jwtDecode(this.tokens.refresh_token));
+    console.log(this.tokens.refresh_token);
+    await this.refreshToken();
+    this.callAuthChangeListeners();
+
+    return true;
+  }
+
   /**
    * Logs in the user with the given email and password. Automatically stores
    * access tokens for subsequent requests.
@@ -70,7 +120,11 @@ export class AuthService {
     }
   }
 
-  async login(email: string, password: string): Promise<User | undefined> {
+  async login(
+    email: string,
+    password: string,
+    rememberMe: boolean = false
+  ): Promise<User | undefined> {
     try {
       const res = await axios.post<ITokens>(`${API_BASE_URL}/auth/signin`, {
         email,
@@ -89,12 +143,15 @@ export class AuthService {
 
       //Convert expiration time to ms then calc time to expiration
       this.scheduleNextRefresh(payload.exp);
-
-      return this.currUser;
     } catch (e: any) {
       console.log(e);
-      return;
     }
+
+    if (rememberMe && this.tokens?.refresh_token)
+      this.saveRefreshToken(this.tokens.refresh_token);
+
+    this.callAuthChangeListeners();
+    return this.currUser;
   }
 
   isLoggedIn() {
@@ -116,6 +173,10 @@ export class AuthService {
       this.tokens.access_token = accessToken;
 
       const payload = jwtDecode<IJWTPayload>(this.tokens.access_token);
+      this.currUser = {
+        email: payload.email as string,
+        id: payload.id as number,
+      };
 
       this.scheduleNextRefresh(payload.exp);
     } catch (e: any) {

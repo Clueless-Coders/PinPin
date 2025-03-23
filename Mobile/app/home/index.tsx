@@ -40,11 +40,11 @@ export default function HomeIndex() {
   );
 
   const handlePinPress = () => {
-    router.push("/(home)/NewPin");
+    router.push("./NewPin");
   };
 
   const handleSettingsPress = () => {
-    router.push("/(home)/Settings");
+    router.push("/home/Settings");
   };
 
   const locationContext = useContext(LocationContext);
