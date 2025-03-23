@@ -1,6 +1,7 @@
 import SettingsOptions from "@/components/SettingsOptions";
 import React from "react";
 import { SafeAreaView, StyleSheet, View } from "react-native";
+import { authService } from "../_layout";
 
 export default function Settings() {
   return (
@@ -10,7 +11,13 @@ export default function Settings() {
         <SettingsOptions text="Password and Email" icon="shield" />
         <SettingsOptions text="Privacy Policy" icon="lock" />
         <SettingsOptions text="Support" icon="user" />
-        <SettingsOptions text="Sign Out" icon="signOut" />
+        <SettingsOptions
+          text="Sign Out"
+          icon="signOut"
+          onPress={() => {
+            authService.logout();
+          }}
+        />
         <SettingsOptions text="Contact Us" icon="envelope" />
       </View>
 

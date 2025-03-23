@@ -1,4 +1,3 @@
-import { AuthService } from "@/services/AuthService";
 import { Redirect, router } from "expo-router";
 import React from "react";
 import { useEffect, useState } from "react";
@@ -12,8 +11,7 @@ import {
 } from "react-native";
 import PinPinTextArea from "@/components/PinPinTextArea";
 import SquareButton from "@/components/SquareButton";
-
-export const authService = new AuthService();
+import { authService } from "./_layout";
 
 export default function Index() {
   const [isLoggingIn, setIsLoggingIn] = useState(true);
@@ -24,10 +22,6 @@ export default function Index() {
 
   useEffect(() => {
     async function login() {
-      if (authService.isLoggedIn()) {
-        router.replace("/(home)");
-      }
-
       if (email.length === 0 || password.length === 0) {
         setIsProcessing(false);
         return;
@@ -35,7 +29,7 @@ export default function Index() {
 
       try {
         // Take appropriate action depending on login/signup state
-        if (isLoggingIn) await authService.login(email, password);
+        if (isLoggingIn) await authService.login(email, password, true);
         else await authService.signup({ email, password });
 
         // Redirect to Home page if login success
@@ -53,7 +47,29 @@ export default function Index() {
     login();
   }, [isProcessing]);
 
-  if (loggedIn) return <Redirect href={"/home/"}></Redirect>;
+  useEffect(() => {
+    const id = authService.addListener((user) => {
+      if (user) {
+        setLoggedIn(true);
+        console.log("Logged in!");
+      }
+    });
+
+    authService.loginUsingSavedToken();
+
+    return () => {
+      authService.removeListener(id);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (loggedIn) {
+      console.log("going home");
+      router.push("/home/");
+    }
+  }, [loggedIn]);
+
+  console.log("render");
 
   return (
     <KeyboardAvoidingView
