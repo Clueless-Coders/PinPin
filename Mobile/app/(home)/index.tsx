@@ -62,6 +62,7 @@ export default function HomeIndex() {
   async function getAllViewablePins() {
     const pins = await axios.get<VisiblePin[]>(`${API_BASE_URL}/pin/visible`);
     let data = pins.data;
+    //console.log(location);
     if (location) {
       const distanceAdded = data.map((pin) => {
         // Add current distance data to pins provided
@@ -83,6 +84,10 @@ export default function HomeIndex() {
     setAllViewablePins(data);
   }
 
+  useEffect(() => {
+    getAllViewablePins();
+  }, [location]);
+
   // Asks user for location permissions then renders the map if enabled
   useEffect(() => {
     async function getCurrentLocation() {
@@ -92,13 +97,16 @@ export default function HomeIndex() {
         return;
       }
 
-      let location = await Location.getCurrentPositionAsync({});
-      setLocation(location);
-      locationContext?.setLocation(location);
-      getAllViewablePins();
+      let newLocation = await Location.getCurrentPositionAsync({});
+
+      if (!newLocation) return;
+
+      setLocation(newLocation);
+      locationContext?.setLocation(newLocation);
+
       mapRef.current?.animateToRegion({
-        latitude: location.coords.latitude,
-        longitude: location.coords.longitude,
+        latitude: newLocation.coords.latitude,
+        longitude: newLocation.coords.longitude,
         latitudeDelta: 0.01,
         longitudeDelta: 0.01,
       });
@@ -180,7 +188,9 @@ export default function HomeIndex() {
     if (newlyVisible.data.length !== 0) getAllViewablePins();
 
     setLocation(currLoc);
+    console.log(location);
     await getAllViewablePins();
+    console.log(location);
     await getCurrentBounds();
   }
 
