@@ -12,6 +12,8 @@ import {
 import PinPinTextArea from "@/components/PinPinTextArea";
 import SquareButton from "@/components/SquareButton";
 import { authService } from "./_layout";
+import Toastable, { showToastable } from "react-native-toastable";
+import Checkbox from "expo-checkbox";
 
 export default function Index() {
   const [isLoggingIn, setIsLoggingIn] = useState(true);
@@ -19,39 +21,38 @@ export default function Index() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loggedIn, setLoggedIn] = useState(false);
+  const [remember, setRemember] = useState(false);
 
-  useEffect(() => {
-    async function login() {
-      if (email.length === 0 || password.length === 0) {
-        setIsProcessing(false);
-        return;
-      }
-
-      try {
-        // Take appropriate action depending on login/signup state
-        if (isLoggingIn) await authService.login(email, password, true);
-        else await authService.signup({ email, password });
-
-        // Redirect to Home page if login success
-        if (authService.isLoggedIn()) {
-          setEmail("");
-          setPassword("");
-          setLoggedIn(true);
-        }
-      } catch (e) {
-        console.log(e);
-      }
+  async function login() {
+    setIsProcessing(true);
+    if (email.length === 0 || password.length === 0) {
       setIsProcessing(false);
+      return;
     }
 
-    login();
-  }, [isProcessing]);
+    // Take appropriate action depending on login/signup state
+    try {
+      if (isLoggingIn) await authService.login(email, password, remember);
+      else await authService.signup({ email, password });
+    } catch (e: any) {
+      console.log(e);
+      showToastable({ message: e.message, status: "danger" });
+    }
+
+    // Redirect to Home page if login success
+    if (authService.isLoggedIn()) {
+      setEmail("");
+      setPassword("");
+      setLoggedIn(true);
+    }
+
+    setIsProcessing(false);
+  }
 
   useEffect(() => {
     const id = authService.addListener((user) => {
       if (user) {
         setLoggedIn(true);
-        console.log("Logged in!");
       }
     });
 
@@ -64,12 +65,9 @@ export default function Index() {
 
   useEffect(() => {
     if (loggedIn) {
-      console.log("going home");
       router.push("/home/");
     }
   }, [loggedIn]);
-
-  console.log("render");
 
   return (
     <KeyboardAvoidingView
@@ -78,6 +76,14 @@ export default function Index() {
         backgroundColor: "#FFF9ED",
       }}
     >
+      <Toastable
+        statusMap={{
+          success: "green",
+          danger: "red",
+          warning: "yellow",
+          info: "blue",
+        }}
+      ></Toastable>
       <View
         style={{
           justifyContent: "flex-start",
@@ -130,12 +136,35 @@ export default function Index() {
           }}
           onTextChange={(val) => setPassword(val)}
         ></PinPinTextArea>
-
+        <View
+          style={{
+            display: "flex",
+            flexDirection: "row",
+            justifyContent: "space-evenly",
+            alignItems: "center",
+            paddingBottom: 10,
+            width: "50%",
+          }}
+        >
+          <Checkbox
+            value={remember}
+            onValueChange={() => setRemember(!remember)}
+            disabled={isProcessing}
+          />
+          <Text
+            style={{
+              fontFamily: "VisbyRoundCF-Bold",
+              fontSize: 20,
+            }}
+          >
+            Remember me
+          </Text>
+        </View>
         <SquareButton
           width={180}
           height={60}
           text={isLoggingIn ? "Login" : "Signup"}
-          onPress={() => setIsProcessing(true)}
+          onPress={() => login()}
           disabled={isProcessing}
           color={!isLoggingIn ? "#A7A6FF" : undefined}
         />
