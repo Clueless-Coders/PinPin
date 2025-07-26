@@ -1,0 +1,15 @@
+FROM node:24-alpine
+
+RUN apk update && apk upgrade && apk add openssl
+
+WORKDIR /pinpin
+
+COPY --chown=node:node . .
+
+RUN npm i 
+
+RUN npm run build
+
+USER node
+
+CMD [ "node", "dist/main.js"]

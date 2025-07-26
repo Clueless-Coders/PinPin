@@ -40,7 +40,7 @@ export default function HomeIndex() {
   );
 
   const handlePinPress = () => {
-    router.push("./NewPin");
+    router.push("/home/NewPin");
   };
 
   const handleSettingsPress = () => {
