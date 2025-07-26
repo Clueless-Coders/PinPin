@@ -22,7 +22,7 @@ import {
 } from "@/interfaces/pin.interface";
 import SquareButton from "@/components/SquareButton";
 import { router } from "expo-router";
-import Animated, { useSharedValue } from "react-native-reanimated";
+import Animated, { isSharedValue, useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";
 import * as geolib from "geolib";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { LocationContext } from "./_layout";
@@ -47,6 +47,7 @@ export default function HomeIndex() {
     router.push("/home/Settings");
   };
 
+  const bottomSheetSharedValue = useSharedValue(0)
   const locationContext = useContext(LocationContext);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [pins, setPins] = useState<PinLocationRangeData | undefined>();
@@ -229,13 +230,11 @@ export default function HomeIndex() {
     );
   }
 
-  const [buttonOffset, setButtonOffset] = useState(0);
-  const buttonPosition = useSharedValue({ x: 0, y: 0 });
-
-  // Move new pin button icon based on state of bottom sheet. JANKKK :(
-  const handleSheetChanges = useCallback((index: number) => {
-    setButtonOffset(index === 1 ? -600 : -75);
-  }, []);
+  const pinButtonAnimatedStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{ translateY: bottomSheetSharedValue.get() - 60 }]
+    }
+  })
 
   return (
     <SafeAreaProvider style={{ position: "relative" }}>
@@ -261,10 +260,10 @@ export default function HomeIndex() {
           {pins?.visible.map(renderMarker) ?? <></>}
         </MapView>
 
-        <View
+        <Animated.View
           style={[
             styles.buttonContainer,
-            { transform: [{ translateY: buttonOffset }] },
+            pinButtonAnimatedStyle
           ]}
         >
           <SquareButton
@@ -272,16 +271,16 @@ export default function HomeIndex() {
             color={"#A7A6FF"}
             onPress={handlePinPress}
           />
-        </View>
+        </Animated.View>
 
         <BottomSheet
           ref={sheetRef}
           snapPoints={snapPoints}
-          onChange={handleSheetChanges}
           enableDynamicSizing={false}
           enableHandlePanningGesture={true}
           enableOverDrag={false}
           backgroundStyle={{ backgroundColor: "#FFF9ED" }}
+          animatedPosition={bottomSheetSharedValue}
           style={{
             backgroundColor: "#FFF9ED",
             borderRadius: 10,
@@ -325,7 +324,6 @@ const styles = StyleSheet.create({
   },
   buttonContainer: {
     position: "absolute",
-    bottom: 20,
     right: 15,
   },
   topRightButton: {

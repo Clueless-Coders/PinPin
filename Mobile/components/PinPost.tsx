@@ -32,7 +32,7 @@ export default function PinPost({
   const minutes = timeSincePassed.getUTCMinutes();
 
   return (
-    <Pressable onPress={() => router.push(`/${pinId}`)}>
+    <Pressable onPress={() => router.push(`/home/${pinId}`)}>
       <View style={{ marginHorizontal: 10 }}>
         <View style={styles.shadow} />
         <View
