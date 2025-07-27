@@ -15,5 +15,11 @@ services:
   #   env_file: docker.env
   #   ports:
   #     - 3000:3000
+  inbucket:
+    image: inbucket/inbucket:main
+    restart: always
+    ports:
+      - ${INBUCKET_UI_PORT}:9000
+      - ${INBUCKET_SMTP_PORT}:2500
 volumes:
   PINPIN_DB:

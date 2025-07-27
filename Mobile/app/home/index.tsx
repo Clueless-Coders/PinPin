@@ -1,14 +1,11 @@
-import { useCallback, useRef, useMemo, createContext, useContext } from "react";
+import { useCallback, useRef, useMemo, useContext } from "react";
 import { StyleSheet, View, Text, Platform } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import BottomSheet, {
   BottomSheetFlatList,
   BottomSheetFlatListMethods,
-  BottomSheetTextInput,
 } from "@gorhom/bottom-sheet";
 import PinPost from "@/components/PinPost";
-import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
-import { faFilter } from "@fortawesome/free-solid-svg-icons/faFilter";
 import React from "react";
 import { useState, useEffect } from "react";
 import MapView, { Callout, Marker, MarkerPressEvent } from "react-native-maps";
@@ -22,10 +19,11 @@ import {
 } from "@/interfaces/pin.interface";
 import SquareButton from "@/components/SquareButton";
 import { router } from "expo-router";
-import Animated, { isSharedValue, useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";
+import Animated, { useAnimatedStyle, useSharedValue } from "react-native-reanimated";
 import * as geolib from "geolib";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { LocationContext } from "./_layout";
+import Toastable, { showToastable } from "react-native-toastable";
 
 export const metersToMilesConversionFactor = 0.000621371;
 
@@ -49,7 +47,6 @@ export default function HomeIndex() {
 
   const bottomSheetSharedValue = useSharedValue(0)
   const locationContext = useContext(LocationContext);
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [pins, setPins] = useState<PinLocationRangeData | undefined>();
   const [images, setImages] = useState<LocalImages | undefined>();
   const [selectedPinIndex, setSelectedPinIndex] = useState<number>(0);
@@ -94,7 +91,10 @@ export default function HomeIndex() {
     async function getCurrentLocation() {
       let { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== "granted") {
-        setErrorMsg("Permission to access location was denied");
+        showToastable({
+          message: "Permission to access location was denied",
+          status: "danger"
+        })
         return;
       }
 
@@ -239,6 +239,14 @@ export default function HomeIndex() {
   return (
     <SafeAreaProvider style={{ position: "relative" }}>
       <GestureHandlerRootView style={styles.root}>
+        <Toastable
+          statusMap={{
+            success: "green",
+            danger: "red",
+            warning: "yellow",
+            info: "blue",
+          }}
+        ></Toastable>
         <View style={styles.topRightButton}>
           <SquareButton
             onPress={handleSettingsPress}
@@ -297,11 +305,9 @@ export default function HomeIndex() {
           handleIndicatorStyle={{ backgroundColor: "#000000" }}
         >
           <View style={styles.search}>
-            <BottomSheetTextInput
-              style={styles.input}
-              placeholder="Search Pins"
-            />
-            <FontAwesomeIcon icon={faFilter} />
+            <Text style={{ fontFamily: 'OverpassMono-Light', fontSize: 18 }}>
+              Your local pins 📌
+            </Text>
           </View>
           <BottomSheetFlatList
             data={allViewablePins}
