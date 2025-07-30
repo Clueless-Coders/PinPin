@@ -1,8 +1,13 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { User } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
 import { UserCreateDTO } from './dto/user.dto';
+import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 
 @Injectable()
 export class UsersService {
@@ -20,6 +25,10 @@ export class UsersService {
       return { ...res, pwHash: undefined };
     } catch (e) {
       console.log(e);
+      if (e instanceof PrismaClientKnownRequestError) {
+        if (e.code === 'P2002')
+          throw new BadRequestException('User already exists.');
+      }
       throw new InternalServerErrorException(e.message);
     }
   }

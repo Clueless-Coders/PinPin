@@ -1,14 +1,11 @@
-import { useCallback, useRef, useMemo, createContext, useContext } from "react";
+import { useCallback, useRef, useMemo, useContext } from "react";
 import { StyleSheet, View, Text, Platform } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import BottomSheet, {
   BottomSheetFlatList,
   BottomSheetFlatListMethods,
-  BottomSheetTextInput,
 } from "@gorhom/bottom-sheet";
 import PinPost from "@/components/PinPost";
-import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
-import { faFilter } from "@fortawesome/free-solid-svg-icons/faFilter";
 import React from "react";
 import { useState, useEffect } from "react";
 import MapView, { Callout, Marker, MarkerPressEvent } from "react-native-maps";
@@ -22,10 +19,11 @@ import {
 } from "@/interfaces/pin.interface";
 import SquareButton from "@/components/SquareButton";
 import { router } from "expo-router";
-import Animated, { useSharedValue } from "react-native-reanimated";
+import Animated, { useAnimatedStyle, useSharedValue } from "react-native-reanimated";
 import * as geolib from "geolib";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { LocationContext } from "./_layout";
+import Toastable, { showToastable } from "react-native-toastable";
 
 export const metersToMilesConversionFactor = 0.000621371;
 
@@ -40,15 +38,15 @@ export default function HomeIndex() {
   );
 
   const handlePinPress = () => {
-    router.push("./NewPin");
+    router.push("/home/NewPin");
   };
 
   const handleSettingsPress = () => {
     router.push("/home/Settings");
   };
 
+  const bottomSheetSharedValue = useSharedValue(0)
   const locationContext = useContext(LocationContext);
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [pins, setPins] = useState<PinLocationRangeData | undefined>();
   const [images, setImages] = useState<LocalImages | undefined>();
   const [selectedPinIndex, setSelectedPinIndex] = useState<number>(0);
@@ -93,7 +91,10 @@ export default function HomeIndex() {
     async function getCurrentLocation() {
       let { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== "granted") {
-        setErrorMsg("Permission to access location was denied");
+        showToastable({
+          message: "Permission to access location was denied",
+          status: "danger"
+        })
         return;
       }
 
@@ -229,17 +230,23 @@ export default function HomeIndex() {
     );
   }
 
-  const [buttonOffset, setButtonOffset] = useState(0);
-  const buttonPosition = useSharedValue({ x: 0, y: 0 });
-
-  // Move new pin button icon based on state of bottom sheet. JANKKK :(
-  const handleSheetChanges = useCallback((index: number) => {
-    setButtonOffset(index === 1 ? -600 : -75);
-  }, []);
+  const pinButtonAnimatedStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{ translateY: bottomSheetSharedValue.get() - 60 }]
+    }
+  })
 
   return (
     <SafeAreaProvider style={{ position: "relative" }}>
       <GestureHandlerRootView style={styles.root}>
+        <Toastable
+          statusMap={{
+            success: "green",
+            danger: "red",
+            warning: "yellow",
+            info: "blue",
+          }}
+        ></Toastable>
         <View style={styles.topRightButton}>
           <SquareButton
             onPress={handleSettingsPress}
@@ -261,10 +268,10 @@ export default function HomeIndex() {
           {pins?.visible.map(renderMarker) ?? <></>}
         </MapView>
 
-        <View
+        <Animated.View
           style={[
             styles.buttonContainer,
-            { transform: [{ translateY: buttonOffset }] },
+            pinButtonAnimatedStyle
           ]}
         >
           <SquareButton
@@ -272,16 +279,16 @@ export default function HomeIndex() {
             color={"#A7A6FF"}
             onPress={handlePinPress}
           />
-        </View>
+        </Animated.View>
 
         <BottomSheet
           ref={sheetRef}
           snapPoints={snapPoints}
-          onChange={handleSheetChanges}
           enableDynamicSizing={false}
           enableHandlePanningGesture={true}
           enableOverDrag={false}
           backgroundStyle={{ backgroundColor: "#FFF9ED" }}
+          animatedPosition={bottomSheetSharedValue}
           style={{
             backgroundColor: "#FFF9ED",
             borderRadius: 10,
@@ -298,11 +305,9 @@ export default function HomeIndex() {
           handleIndicatorStyle={{ backgroundColor: "#000000" }}
         >
           <View style={styles.search}>
-            <BottomSheetTextInput
-              style={styles.input}
-              placeholder="Search Pins"
-            />
-            <FontAwesomeIcon icon={faFilter} />
+            <Text style={{ fontFamily: 'OverpassMono-Light', fontSize: 18 }}>
+              Your local pins 📌
+            </Text>
           </View>
           <BottomSheetFlatList
             data={allViewablePins}
@@ -325,7 +330,6 @@ const styles = StyleSheet.create({
   },
   buttonContainer: {
     position: "absolute",
-    bottom: 20,
     right: 15,
   },
   topRightButton: {

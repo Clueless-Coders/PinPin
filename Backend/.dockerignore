@@ -1,0 +1,9 @@
+**/node_modules
+/packages/client
+**/dist
+**/.env
+.git
+**/dumps
+**/out.tar
+dockerfile
+readme.md
