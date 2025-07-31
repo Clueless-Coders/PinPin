@@ -6,8 +6,6 @@ import {
 import { User } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
-import { UserCreateDTO } from './dto/user.dto';
-import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 
 @Injectable()
 export class UsersService {
@@ -24,28 +22,31 @@ export class UsersService {
 
       return { ...res, pwHash: undefined };
     } catch (e) {
-      console.log(e);
-      if (e instanceof PrismaClientKnownRequestError) {
-        if (e.code === 'P2002')
-          throw new BadRequestException('User already exists.');
-      }
-      throw new InternalServerErrorException(e.message);
+      PrismaService.handlePrismaError(e, 'User', 'email: ' + email);
     }
   }
 
   async getUserByEmail(email: string): Promise<User> {
-    return await this.primsaService.user.findFirstOrThrow({
-      where: {
-        email,
-      },
-    });
+    try {
+      return await this.primsaService.user.findFirstOrThrow({
+        where: {
+          email,
+        },
+      });
+    } catch (e: any) {
+      PrismaService.handlePrismaError(e, 'User', 'email: ' + email);
+    }
   }
 
   async getUserById(id: number): Promise<User> {
-    return await this.primsaService.user.findFirstOrThrow({
-      where: {
-        id,
-      },
-    });
+    try {
+      return await this.primsaService.user.findFirstOrThrow({
+        where: {
+          id,
+        },
+      });
+    } catch (e: any) {
+      PrismaService.handlePrismaError(e, 'User', 'userId: ' + id);
+    }
   }
 }

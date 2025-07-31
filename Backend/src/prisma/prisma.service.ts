@@ -20,6 +20,7 @@ export class PrismaService
   }
 
   static handlePrismaError(e: any, entityName: string, entityKey: string) {
+    console.error(e);
     if (e instanceof PrismaClientKnownRequestError) {
       if (e.code === 'P2002') {
         throw new DuplicateEntityException(

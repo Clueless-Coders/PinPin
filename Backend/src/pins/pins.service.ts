@@ -276,8 +276,7 @@ export class PinsService {
       });
       return res;
     } catch (e: any) {
-      console.log(e);
-      throw new InternalServerErrorException('Database query failed ', e);
+      PrismaService.handlePrismaError(e, 'Pin', '');
     }
   }
 
@@ -298,8 +297,7 @@ export class PinsService {
       });
       return res.map((pin) => pin.pin);
     } catch (e: any) {
-      console.log(e);
-      throw new InternalServerErrorException('Database query failed', e);
+      PrismaService.handlePrismaError(e, 'Pin', 'userId: ' + userId);
     }
   }
 
@@ -342,8 +340,7 @@ export class PinsService {
         userID,
       );
     } catch (e: any) {
-      console.log(e);
-      throw new InternalServerErrorException('Database query failed', e);
+      PrismaService.handlePrismaError(e, 'Pin', '' + userID);
     }
 
     //Creates viewable relationship for pins to users...
@@ -365,12 +362,12 @@ export class PinsService {
     return pinsToMakeVisible;
   }
 
-  async createComment(CommentDTO: CreateCommentDTO, req: Request) {
+  async createComment(CommentDTO: CreateCommentDTO, userID: number) {
     try {
       return await this.databaseService.comment.create({
         data: {
           pinID: CommentDTO.pinID,
-          userID: req['user'].id,
+          userID,
           text: CommentDTO.text,
           upvotes: 0,
           downvotes: 0,
@@ -378,7 +375,7 @@ export class PinsService {
       });
     } catch (e) {
       console.log(e);
-      throw new InternalServerErrorException('Comment create failed. ', e);
+      PrismaService.handlePrismaError(e, 'Pin', 'userId: ' + userID);
     }
   }
 
@@ -391,7 +388,7 @@ export class PinsService {
       });
       return res;
     } catch (e) {
-      throw new InternalServerErrorException('Comment create failed. ', e);
+      PrismaService.handlePrismaError(e, 'Commnet', 'pinId' + pinID);
     }
   }
 
@@ -403,7 +400,7 @@ export class PinsService {
         },
       });
     } catch (e) {
-      throw new InternalServerErrorException('Comment create failed. ', e);
+      PrismaService.handlePrismaError(e, 'Commnet', 'commentId' + commentID);
     }
   }
 }

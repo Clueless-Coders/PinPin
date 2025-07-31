@@ -79,9 +79,9 @@ export class PinsController {
   async updatePin(
     @Param('id') id: String,
     @Body() updatePinDTO: UpdatePinDTO,
-    @Req() req: Request,
+    @Req() { user },
   ) {
-    return await this.pinsService.updatePin(+id, updatePinDTO, req);
+    return await this.pinsService.updatePin(+id, updatePinDTO, user.id);
   }
 
   //change delete to check if user is deleting their own posts
@@ -91,11 +91,8 @@ export class PinsController {
   }
 
   @Post('comments')
-  async postComment(
-    @Body() commentDTO: CreateCommentDTO,
-    @Req() request: Request,
-  ) {
-    return await this.pinsService.createComment(commentDTO, request);
+  async postComment(@Body() commentDTO: CreateCommentDTO, @Req() { user }) {
+    return await this.pinsService.createComment(commentDTO, user.id);
   }
 
   @Get('comments/:id')
