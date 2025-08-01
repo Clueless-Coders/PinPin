@@ -4,7 +4,7 @@ import {
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
-import { Pin } from '@prisma/client';
+import { Pin, Prisma } from '@prisma/client';
 import { CreatePinDTO, UpdatePinDTO, CreateCommentDTO } from './dto/pins.dto';
 import { Request } from 'express';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -45,8 +45,7 @@ export class PinsService {
         },
       });
     } catch (e) {
-      console.log(e);
-      throw new InternalServerErrorException('DB call failed');
+      PrismaService.handlePrismaError(e, 'Pin', 'pinId: ' + pinID);
     }
 
     if (!res)
@@ -61,12 +60,16 @@ export class PinsService {
     if (currUser.id !== pinToEdit.userID)
       throw new ForbiddenException('User can only edit their own pin');
 
-    return this.databaseService.pin.update({
-      where: {
-        id: pinID,
-      },
-      data: updatePinDTO,
-    });
+    try {
+      return this.databaseService.pin.update({
+        where: {
+          id: pinID,
+        },
+        data: updatePinDTO,
+      });
+    } catch (e: any) {
+      PrismaService.handlePrismaError(e, 'Pin', 'pinId' + pinID);
+    }
   }
 
   async patchUpvote(pinID: number, increment: number) {
@@ -98,12 +101,16 @@ export class PinsService {
       where: { pinId: pinID },
     });
 
-    return await this.databaseService.pin.delete({
-      where: {
-        id: pinID,
-        userID: currUser.id,
-      },
-    });
+    try {
+      return await this.databaseService.pin.delete({
+        where: {
+          id: pinID,
+          userID: currUser.id,
+        },
+      });
+    } catch (e: any) {
+      PrismaService.handlePrismaError(e, 'Pin', 'pinID: ' + pinID);
+    }
   }
 
   /**
@@ -228,8 +235,7 @@ export class PinsService {
       const mut = res.map((invisPin) => ({ ...invisPin, viewable: false }));
       return mut;
     } catch (e: any) {
-      console.log(e);
-      throw new InternalServerErrorException('DB call failed ', e);
+      PrismaService.handlePrismaError(e, 'Pin', 'location');
     }
   }
 
@@ -355,8 +361,7 @@ export class PinsService {
         data: viewables,
       });
     } catch (e: any) {
-      console.log(e);
-      throw new InternalServerErrorException('Marking Pins visible failed', e);
+      PrismaService.handlePrismaError(e, 'Pin', 'location');
     }
 
     return pinsToMakeVisible;
@@ -374,7 +379,6 @@ export class PinsService {
         },
       });
     } catch (e) {
-      console.log(e);
       PrismaService.handlePrismaError(e, 'Pin', 'userId: ' + userID);
     }
   }
