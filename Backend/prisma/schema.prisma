@@ -20,6 +20,9 @@ model User {
   comments Comment[]
   pins     Pin[]
   Viewable Viewable[]
+  Vote     PinVote[]
+
+  CommentVote CommentVote[]
 }
 
 model Viewable {
@@ -31,13 +34,31 @@ model Viewable {
   @@id([userId, pinId])
 }
 
+model PinVote {
+  value  Int
+  user   User @relation(fields: [userId], references: [id])
+  userId Int
+  pin    Pin  @relation(fields: [pinId], references: [id])
+  pinId  Int
+
+  @@id([userId, pinId])
+}
+
+model CommentVote {
+  value     Int
+  user      User    @relation(fields: [userId], references: [id])
+  userId    Int
+  comment   Comment @relation(fields: [commentId], references: [id])
+  commentId Int
+
+  @@id([userId, commentId])
+}
+
 model Pin {
   id        Int        @id @default(autoincrement())
   user      User       @relation(fields: [userID], references: [id])
   userID    Int
   text      String     @db.VarChar(300)
-  upvotes   Int
-  downvotes Int
   imageURL  String?
   longitude Float
   latitude  Float
@@ -45,6 +66,7 @@ model Pin {
   updatedAt DateTime   @updatedAt
   comments  Comment[]
   Viewable  Viewable[]
+  Vote      PinVote[]
 }
 
 model Comment {
@@ -54,8 +76,8 @@ model Comment {
   pinID     Int
   pin       Pin      @relation(fields: [pinID], references: [id])
   text      String   @db.VarChar(300)
-  upvotes   Int
-  downvotes Int
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  CommentVote CommentVote[]
 }

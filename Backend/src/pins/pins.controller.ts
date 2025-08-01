@@ -65,12 +65,12 @@ export class PinsController {
     return await this.pinsService.markVisibleByLocation(loc, user.id);
   }
 
-  @Post(':id/upvotes')
+  @Post(':id/upvote')
   patchUpvote(@Param('id') id: String, @Body() increment: UpdateVotes) {
     return 'not implemented yet :(';
   }
 
-  @Post(':id/downvotes')
+  @Post(':id/downvote')
   patchDownvote(@Param('id') id: String, @Body() increment: UpdateVotes) {
     return 'not implemented yet :(';
   }

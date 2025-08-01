@@ -13,10 +13,14 @@ import {
   InvisiblePin,
   VisiblePin,
 } from 'src/interfaces/invisible-pin.interface';
+import { UsersService } from 'src/users/users.service';
 
 @Injectable()
 export class PinsService {
-  constructor(private readonly databaseService: PrismaService) {}
+  constructor(
+    private readonly databaseService: PrismaService,
+    private readonly userService: UsersService,
+  ) {}
 
   async create(createPin: CreatePinDTO, req: Request) {
     try {
@@ -27,8 +31,6 @@ export class PinsService {
           imageURL: createPin.imageURL, // This will be optional
           longitude: createPin.longitude,
           latitude: createPin.latitude,
-          downvotes: 0,
-          upvotes: 0,
         },
       });
     } catch (e) {
@@ -72,22 +74,104 @@ export class PinsService {
     }
   }
 
-  async patchUpvote(pinID: number, increment: number) {
-    // return this.databaseService.pin.update({
-    //     where: {
-    //         id: pinID,
-    //     },
-    //     data: { upvotes: { increment: increment } },
-    // });
+  /**
+   * Counts the total number of upvotes/downvotes on the pin referenced by ID
+   * @param id
+   * @returns
+   */
+  async getPinPoints(id: number): Promise<number> {
+    try {
+      const res = await this.databaseService.pinVote.aggregate({
+        _sum: {
+          value: true,
+        },
+        where: {
+          pinId: id,
+        },
+      });
+      return res._sum.value;
+    } catch (e: any) {
+      PrismaService.handlePrismaError(e, 'Pin', 'id: ' + id);
+    }
   }
 
-  async patchDownvote(pinID: number, increment: number) {
-    // return this.databaseService.pin.update({
-    //     where: {
-    //         id: pinID,
-    //     },
-    //     data: { downvotes: { increment: increment } },
-    // });
+  /**
+   * Upvotes or downvotes a pin for a user by their respective IDs
+   * If the user tries to take the same action they already have on record,
+   * calling this method again will delete their action. Otherwise, it will
+   * save the indicated action to the database. (Think about how reddit's karma
+   * system works)
+   *
+   * @param pinId
+   * @param userId
+   * @param isUpvote
+   * @returns An object containing the current amount of points the pin has in total
+   * and a message detailing the action the server took to fulfill the request
+   */
+  async togglePinVote(
+    pinId: number,
+    userId: number,
+    isUpvote: boolean,
+  ): Promise<{ points: number; message: string }> {
+    const valToSet = isUpvote ? 1 : -1;
+    const currentState = await this.userService.getPinVoteById(userId, pinId);
+    const word = valToSet == 1 ? 'upvote' : 'downvote';
+
+    try {
+      if (!currentState) {
+        await this.databaseService.pinVote.create({
+          data: {
+            pinId,
+            userId,
+            value: valToSet,
+          },
+        });
+        return {
+          points: await this.getPinPoints(pinId),
+          message: 'Created new ' + word + ' for user',
+        };
+      }
+
+      // User already has value equal to what they want to change - delete vote
+      // Otherwise, set to current value
+      if (currentState.value == valToSet) {
+        await this.databaseService.pinVote.delete({
+          where: {
+            userId_pinId: {
+              userId,
+              pinId,
+            },
+          },
+        });
+        return {
+          points: await this.getPinPoints(pinId),
+          message: 'Deleted Pin vote for user',
+        };
+      } else {
+        await this.databaseService.pinVote.update({
+          where: {
+            userId_pinId: {
+              userId,
+              pinId,
+            },
+          },
+          data: {
+            value: currentState.value,
+          },
+        });
+
+        return {
+          points: await this.getPinPoints(pinId),
+          message: 'Updated previous Pin vote to ' + word,
+        };
+      }
+    } catch (e: any) {
+      PrismaService.handlePrismaError(
+        e,
+        'PinVote',
+        `pinId: ${pinId} userId: ${userId}`,
+      );
+    }
   }
 
   async removePin(pinID: number, req?: Request) {
@@ -374,8 +458,6 @@ export class PinsService {
           pinID: CommentDTO.pinID,
           userID,
           text: CommentDTO.text,
-          upvotes: 0,
-          downvotes: 0,
         },
       });
     } catch (e) {
