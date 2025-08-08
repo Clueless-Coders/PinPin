@@ -51,7 +51,7 @@ export class PinsController {
   }
 
   @Get(':id')
-  async getPin(@Param('id') id: String) {
+  async getPin(@Param('id') id: string) {
     return await this.pinsService.getPin(+id);
   }
 
@@ -66,18 +66,18 @@ export class PinsController {
   }
 
   @Post(':id/upvote')
-  patchUpvote(@Param('id') id: String, @Body() increment: UpdateVotes) {
-    return 'not implemented yet :(';
+  async patchUpvote(@Param('id') id: string, @Req() { user }) {
+    return await this.pinsService.togglePinVote(+id, user.id, true);
   }
 
   @Post(':id/downvote')
-  patchDownvote(@Param('id') id: String, @Body() increment: UpdateVotes) {
-    return 'not implemented yet :(';
+  async downvote(@Param('id') id: string, @Req() { user }) {
+    return await this.pinsService.togglePinVote(+id, user.id, false);
   }
 
   @Patch(':id')
   async updatePin(
-    @Param('id') id: String,
+    @Param('id') id: string,
     @Body() updatePinDTO: UpdatePinDTO,
     @Req() { user },
   ) {
@@ -86,7 +86,7 @@ export class PinsController {
 
   //change delete to check if user is deleting their own posts
   @Delete(':id')
-  async deletePin(@Param('id') id: String, @Req() request: Request) {
+  async deletePin(@Param('id') id: string, @Req() request: Request) {
     return await this.pinsService.removePin(+id, request);
   }
 
