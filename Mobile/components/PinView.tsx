@@ -1,5 +1,5 @@
-import React from "react";
-import { View, Text, StyleSheet } from "react-native";
+import React, { useState } from "react";
+import { View, Text, StyleSheet, Pressable } from "react-native";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { faEllipsis } from "@fortawesome/free-solid-svg-icons/faEllipsis";
 import { faCaretUp } from "@fortawesome/free-solid-svg-icons/faCaretUp";
@@ -11,18 +11,34 @@ export interface PinPostProps {
   text: string;
   commentCount: number;
   karma: number;
+  /**
+   * 1: User previously upvoted this pin
+   * 0: User has not interacted yet
+   * -1: User previously downvoted this pin
+   */
+  userVoteStatus: number
 }
 
+/**
+ * Renders a Pin's post at a larger scale for viewing more information, including
+ * its associated images 
+ */
 export default function PinView({
   distance,
   time,
   text,
   commentCount,
   karma,
+  userVoteStatus
 }: PinPostProps) {
   const timeSincePassed = new Date(Date.now() - time.getTime());
   const hours = timeSincePassed.getUTCHours();
   const minutes = timeSincePassed.getUTCMinutes();
+  const [voteStatus, setVoteStatus] = useState(-1)
+  const voteIconSize = 27
+
+  async function pressVote(isUpvote: true) {
+  }
 
   return (
     <View>
@@ -38,17 +54,26 @@ export default function PinView({
             <FontAwesomeIcon icon={faEllipsis} size={20} />
           </View>
         </View>
-
         <Text style={styles.text}>{text}</Text>
-
         <View style={styles.bottom}>
           <View style={styles.topLeft}>
-            <Text style={styles.bottomText}>{`${commentCount}`} comments</Text>
+            <Text style={styles.bottomText}>{`${commentCount}`} comment{commentCount !== 1 ? 's' : ''}</Text>
           </View>
           <View style={styles.topRight}>
-            <FontAwesomeIcon icon={faCaretUp} />
+            <Pressable onPressIn={() => pressVote(true)}>
+              <FontAwesomeIcon
+                icon={faCaretUp}
+                color={voteStatus > 0 ? 'orange' : undefined}
+                size={voteIconSize}
+                style={{ marginTop: 5 }}
+              />
+            </Pressable>
             <Text style={styles.bottomText}>{karma}</Text>
-            <FontAwesomeIcon icon={faCaretDown} />
+            <FontAwesomeIcon
+              icon={faCaretDown}
+              color={voteStatus < 0 ? 'blue' : undefined}
+              size={voteIconSize}
+            />
           </View>
         </View>
       </View>
@@ -106,7 +131,7 @@ const styles = StyleSheet.create({
   bottomText: {
     marginVertical: 5,
     marginHorizontal: 1,
-    fontSize: 12,
+    fontSize: 15,
     fontFamily: "OverpassMono-Light",
   },
 });

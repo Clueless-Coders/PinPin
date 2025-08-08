@@ -6,7 +6,7 @@ import {
   GestureHandlerRootView,
   Pressable,
 } from "react-native-gesture-handler";
-import { TextInput, View, StyleSheet } from "react-native";
+import { TextInput, View, StyleSheet, Text } from "react-native";
 import { useLocalSearchParams } from "expo-router";
 import { IComment, IPin, PinService } from "@/services/PinService";
 import { faPaperPlane } from "@fortawesome/free-solid-svg-icons/faPaperPlane";
@@ -81,38 +81,46 @@ export default function PinDetail() {
           distance={
             locationContext?.location
               ? // Gets the distance between user's current location and
-                // the pin's location, converted to miles then formatted
-                // to 1 decimal place
-                +(
-                  geolib.getDistance(locationContext.location.coords, {
-                    latitude: pin.latitude,
-                    longitude: pin.longitude,
-                  }) * metersToMilesConversionFactor
-                ).toFixed(1)
+              // the pin's location, converted to miles then formatted
+              // to 1 decimal place
+              +(
+                geolib.getDistance(locationContext.location.coords, {
+                  latitude: pin.latitude,
+                  longitude: pin.longitude,
+                }) * metersToMilesConversionFactor
+              ).toFixed(1)
               : -1
           }
           time={new Date(pin.createdAt)}
           text={pin.text}
           commentCount={comments.length}
           karma={pin.upvotes - pin.downvotes}
+          userVoteStatus={0}
         />
       ) : (
         <></>
       )}
-
-      <FlatList
-        data={comments}
-        keyExtractor={(item, index) => index.toString()}
-        renderItem={renderItem}
-        ref={flatListRef}
-        onScrollToIndexFailed={(info) => {
-          console.log(info);
-        }}
+      <View
         style={{
           maxHeight: "74%",
           backgroundColor: "#FFF9ED",
         }}
-      />
+      >
+
+        {
+          comments.length === 0 ? <Text>Be the first to leave a comment!</Text> :
+            <FlatList
+              data={comments}
+              keyExtractor={(item, index) => index.toString()}
+              renderItem={renderItem}
+              ref={flatListRef}
+              onScrollToIndexFailed={(info) => {
+                console.log(info);
+              }}
+            />
+        }
+
+      </View>
       <View style={styles.textBoxContainer}>
         <TextInput
           style={styles.textInput}

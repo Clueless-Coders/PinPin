@@ -15,6 +15,7 @@ export interface PinPostProps {
   commentCount: number;
   karma: number;
   pinId: number;
+  containsImage: boolean
   isFocused?: boolean;
 }
 
@@ -26,6 +27,7 @@ export default function PinPost({
   karma,
   pinId,
   isFocused,
+  containsImage
 }: PinPostProps) {
   const timeSincePassed = new Date(Date.now() - time.getTime());
   const hours = timeSincePassed.getUTCHours();
@@ -56,14 +58,12 @@ export default function PinPost({
 
           <View style={styles.bottom}>
             <View style={styles.topLeft}>
-              <FontAwesomeIcon icon={faImage} size={14} style={styles.icon} />
+              {containsImage ? <FontAwesomeIcon icon={faImage} size={14} style={styles.icon} /> : <></>}
               <FontAwesomeIcon icon={faMessage} size={14} style={styles.icon} />
               <Text style={styles.bottomText}>{`${commentCount}`}</Text>
             </View>
             <View style={styles.topRight}>
-              <FontAwesomeIcon icon={faCaretUp} />
-              <Text style={styles.bottomText}>{karma}</Text>
-              <FontAwesomeIcon icon={faCaretDown} />
+              <Text style={styles.bottomText}>{karma} Points</Text>
             </View>
           </View>
         </View>

@@ -144,6 +144,7 @@ export default function HomeIndex() {
             karma={item.upvotes - item.downvotes}
             isFocused={index === selectedPinIndex}
             pinId={item.id}
+            containsImage={false}
           />
         </View>
       );
