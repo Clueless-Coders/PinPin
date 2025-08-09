@@ -7,6 +7,7 @@ import {
   Delete,
   Patch,
   Req,
+  Put,
 } from '@nestjs/common';
 import { PinsService } from './pins.service';
 import {
@@ -18,7 +19,6 @@ import {
   CreateCommentDTO,
 } from './dto/pins.dto';
 import { Request } from 'express';
-import { request } from 'http';
 
 @Controller()
 export class PinsController {
@@ -65,12 +65,12 @@ export class PinsController {
     return await this.pinsService.markVisibleByLocation(loc, user.id);
   }
 
-  @Post(':id/upvote')
+  @Put(':id/upvote')
   async patchUpvote(@Param('id') id: string, @Req() { user }) {
     return await this.pinsService.togglePinVote(+id, user.id, true);
   }
 
-  @Post(':id/downvote')
+  @Put(':id/downvote')
   async downvote(@Param('id') id: string, @Req() { user }) {
     return await this.pinsService.togglePinVote(+id, user.id, false);
   }

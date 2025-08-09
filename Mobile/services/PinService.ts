@@ -6,8 +6,7 @@ export interface IPin {
   id: number;
   userID: number;
   text: string;
-  upvotes: number;
-  downvotes: number;
+  points: number;
   imageURL?: string;
   longitude: number;
   latitude: number;

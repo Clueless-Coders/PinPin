@@ -14,6 +14,7 @@ import {
   VisiblePin,
 } from 'src/interfaces/invisible-pin.interface';
 import { UsersService } from 'src/users/users.service';
+import { PinQuery } from 'src/interfaces/PinQuery.interface';
 
 @Injectable()
 export class PinsService {
@@ -38,7 +39,7 @@ export class PinsService {
     }
   }
 
-  async getPin(pinID: number) {
+  async getPin(pinID: number): Promise<Pin & { points: number }> {
     let res: Pin;
     try {
       res = await this.databaseService.pin.findUnique({
@@ -52,7 +53,9 @@ export class PinsService {
 
     if (!res)
       throw new NotFoundException('Pin with ID ' + pinID + ' not found.');
-    return res;
+
+    const points = await this.getPinPoints(pinID);
+    return { ...res, points };
   }
 
   async updatePin(pinID: number, updatePinDTO: UpdatePinDTO, req: Request) {
@@ -89,7 +92,7 @@ export class PinsService {
           pinId: id,
         },
       });
-      return res._sum.value;
+      return res._sum.value ?? 0;
     } catch (e: any) {
       PrismaService.handlePrismaError(e, 'Pin', 'id: ' + id);
     }
@@ -375,17 +378,38 @@ export class PinsService {
    * @param userID
    * @returns
    */
-  async getVisiblePinsByUserID(userId: number): Promise<Pin[]> {
+  async getVisiblePinsByUserID(userId: number): Promise<PinQuery[]> {
     try {
       const res = await this.databaseService.viewable.findMany({
         where: {
           userId,
         },
         select: {
-          pin: true,
+          pin: {
+            include: {
+              _count: {
+                select: {
+                  Vote: true,
+                },
+              },
+            },
+          },
         },
       });
-      return res.map((pin) => pin.pin);
+      return res.map((pin) => {
+        console.log(pin.pin);
+        return {
+          id: pin.pin.id,
+          userID: pin.pin.userID,
+          text: pin.pin.text,
+          imageURL: pin.pin.imageURL,
+          longitude: pin.pin.longitude,
+          latitude: pin.pin.latitude,
+          createdAt: pin.pin.createdAt,
+          updatedAt: pin.pin.updatedAt,
+          points: pin.pin._count.Vote,
+        };
+      });
     } catch (e: any) {
       PrismaService.handlePrismaError(e, 'Pin', 'userId: ' + userId);
     }

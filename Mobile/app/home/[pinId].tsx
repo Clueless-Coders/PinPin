@@ -12,7 +12,6 @@ import { IComment, IPin, PinService } from "@/services/PinService";
 import { faPaperPlane } from "@fortawesome/free-solid-svg-icons/faPaperPlane";
 import * as geolib from "geolib";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
-import * as Location from "expo-location";
 import { LocationContext } from "./_layout";
 import { metersToMilesConversionFactor } from ".";
 
@@ -94,7 +93,7 @@ export default function PinDetail() {
           time={new Date(pin.createdAt)}
           text={pin.text}
           commentCount={comments.length}
-          karma={pin.upvotes - pin.downvotes}
+          karma={pin.points}
           userVoteStatus={0}
         />
       ) : (
