@@ -317,9 +317,19 @@ export class PinsService {
           updatedAt: true,
           userID: true,
           id: true,
+          _count: {
+            select: {
+              Vote: true,
+            },
+          },
         },
       });
-      const mut = res.map((invisPin) => ({ ...invisPin, viewable: false }));
+      const mut = res.map((invisPin) => ({
+        ...invisPin,
+        viewable: false,
+        points: invisPin._count.Vote,
+        _count: undefined,
+      }));
       return mut;
     } catch (e: any) {
       PrismaService.handlePrismaError(e, 'Pin', 'location');
@@ -397,7 +407,6 @@ export class PinsService {
         },
       });
       return res.map((pin) => {
-        console.log(pin.pin);
         return {
           id: pin.pin.id,
           userID: pin.pin.userID,
