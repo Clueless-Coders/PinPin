@@ -4,7 +4,7 @@ import {
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
-import { Pin } from '@prisma/client';
+import { Pin, Prisma } from '@prisma/client';
 import { CreatePinDTO, UpdatePinDTO, CreateCommentDTO } from './dto/pins.dto';
 import { Request } from 'express';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -13,10 +13,15 @@ import {
   InvisiblePin,
   VisiblePin,
 } from 'src/interfaces/invisible-pin.interface';
+import { UsersService } from 'src/users/users.service';
+import { PinQuery } from 'src/interfaces/PinQuery.interface';
 
 @Injectable()
 export class PinsService {
-  constructor(private readonly databaseService: PrismaService) {}
+  constructor(
+    private readonly databaseService: PrismaService,
+    private readonly userService: UsersService,
+  ) {}
 
   async create(createPin: CreatePinDTO, req: Request) {
     try {
@@ -27,8 +32,6 @@ export class PinsService {
           imageURL: createPin.imageURL, // This will be optional
           longitude: createPin.longitude,
           latitude: createPin.latitude,
-          downvotes: 0,
-          upvotes: 0,
         },
       });
     } catch (e) {
@@ -36,22 +39,37 @@ export class PinsService {
     }
   }
 
-  async getPin(pinID: number) {
-    let res: Pin;
+  async getPin(pinID: number, userId?: number): Promise<PinQuery> {
     try {
-      res = await this.databaseService.pin.findUnique({
+      const res = await this.databaseService.pin.findUniqueOrThrow({
         where: {
           id: pinID,
         },
+        include: {
+          // if userId provided, get their vote status for this pin
+          Vote: userId
+            ? {
+                select: {
+                  value: true,
+                },
+                where: {
+                  userId,
+                },
+              }
+            : undefined,
+        },
       });
-    } catch (e) {
-      console.log(e);
-      throw new InternalServerErrorException('DB call failed');
-    }
 
-    if (!res)
-      throw new NotFoundException('Pin with ID ' + pinID + ' not found.');
-    return res;
+      const points = await this.getPinPoints(pinID);
+      const ret = {
+        ...res,
+        points,
+        userVoteStatus: res.Vote[0]?.value ?? 0,
+      };
+      return ret;
+    } catch (e) {
+      PrismaService.handlePrismaError(e, 'Pin', 'pinId: ' + pinID);
+    }
   }
 
   async updatePin(pinID: number, updatePinDTO: UpdatePinDTO, req: Request) {
@@ -61,30 +79,119 @@ export class PinsService {
     if (currUser.id !== pinToEdit.userID)
       throw new ForbiddenException('User can only edit their own pin');
 
-    return this.databaseService.pin.update({
-      where: {
-        id: pinID,
-      },
-      data: updatePinDTO,
-    });
+    try {
+      return this.databaseService.pin.update({
+        where: {
+          id: pinID,
+        },
+        data: updatePinDTO,
+      });
+    } catch (e: any) {
+      PrismaService.handlePrismaError(e, 'Pin', 'pinId' + pinID);
+    }
   }
 
-  async patchUpvote(pinID: number, increment: number) {
-    // return this.databaseService.pin.update({
-    //     where: {
-    //         id: pinID,
-    //     },
-    //     data: { upvotes: { increment: increment } },
-    // });
+  /**
+   * Counts the total number of upvotes/downvotes on the pin referenced by ID
+   * @param id
+   * @returns
+   */
+  async getPinPoints(id: number): Promise<number> {
+    try {
+      const res = await this.databaseService.pinVote.aggregate({
+        _sum: {
+          value: true,
+        },
+        where: {
+          pinId: id,
+        },
+      });
+      return res._sum.value ?? 0;
+    } catch (e: any) {
+      PrismaService.handlePrismaError(e, 'Pin', 'id: ' + id);
+    }
   }
 
-  async patchDownvote(pinID: number, increment: number) {
-    // return this.databaseService.pin.update({
-    //     where: {
-    //         id: pinID,
-    //     },
-    //     data: { downvotes: { increment: increment } },
-    // });
+  /**
+   * Upvotes or downvotes a pin for a user by their respective IDs
+   * If the user tries to take the same action they already have on record,
+   * calling this method again will delete their action. Otherwise, it will
+   * save the indicated action to the database. (Think about how reddit's karma
+   * system works)
+   *
+   * @param pinId
+   * @param userId
+   * @param isUpvote
+   * @returns An object containing the current amount of points the pin has in total
+   * and a message detailing the action the server took to fulfill the request
+   */
+  async togglePinVote(
+    pinId: number,
+    userId: number,
+    isUpvote: boolean,
+  ): Promise<{ points: number; message: string; userVoteStatus: number }> {
+    const valToSet = isUpvote ? 1 : -1;
+    const currentState = await this.userService.getPinVoteById(userId, pinId);
+    const word = valToSet == 1 ? 'upvote' : 'downvote';
+
+    try {
+      if (!currentState) {
+        await this.databaseService.pinVote.create({
+          data: {
+            pinId,
+            userId,
+            value: valToSet,
+          },
+        });
+        return {
+          points: await this.getPinPoints(pinId),
+          userVoteStatus: valToSet,
+          message: 'Created new ' + word + ' for user',
+        };
+      }
+
+      // User already has value equal to what they want to change - delete vote
+      // Otherwise, set to current value
+      if (currentState.value == valToSet) {
+        await this.databaseService.pinVote.delete({
+          where: {
+            userId_pinId: {
+              userId,
+              pinId,
+            },
+          },
+        });
+        return {
+          points: await this.getPinPoints(pinId),
+          userVoteStatus: 0,
+          message: 'Deleted Pin vote for user',
+        };
+      } else {
+        await this.databaseService.pinVote.update({
+          where: {
+            userId_pinId: {
+              userId,
+              pinId,
+            },
+          },
+          data: {
+            value: valToSet,
+          },
+        });
+
+        return {
+          points: await this.getPinPoints(pinId),
+          userVoteStatus: valToSet,
+          message: 'Updated previous Pin vote to ' + word,
+        };
+      }
+    } catch (e: any) {
+      PrismaService.handlePrismaError(
+        e,
+        'PinVote',
+        `pinId: ${pinId} userId: ${userId}`,
+      );
+    }
   }
 
   async removePin(pinID: number, req?: Request) {
@@ -98,12 +205,16 @@ export class PinsService {
       where: { pinId: pinID },
     });
 
-    return await this.databaseService.pin.delete({
-      where: {
-        id: pinID,
-        userID: currUser.id,
-      },
-    });
+    try {
+      return await this.databaseService.pin.delete({
+        where: {
+          id: pinID,
+          userID: currUser.id,
+        },
+      });
+    } catch (e: any) {
+      PrismaService.handlePrismaError(e, 'Pin', 'pinID: ' + pinID);
+    }
   }
 
   /**
@@ -225,11 +336,14 @@ export class PinsService {
           id: true,
         },
       });
-      const mut = res.map((invisPin) => ({ ...invisPin, viewable: false }));
+      const mut = res.map((invisPin) => ({
+        ...invisPin,
+        viewable: false,
+        _count: undefined,
+      }));
       return mut;
     } catch (e: any) {
-      console.log(e);
-      throw new InternalServerErrorException('DB call failed ', e);
+      PrismaService.handlePrismaError(e, 'Pin', 'location');
     }
   }
 
@@ -276,8 +390,7 @@ export class PinsService {
       });
       return res;
     } catch (e: any) {
-      console.log(e);
-      throw new InternalServerErrorException('Database query failed ', e);
+      PrismaService.handlePrismaError(e, 'Pin', '');
     }
   }
 
@@ -286,20 +399,51 @@ export class PinsService {
    * @param userID
    * @returns
    */
-  async getVisiblePinsByUserID(userId: number): Promise<Pin[]> {
+  async getVisiblePinsByUserID(userId: number): Promise<PinQuery[]> {
     try {
       const res = await this.databaseService.viewable.findMany({
         where: {
           userId,
         },
         select: {
-          pin: true,
+          pin: {
+            include: {
+              Vote: {
+                where: {
+                  userId,
+                },
+                select: {
+                  value: true,
+                },
+              },
+            },
+          },
         },
       });
-      return res.map((pin) => pin.pin);
+
+      const totalVotesPromises: Promise<number>[] = [];
+      const pins = res.map((pin) => {
+        totalVotesPromises.push(this.getPinPoints(pin.pin.id));
+        return {
+          id: pin.pin.id,
+          userID: pin.pin.userID,
+          text: pin.pin.text,
+          imageURL: pin.pin.imageURL,
+          longitude: pin.pin.longitude,
+          latitude: pin.pin.latitude,
+          createdAt: pin.pin.createdAt,
+          updatedAt: pin.pin.updatedAt,
+          userVoteStatus: pin.pin.Vote[0]?.value ?? 0,
+        };
+      });
+
+      const totalVotes = await Promise.all(totalVotesPromises);
+      return pins.map((pin, index) => ({
+        ...pin,
+        points: totalVotes[index],
+      }));
     } catch (e: any) {
-      console.log(e);
-      throw new InternalServerErrorException('Database query failed', e);
+      PrismaService.handlePrismaError(e, 'Pin', 'userId: ' + userId);
     }
   }
 
@@ -342,8 +486,7 @@ export class PinsService {
         userID,
       );
     } catch (e: any) {
-      console.log(e);
-      throw new InternalServerErrorException('Database query failed', e);
+      PrismaService.handlePrismaError(e, 'Pin', '' + userID);
     }
 
     //Creates viewable relationship for pins to users...
@@ -358,27 +501,23 @@ export class PinsService {
         data: viewables,
       });
     } catch (e: any) {
-      console.log(e);
-      throw new InternalServerErrorException('Marking Pins visible failed', e);
+      PrismaService.handlePrismaError(e, 'Pin', 'location');
     }
 
     return pinsToMakeVisible;
   }
 
-  async createComment(CommentDTO: CreateCommentDTO, req: Request) {
+  async createComment(CommentDTO: CreateCommentDTO, userID: number) {
     try {
       return await this.databaseService.comment.create({
         data: {
           pinID: CommentDTO.pinID,
-          userID: req['user'].id,
+          userID,
           text: CommentDTO.text,
-          upvotes: 0,
-          downvotes: 0,
         },
       });
     } catch (e) {
-      console.log(e);
-      throw new InternalServerErrorException('Comment create failed. ', e);
+      PrismaService.handlePrismaError(e, 'Pin', 'userId: ' + userID);
     }
   }
 
@@ -391,7 +530,7 @@ export class PinsService {
       });
       return res;
     } catch (e) {
-      throw new InternalServerErrorException('Comment create failed. ', e);
+      PrismaService.handlePrismaError(e, 'Commnet', 'pinId' + pinID);
     }
   }
 
@@ -403,7 +542,7 @@ export class PinsService {
         },
       });
     } catch (e) {
-      throw new InternalServerErrorException('Comment create failed. ', e);
+      PrismaService.handlePrismaError(e, 'Commnet', 'commentId' + commentID);
     }
   }
 }

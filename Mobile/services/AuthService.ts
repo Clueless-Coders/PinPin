@@ -92,8 +92,6 @@ export class AuthService {
     await this.restoreSavedRefreshToken();
     if (!this.tokens?.refresh_token) return false;
 
-    console.log(jwtDecode(this.tokens.refresh_token));
-    console.log(this.tokens.refresh_token);
     await this.refreshToken();
     this.callAuthChangeListeners();
 

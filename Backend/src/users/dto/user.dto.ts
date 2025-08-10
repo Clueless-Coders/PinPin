@@ -13,6 +13,5 @@ export class UserCreateDTO {
   email: string;
 
   @IsString()
-  //@Exclude()
   password: string;
 }

@@ -1,18 +1,19 @@
 import { API_BASE_URL } from "@/environment";
 import { InvisiblePin, VisiblePin } from "@/interfaces/pin.interface";
 import axios from "axios";
+import { DO_NOT_USE_OR_YOU_WILL_BE_FIRED_CALLBACK_REF_RETURN_VALUES } from "react";
 
 export interface IPin {
   id: number;
   userID: number;
   text: string;
-  upvotes: number;
-  downvotes: number;
+  points: number;
   imageURL?: string;
   longitude: number;
   latitude: number;
   createdAt: string;
   updatedAt: string;
+  userVoteStatus: number;
 }
 
 export interface ICreatePin {
@@ -116,6 +117,22 @@ export class PinService {
       return comments;
     } catch (e) {
       console.log("Failed to get comments ", e);
+    }
+  }
+
+  static async togglePinVote(
+    pinId: number,
+    isUpvote: boolean
+  ): Promise<
+    { points: number; message: string; userVoteStatus: number } | undefined
+  > {
+    try {
+      const res = await axios.put(
+        `${API_BASE_URL}/pin/${pinId}/${isUpvote ? "upvote" : "downvote"}`
+      );
+      return res.data;
+    } catch (e) {
+      console.log("Failed to upvote pin ", e);
     }
   }
 }

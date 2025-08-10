@@ -7,6 +7,7 @@ import {
   Delete,
   Patch,
   Req,
+  Put,
 } from '@nestjs/common';
 import { PinsService } from './pins.service';
 import {
@@ -18,7 +19,6 @@ import {
   CreateCommentDTO,
 } from './dto/pins.dto';
 import { Request } from 'express';
-import { request } from 'http';
 
 @Controller()
 export class PinsController {
@@ -51,8 +51,8 @@ export class PinsController {
   }
 
   @Get(':id')
-  async getPin(@Param('id') id: String) {
-    return await this.pinsService.getPin(+id);
+  async getPin(@Param('id') id: string, @Req() { user }) {
+    return await this.pinsService.getPin(+id, +user?.id);
   }
 
   @Post()
@@ -65,37 +65,34 @@ export class PinsController {
     return await this.pinsService.markVisibleByLocation(loc, user.id);
   }
 
-  @Post(':id/upvotes')
-  patchUpvote(@Param('id') id: String, @Body() increment: UpdateVotes) {
-    return 'not implemented yet :(';
+  @Put(':id/upvote')
+  async patchUpvote(@Param('id') id: string, @Req() { user }) {
+    return await this.pinsService.togglePinVote(+id, user.id, true);
   }
 
-  @Post(':id/downvotes')
-  patchDownvote(@Param('id') id: String, @Body() increment: UpdateVotes) {
-    return 'not implemented yet :(';
+  @Put(':id/downvote')
+  async downvote(@Param('id') id: string, @Req() { user }) {
+    return await this.pinsService.togglePinVote(+id, user.id, false);
   }
 
   @Patch(':id')
   async updatePin(
-    @Param('id') id: String,
+    @Param('id') id: string,
     @Body() updatePinDTO: UpdatePinDTO,
-    @Req() req: Request,
+    @Req() { user },
   ) {
-    return await this.pinsService.updatePin(+id, updatePinDTO, req);
+    return await this.pinsService.updatePin(+id, updatePinDTO, user.id);
   }
 
   //change delete to check if user is deleting their own posts
   @Delete(':id')
-  async deletePin(@Param('id') id: String, @Req() request: Request) {
+  async deletePin(@Param('id') id: string, @Req() request: Request) {
     return await this.pinsService.removePin(+id, request);
   }
 
   @Post('comments')
-  async postComment(
-    @Body() commentDTO: CreateCommentDTO,
-    @Req() request: Request,
-  ) {
-    return await this.pinsService.createComment(commentDTO, request);
+  async postComment(@Body() commentDTO: CreateCommentDTO, @Req() { user }) {
+    return await this.pinsService.createComment(commentDTO, user.id);
   }
 
   @Get('comments/:id')

@@ -2,11 +2,10 @@ import { MailerService } from '@nestjs-modules/mailer';
 import { Injectable, OnModuleInit } from '@nestjs/common';
 
 @Injectable()
-export class MailService implements OnModuleInit {
+export class MailService {
   constructor(private readonly mailerService: MailerService) {}
 
-  async onModuleInit() {
-    console.log('hello');
+  async sendTestEmail() {
     const test = await this.mailerService.sendMail({
       to: 'test@pinpinapp.com',
       from: 'auth@pinpinapp.com',

@@ -2,8 +2,7 @@ export interface VisiblePin {
   id: number;
   userID: number;
   text: string;
-  upvotes: 0;
-  downvotes: 0;
+  points: number;
   imageURL?: string;
   longitude: number;
   latitude: number;
