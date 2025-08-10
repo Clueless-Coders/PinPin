@@ -4,6 +4,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { faEllipsis } from "@fortawesome/free-solid-svg-icons/faEllipsis";
 import { faCaretUp } from "@fortawesome/free-solid-svg-icons/faCaretUp";
 import { faCaretDown } from "@fortawesome/free-solid-svg-icons/faCaretDown";
+import { PinService } from "@/services/PinService";
 
 export interface PinPostProps {
   distance: number;
@@ -17,6 +18,7 @@ export interface PinPostProps {
    * -1: User previously downvoted this pin
    */
   userVoteStatus: number
+  pinId: number
 }
 
 /**
@@ -29,15 +31,22 @@ export default function PinView({
   text,
   commentCount,
   karma,
-  userVoteStatus
+  userVoteStatus,
+  pinId,
 }: PinPostProps) {
   const timeSincePassed = new Date(Date.now() - time.getTime());
   const hours = timeSincePassed.getUTCHours();
   const minutes = timeSincePassed.getUTCMinutes();
-  const [voteStatus, setVoteStatus] = useState(-1)
+  const [voteStatus, setVoteStatus] = useState(userVoteStatus)
+  const [karmaState, setKarmaState] = useState(karma)
   const voteIconSize = 27
 
-  async function pressVote(isUpvote: true) {
+  async function pressVote(isUpvote: boolean) {
+    const newStatus = await PinService.togglePinVote(pinId, isUpvote);
+    if (newStatus) {
+      setVoteStatus(newStatus.userVoteStatus);
+      setKarmaState(newStatus.points);
+    }
   }
 
   return (
@@ -68,12 +77,14 @@ export default function PinView({
                 style={{ marginTop: 5 }}
               />
             </Pressable>
-            <Text style={styles.bottomText}>{karma}</Text>
-            <FontAwesomeIcon
-              icon={faCaretDown}
-              color={voteStatus < 0 ? 'blue' : undefined}
-              size={voteIconSize}
-            />
+            <Text style={styles.bottomText}>{karmaState}</Text>
+            <Pressable onPress={() => pressVote(false)}>
+              <FontAwesomeIcon
+                icon={faCaretDown}
+                color={voteStatus < 0 ? 'blue' : undefined}
+                size={voteIconSize}
+              />
+            </Pressable>
           </View>
         </View>
       </View>

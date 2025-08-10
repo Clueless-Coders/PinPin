@@ -51,8 +51,8 @@ export class PinsController {
   }
 
   @Get(':id')
-  async getPin(@Param('id') id: string) {
-    return await this.pinsService.getPin(+id);
+  async getPin(@Param('id') id: string, @Req() { user }) {
+    return await this.pinsService.getPin(+id, +user?.id);
   }
 
   @Post()

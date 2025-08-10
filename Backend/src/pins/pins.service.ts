@@ -39,23 +39,37 @@ export class PinsService {
     }
   }
 
-  async getPin(pinID: number): Promise<Pin & { points: number }> {
-    let res: Pin;
+  async getPin(pinID: number, userId?: number): Promise<PinQuery> {
     try {
-      res = await this.databaseService.pin.findUnique({
+      const res = await this.databaseService.pin.findUniqueOrThrow({
         where: {
           id: pinID,
         },
+        include: {
+          // if userId provided, get their vote status for this pin
+          Vote: userId
+            ? {
+                select: {
+                  value: true,
+                },
+                where: {
+                  userId,
+                },
+              }
+            : undefined,
+        },
       });
+
+      const points = await this.getPinPoints(pinID);
+      const ret = {
+        ...res,
+        points,
+        userVoteStatus: res.Vote[0]?.value ?? 0,
+      };
+      return ret;
     } catch (e) {
       PrismaService.handlePrismaError(e, 'Pin', 'pinId: ' + pinID);
     }
-
-    if (!res)
-      throw new NotFoundException('Pin with ID ' + pinID + ' not found.');
-
-    const points = await this.getPinPoints(pinID);
-    return { ...res, points };
   }
 
   async updatePin(pinID: number, updatePinDTO: UpdatePinDTO, req: Request) {
@@ -115,7 +129,7 @@ export class PinsService {
     pinId: number,
     userId: number,
     isUpvote: boolean,
-  ): Promise<{ points: number; message: string }> {
+  ): Promise<{ points: number; message: string; userVoteStatus: number }> {
     const valToSet = isUpvote ? 1 : -1;
     const currentState = await this.userService.getPinVoteById(userId, pinId);
     const word = valToSet == 1 ? 'upvote' : 'downvote';
@@ -131,6 +145,7 @@ export class PinsService {
         });
         return {
           points: await this.getPinPoints(pinId),
+          userVoteStatus: valToSet,
           message: 'Created new ' + word + ' for user',
         };
       }
@@ -148,6 +163,7 @@ export class PinsService {
         });
         return {
           points: await this.getPinPoints(pinId),
+          userVoteStatus: 0,
           message: 'Deleted Pin vote for user',
         };
       } else {
@@ -159,12 +175,13 @@ export class PinsService {
             },
           },
           data: {
-            value: currentState.value,
+            value: valToSet,
           },
         });
 
         return {
           points: await this.getPinPoints(pinId),
+          userVoteStatus: valToSet,
           message: 'Updated previous Pin vote to ' + word,
         };
       }
@@ -317,17 +334,11 @@ export class PinsService {
           updatedAt: true,
           userID: true,
           id: true,
-          _count: {
-            select: {
-              Vote: true,
-            },
-          },
         },
       });
       const mut = res.map((invisPin) => ({
         ...invisPin,
         viewable: false,
-        points: invisPin._count.Vote,
         _count: undefined,
       }));
       return mut;
@@ -397,16 +408,22 @@ export class PinsService {
         select: {
           pin: {
             include: {
-              _count: {
+              Vote: {
+                where: {
+                  userId,
+                },
                 select: {
-                  Vote: true,
+                  value: true,
                 },
               },
             },
           },
         },
       });
-      return res.map((pin) => {
+
+      const totalVotesPromises: Promise<number>[] = [];
+      const pins = res.map((pin) => {
+        totalVotesPromises.push(this.getPinPoints(pin.pin.id));
         return {
           id: pin.pin.id,
           userID: pin.pin.userID,
@@ -416,9 +433,15 @@ export class PinsService {
           latitude: pin.pin.latitude,
           createdAt: pin.pin.createdAt,
           updatedAt: pin.pin.updatedAt,
-          points: pin.pin._count.Vote,
+          userVoteStatus: pin.pin.Vote[0]?.value ?? 0,
         };
       });
+
+      const totalVotes = await Promise.all(totalVotesPromises);
+      return pins.map((pin, index) => ({
+        ...pin,
+        points: totalVotes[index],
+      }));
     } catch (e: any) {
       PrismaService.handlePrismaError(e, 'Pin', 'userId: ' + userId);
     }

@@ -60,7 +60,6 @@ export default function HomeIndex() {
   async function getAllViewablePins() {
     const pins = await axios.get<VisiblePin[]>(`${API_BASE_URL}/pin/visible`);
     let data = pins.data;
-    //console.log(location);
     if (location) {
       const distanceAdded = data.map((pin) => {
         // Add current distance data to pins provided
@@ -141,7 +140,7 @@ export default function HomeIndex() {
             time={new Date(Date.parse(item.createdAt)) ?? new Date()}
             text={item.text}
             commentCount={2}
-            karma={item.upvotes - item.downvotes}
+            karma={item.points}
             isFocused={index === selectedPinIndex}
             pinId={item.id}
             containsImage={false}
@@ -190,9 +189,7 @@ export default function HomeIndex() {
     if (newlyVisible.data.length !== 0) getAllViewablePins();
 
     setLocation(currLoc);
-    console.log(location);
     await getAllViewablePins();
-    console.log(location);
     await getCurrentBounds();
   }
 

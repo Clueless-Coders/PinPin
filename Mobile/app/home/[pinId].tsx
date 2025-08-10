@@ -94,7 +94,8 @@ export default function PinDetail() {
           text={pin.text}
           commentCount={comments.length}
           karma={pin.points}
-          userVoteStatus={0}
+          userVoteStatus={pin.userVoteStatus}
+          pinId={pin.id}
         />
       ) : (
         <></>
