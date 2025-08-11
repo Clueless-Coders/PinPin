@@ -1,4 +1,5 @@
-FROM node:24-alpine
+
+FROM --platform=linux/amd64 node:24-alpine
 
 RUN apk update && apk upgrade && apk add openssl
 

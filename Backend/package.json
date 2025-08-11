@@ -32,9 +32,12 @@
     "bcrypt": "^5.1.1",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.2",
+    "ejs": "^3.1.10",
     "geolib": "^3.3.4",
+    "handlebars": "^4.7.8",
     "nodemailer": "^7.0.5",
     "prisma": "^5.22.0",
+    "pug": "^3.0.3",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.2"
   },

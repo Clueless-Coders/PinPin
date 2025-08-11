@@ -6,9 +6,13 @@ import { AuthModule } from './auth/auth.module';
 import { PinsModule } from './pins/pins.module';
 import { MailModule } from './mail/mail.module';
 import { RequestLoggerMiddleware } from './interceptors/request-logger.interceptor';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
     RoutesModule,
     UsersModule,
     PinsModule,
