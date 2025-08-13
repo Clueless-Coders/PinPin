@@ -39,9 +39,8 @@ export interface IComment {
 }
 
 export class PinService {
-  // private pins: IPins[];
   constructor() {}
-  async getPin(pinID: number): Promise<IPin> {
+  static async getPin(pinID: number): Promise<IPin> {
     try {
       const res = await axios.get<IPin>(`${API_BASE_URL}/pin/${pinID}`);
       const pin = res.data;
@@ -52,7 +51,7 @@ export class PinService {
     }
   }
 
-  async deletePin(pinID: number) {
+  static async deletePin(pinID: number) {
     try {
       const res = await axios.delete<IPin>(`${API_BASE_URL}/pin/${pinID}`);
       const pin = res.data;
@@ -62,7 +61,7 @@ export class PinService {
     }
   }
 
-  async patchPin(pinID: number, text: string) {
+  static async patchPin(pinID: number, text: string) {
     console.log("updating pin " + pinID);
     try {
       const res = await axios.patch<IPin>(`${API_BASE_URL}/pin/${pinID}`, {
@@ -75,7 +74,7 @@ export class PinService {
     }
   }
 
-  async createPin(IPin: ICreatePin) {
+  static async createPin(IPin: ICreatePin) {
     try {
       const res = await axios.post<IPin>(`${API_BASE_URL}/pin`, IPin);
       const pin = res.data;
@@ -85,7 +84,7 @@ export class PinService {
     }
   }
 
-  async getAllViewable() {
+  static async getAllViewable() {
     try {
       const res = await axios.get<VisiblePin[]>(`${API_BASE_URL}/pin/visible`);
       const pins = res.data;
@@ -95,7 +94,7 @@ export class PinService {
     }
   }
 
-  async createComment(IComment: ICreateComment) {
+  static async createComment(IComment: ICreateComment) {
     try {
       const res = await axios.post<IComment>(
         `${API_BASE_URL}/pin/comments`,
@@ -108,7 +107,7 @@ export class PinService {
     }
   }
 
-  async getCommentsByPin(pinID: number) {
+  static async getCommentsByPin(pinID: number) {
     try {
       const res = await axios.get<IComment[]>(
         `${API_BASE_URL}/pin/comments/${pinID}`

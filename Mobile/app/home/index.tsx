@@ -38,7 +38,7 @@ export default function HomeIndex() {
   );
 
   const handlePinPress = () => {
-    router.push("/home/NewPin");
+    router.push("/home/create-pin");
   };
 
   const handleSettingsPress = () => {
