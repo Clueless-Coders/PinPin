@@ -109,6 +109,9 @@ export class AuthService {
   async signup(newUser: Account) {
     try {
       const res = await axios.post<User>(`${API_BASE_URL}/user`, newUser);
+      if (res.status !== 201) {
+        throw new Error("Failed to create account");
+      }
       const account = res.data;
       const loginRes = await this.login(newUser.email, newUser.password);
       return account;
