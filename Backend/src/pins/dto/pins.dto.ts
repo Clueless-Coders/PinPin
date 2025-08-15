@@ -1,4 +1,11 @@
-import { IsInt, IsNumber, IsOptional, IsString, Length } from 'class-validator';
+import {
+  IsBoolean,
+  IsInt,
+  IsNumber,
+  IsOptional,
+  IsString,
+  Length,
+} from 'class-validator';
 
 export class CreatePinDTO {
   @IsString()
@@ -6,8 +13,8 @@ export class CreatePinDTO {
   text: string;
 
   @IsOptional()
-  @IsString()
-  imageURL?: string;
+  @IsBoolean()
+  isUploadingImage?: boolean;
 
   @IsNumber()
   longitude: number;

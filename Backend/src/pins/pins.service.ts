@@ -29,7 +29,6 @@ export class PinsService {
         data: {
           text: createPin.text,
           userID: req['user'].id,
-          imageURL: createPin.imageURL, // This will be optional
           longitude: createPin.longitude,
           latitude: createPin.latitude,
         },
