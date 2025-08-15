@@ -28,4 +28,4 @@ jobs:
         with:
           context: Backend
           push: true
-          tags: ghcr.io/clueless-coders/pinpin/pinpin-api:${{ github.ref_name}}
+          tags: ghcr.io/clueless-coders/pinpin/pinpin-api:${{ github.github.head_ref }}
