@@ -6,7 +6,7 @@ import {
   GestureHandlerRootView,
   Pressable,
 } from "react-native-gesture-handler";
-import { TextInput, View, StyleSheet, Text } from "react-native";
+import { TextInput, View, StyleSheet, Text, KeyboardAvoidingView, Platform } from "react-native";
 import { useLocalSearchParams } from "expo-router";
 import { IComment, IPin, PinService } from "@/services/PinService";
 import { faPaperPlane } from "@fortawesome/free-solid-svg-icons/faPaperPlane";
@@ -15,7 +15,6 @@ import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { LocationContext } from "./_layout";
 import { metersToMilesConversionFactor } from ".";
 
-const pinService = new PinService();
 export default function PinDetail() {
   const { pinId } = useLocalSearchParams();
   const [pin, setPin] = useState<IPin | undefined>();
@@ -26,7 +25,7 @@ export default function PinDetail() {
 
   async function getComments() {
     try {
-      const res = await pinService.getCommentsByPin(+pinId);
+      const res = await PinService.getCommentsByPin(+pinId);
       setComments(res ?? []);
     } catch (e: any) {
       console.log(e);
@@ -36,7 +35,7 @@ export default function PinDetail() {
   useEffect(() => {
     async function getPin() {
       try {
-        const [res] = await Promise.all([await pinService.getPin(+pinId)]);
+        const [res] = await Promise.all([await PinService.getPin(+pinId)]);
         setPin(res);
       } catch (e: any) {
         console.log(e);
@@ -50,7 +49,7 @@ export default function PinDetail() {
   async function submit() {
     setIsSubmittingComment(true);
     try {
-      const res = await pinService.createComment({
+      const res = await PinService.createComment({
         pinID: +pinId,
         text: commentInput,
       });
@@ -121,21 +120,23 @@ export default function PinDetail() {
         }
 
       </View>
-      <View style={styles.textBoxContainer}>
-        <TextInput
-          style={styles.textInput}
-          placeholder="Leave a comment..."
-          onChangeText={(text) => setCommentInput(text)}
-        />
-        <Pressable
-          style={styles.submitButton}
-          onPress={submit}
-          disabled={isSubmittingComment}
-        >
-          <FontAwesomeIcon icon={faPaperPlane} size={25} />
-        </Pressable>
-      </View>
-    </GestureHandlerRootView>
+      <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex: 1 }}>
+        <View style={styles.textBoxContainer}>
+          <TextInput
+            style={styles.textInput}
+            placeholder="Leave a comment..."
+            onChangeText={(text) => setCommentInput(text)}
+          />
+          <Pressable
+            style={styles.submitButton}
+            onPress={submit}
+            disabled={isSubmittingComment}
+          >
+            <FontAwesomeIcon icon={faPaperPlane} size={25} />
+          </Pressable>
+        </View>
+      </KeyboardAvoidingView>
+    </GestureHandlerRootView >
   );
 }
 
