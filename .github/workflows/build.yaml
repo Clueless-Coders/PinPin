@@ -24,13 +24,13 @@ jobs:
 
       - run: ls -lah
 
-      - run: npm ci
+      - run: cd Backend && npm ci
         name: Install Dependencies
 
-      - run: npm run build --if-present
+      - run: cd Backend && npm run build --if-present
         name: Build Project
 
-      - run: npm test
+      - run: cd Backend && npm test
         name: Run Tests
 
       - name: Set up Docker Buildx
@@ -39,5 +39,6 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v6
         with:
+          context: Backend
           push: true
           tags: ghcr.io/clueless-coders/pinpin/pinpin-api:{{ github.ref_name }}
