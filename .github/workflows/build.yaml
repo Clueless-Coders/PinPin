@@ -42,3 +42,5 @@ jobs:
           context: Backend
           push: true
           tags: ghcr.io/clueless-coders/pinpin/pinpin-api:${{ github.head_ref }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
