@@ -1,11 +1,15 @@
 import {
   CreateBucketCommand,
+  DeleteObjectCommand,
   paginateListBuckets,
+  PutObjectCommand,
   S3Client,
   waitUntilBucketExists,
+  waitUntilObjectNotExists,
 } from '@aws-sdk/client-s3';
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
 @Injectable()
 export class ImagesService implements OnModuleInit {
@@ -35,6 +39,10 @@ export class ImagesService implements OnModuleInit {
     this.logger.log(`Images referenced from S3 Bucket: ${this.bucketName}`);
   }
 
+  /**
+   * Check if the S3 bucket specified in the environment variables exists.
+   * @returns
+   */
   async checkIfS3BucketExists() {
     const paginator = paginateListBuckets({ client: this.client }, {});
     for await (const page of paginator) {
@@ -50,6 +58,10 @@ export class ImagesService implements OnModuleInit {
     return false;
   }
 
+  /**
+   * Create the S3 bucket specified in the environment variables.
+   * WARNING: ONLY CALL IF YOU ARE SURE THE BUCKET DOES NOT EXIST.
+   */
   async createS3Bucket() {
     const { Location } = await this.client.send(
       new CreateBucketCommand({
@@ -65,8 +77,45 @@ export class ImagesService implements OnModuleInit {
   }
 
   // create
-  async createImageS3() {}
+  async createImagePresignUrlS3(id: number, type: 'comment' | 'post') {
+    const uuid = crypto.randomUUID();
+    const key = `${type}/${id}-${uuid}`;
+    const command = new PutObjectCommand({ Bucket: this.bucketName, Key: key });
+    this.logErrorIfImageNotUploaded(key);
+
+    return {
+      url: await getSignedUrl(this.client, command, { expiresIn: 3600 }),
+      key,
+    };
+  }
+
   // read
   // update
   // delete
+  async deleteImageS3(key: string) {
+    await this.client.send(
+      new DeleteObjectCommand({
+        Bucket: this.bucketName,
+        Key: key,
+      }),
+    );
+    await waitUntilObjectNotExists(
+      { client: this.client, maxWaitTime: 3 },
+      { Bucket: this.bucketName, Key: key },
+    );
+  }
+
+  async logErrorIfImageNotUploaded(key: string) {
+    try {
+      this.logger.error('waiting...');
+      await waitUntilObjectNotExists(
+        { client: this.client, maxWaitTime: 4000 },
+        { Bucket: this.bucketName, Key: key },
+      );
+      this.logger.error(`Image with key ${key} was not uploaded to S3.`);
+    } catch (error) {
+      // Image was uploaded successfully
+      this.logger.log(`Image with key ${key} was uploaded to S3.`);
+    }
+  }
 }

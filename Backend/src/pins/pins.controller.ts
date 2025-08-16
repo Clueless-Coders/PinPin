@@ -57,7 +57,7 @@ export class PinsController {
 
   @Post()
   async postPin(@Body() createPinDTO: CreatePinDTO, @Req() request: Request) {
-    return await this.pinsService.create(createPinDTO, request);
+    return await this.pinsService.create(createPinDTO, request['user'].id);
   }
 
   @Post('visible')

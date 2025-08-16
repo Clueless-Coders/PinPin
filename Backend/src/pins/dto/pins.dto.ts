@@ -33,8 +33,13 @@ export class CreateCommentDTO {
 
 export class UpdatePinDTO {
   @IsString()
+  @IsOptional()
   @Length(1, 300)
-  text: string;
+  text?: string;
+}
+
+export interface UpdatePinOptions extends UpdatePinDTO {
+  imageURL?: string;
 }
 
 export class UpdateVotes {
