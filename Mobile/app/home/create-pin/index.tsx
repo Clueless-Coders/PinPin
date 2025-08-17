@@ -1,4 +1,4 @@
-import { Text, View, StyleSheet, ActivityIndicator, Pressable } from "react-native";
+import { Text, View, StyleSheet, ActivityIndicator, Pressable, Image } from "react-native";
 import React, { useContext, useEffect, useState } from "react";
 import PinPinTextArea from "@/components/PinPinTextArea";
 import SquareButton from "@/components/SquareButton";
@@ -6,11 +6,13 @@ import { PinService } from "@/services/PinService";
 import { ICreatePin } from "@/services/PinService";
 import { Link, router } from "expo-router";
 import { LocationContext } from "../_layout";
+import { useCapturedImage } from "./_layout";
 
 export default function NewPin() {
   const [pinText, setText] = useState("");
   const [creating, setCreating] = useState(false);
   const loc = useContext(LocationContext);
+  const { capturedImage } = useCapturedImage()
 
   // Creates the new Pin at the current location when pin button is pressed
   async function createPin() {
@@ -35,7 +37,7 @@ export default function NewPin() {
     router.back();
   }
 
-
+  console.log(capturedImage)
   return (
     <View style={styles.container}>
       {creating ? <ActivityIndicator></ActivityIndicator> : <></>}
@@ -60,6 +62,8 @@ export default function NewPin() {
         >
         </SquareButton>
       </View>
+      <Image source={{ uri: capturedImage?.uri }} style={{ width: 1000, height: 1000 }}>
+      </Image>
     </View >
   );
 }

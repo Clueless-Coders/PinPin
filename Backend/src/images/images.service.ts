@@ -139,7 +139,7 @@ export class ImagesService implements OnModuleInit {
       this.logger.log(`Image with key ${key} was uploaded to S3.`);
     } catch (error) {
       // Image hasn't been uploaded yet
-      this.logger.error(
+      this.logger.warn(
         `Image with key ${key} was uploaded to S3 - removing ref from pin(s)`,
       );
 
