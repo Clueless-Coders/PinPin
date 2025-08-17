@@ -57,7 +57,7 @@ export class PinsService {
         await this.updatePin(
           created.id,
           {
-            imageURL: s3Ref.url,
+            imageURL: s3Ref.key,
           },
           userId,
         );
@@ -95,6 +95,7 @@ export class PinsService {
       });
 
       const points = await this.getPinPoints(pinID);
+      console.log(res.Vote);
       const ret = {
         ...res,
         points,
@@ -111,7 +112,7 @@ export class PinsService {
     updatePinDTO: UpdatePinOptions,
     userId: number,
   ) {
-    const pinToEdit = await this.getPin(pinID);
+    const pinToEdit = await this.getPin(pinID, userId);
 
     if (userId !== pinToEdit.userID)
       throw new ForbiddenException('User can only edit their own pin');
