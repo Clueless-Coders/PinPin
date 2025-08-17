@@ -95,7 +95,6 @@ export class PinsService {
       });
 
       const points = await this.getPinPoints(pinID);
-      console.log(res.Vote);
       const ret = {
         ...res,
         points,
@@ -117,13 +116,21 @@ export class PinsService {
     if (userId !== pinToEdit.userID)
       throw new ForbiddenException('User can only edit their own pin');
 
+    let s3Ref: { url: string; key: string } | undefined;
+    if (updatePinDTO.willUploadImage) {
+      s3Ref = await this.imagesService.createImagePresignUrlS3(pinID, 'post');
+      updatePinDTO.imageURL = s3Ref.key;
+    }
+
     try {
-      return this.databaseService.pin.update({
+      const res = await this.databaseService.pin.update({
         where: {
           id: pinID,
         },
         data: updatePinDTO,
       });
+
+      return { ...res, uploadURL: s3Ref?.url, imageURL: s3Ref?.key };
     } catch (e: any) {
       PrismaService.handlePrismaError(e, 'Pin', 'pinId' + pinID);
     }

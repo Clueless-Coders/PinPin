@@ -1,4 +1,9 @@
-import { Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  OnModuleDestroy,
+  OnModuleInit,
+} from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
 import {
   PrismaClientKnownRequestError,
@@ -37,6 +42,6 @@ export class PrismaService
     } else if (e instanceof PrismaClientUnknownRequestError) {
       throw new KnownError('Unknown database error');
     }
-    throw new KnownError('Unknown error');
+    throw new InternalServerErrorException('Unknown error');
   }
 }

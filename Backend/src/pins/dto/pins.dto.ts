@@ -36,6 +36,10 @@ export class UpdatePinDTO {
   @IsOptional()
   @Length(1, 300)
   text?: string;
+
+  @IsOptional()
+  @IsBoolean()
+  willUploadImage?: boolean;
 }
 
 export interface UpdatePinOptions extends UpdatePinDTO {
