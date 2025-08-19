@@ -34,7 +34,7 @@ export default function NewPin() {
       return;
     }
     setCreating(false);
-    router.back();
+    router.dismiss();
   }
 
   console.log(capturedImage)
@@ -62,7 +62,7 @@ export default function NewPin() {
         >
         </SquareButton>
       </View>
-      <Image source={{ uri: capturedImage?.uri }} style={{ width: 1000, height: 1000 }}>
+      <Image source={capturedImage} style={{ width: 300, height: 400 }}>
       </Image>
     </View >
   );

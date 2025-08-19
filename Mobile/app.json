@@ -17,7 +17,17 @@
         "NSLocationWhenInUseUsageDescription": "We need your location to show location-based pins.",
         "NSLocationAlwaysUsageDescription": "We need your location to enable background location updates for pins.",
         "ITSAppUsesNonExemptEncryption": false,
-        "NSCameraUsageDescription": "We need access to your camera to take photos for pins."
+        "NSCameraUsageDescription": "We need access to your camera to take photos for pins.",
+        "NSAppTransportSecurity": {
+          "NSAllowsArbitraryLoads": true,
+          "NSAllowsLocalNetworking": true,
+          "NSExceptionDomains": {
+            "xxx.xx.xx.xxx": {
+              "NSIncludesSubdomains": true,
+              "NSExceptionAllowsInsecureHTTPLoads": true
+            }
+          }
+        }
       },
       "supportsTablet": true,
       "bundleIdentifier": "com.clueless.pinpin"
