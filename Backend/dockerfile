@@ -6,7 +6,7 @@ WORKDIR /pinpin
 
 COPY --chown=node:node . .
 
-RUN npm i 
+RUN npm ci 
 
 RUN npm run build
 

@@ -22,8 +22,6 @@ jobs:
       - name: Nav to Backend Directory
         run: cd Backend
 
-      - run: ls -lah
-
       - run: cd Backend && npm ci
         name: Install Dependencies
 
