@@ -5,8 +5,9 @@ import { IconDefinition } from "@fortawesome/fontawesome-svg-core";
 import { faGear } from "@fortawesome/free-solid-svg-icons/faGear";
 import { faPlus } from "@fortawesome/free-solid-svg-icons/faPlus";
 import { faLocationDot } from "@fortawesome/free-solid-svg-icons/faLocationDot";
+import { faCamera } from "@fortawesome/free-solid-svg-icons/faCamera";
+import { faXmark } from "@fortawesome/free-solid-svg-icons/faXmark";
 
-export type SquareButtonIcon = "gear" | "plus" | "pin";
 
 export interface SquareButtonProps {
   size?: number;
@@ -17,14 +18,18 @@ export interface SquareButtonProps {
   disabled?: boolean;
   text?: string;
   style?: any;
-  onPress: () => void;
+  onPress?: () => void;
 }
 
 const icons = {
   gear: faGear,
   plus: faPlus,
   pin: faLocationDot,
+  camera: faCamera,
+  x: faXmark
 };
+
+export type SquareButtonIcon = keyof typeof icons
 
 export default function SquareButton({
   size = 45,
@@ -42,7 +47,7 @@ export default function SquareButton({
   const buttonColor = disabled ? "gray" : color;
 
   const handlePress = () => {
-    if (!disabled) {
+    if (!disabled && onPress) {
       onPress();
     }
   };

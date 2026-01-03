@@ -16,7 +16,18 @@
       "infoPlist": {
         "NSLocationWhenInUseUsageDescription": "We need your location to show location-based pins.",
         "NSLocationAlwaysUsageDescription": "We need your location to enable background location updates for pins.",
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSCameraUsageDescription": "We need access to your camera to take photos for pins.",
+        "NSAppTransportSecurity": {
+          "NSAllowsArbitraryLoads": true,
+          "NSAllowsLocalNetworking": true,
+          "NSExceptionDomains": {
+            "xxx.xx.xx.xxx": {
+              "NSIncludesSubdomains": true,
+              "NSExceptionAllowsInsecureHTTPLoads": true
+            }
+          }
+        }
       },
       "supportsTablet": true,
       "bundleIdentifier": "com.clueless.pinpin"
@@ -28,7 +39,7 @@
       },
       "config": {
         "googleMaps": {
-          "apiKey": "AIzaSyDaz7bRt1Pk1z-ALmXm3ipdzmHKOw47fB8"
+          "apiKey": "AIzaSyAxUFo9T3XTysblSmvbndRhuhOFjCoRlKQ"
         }
       },
       "package": "com.clueless.pinpin",
@@ -60,6 +71,14 @@
           "locationWhenInUsePermission": "Allow $(PRODUCT_NAME) to use your location.",
           "locationAlwaysPermission": "Allow $(PRODUCT_NAME) to use your location."
         }
+      ],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow $(PRODUCT_NAME) to access your camera.",
+          "microphonePermission": "Allow $(PRODUCT_NAME) to access your microphone",
+          "recordAudioAndroid": true
+        }
       ]
     ],
     "experiments": {
@@ -70,7 +89,7 @@
         "origin": false
       },
       "eas": {
-        "projectId": "c59ddd48-4b87-4922-b36a-32895dfe2386"
+        "projectId": "PinPin-Preview"
       }
     },
     "owner": "tristand0703"

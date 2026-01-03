@@ -28,6 +28,7 @@ export default function PinPinTextArea({
         width: textInputProps?.multiline ? 350 : 250,
         height: textInputProps?.multiline ? 200 : 40,
         alignSelf: "center",
+        marginBottom: 20,
         ...style,
       }}
     >
@@ -61,7 +62,6 @@ const styles = StyleSheet.create({
   },
   input: {
     backgroundColor: "white",
-    position: "relative",
     flexDirection: "column",
     borderColor: "black",
     borderWidth: 1.5,

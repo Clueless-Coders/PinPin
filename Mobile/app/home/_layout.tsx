@@ -11,7 +11,6 @@ export const LocationContext = createContext<{
 
 export default function HomeLayout() {
   const [location, setLocation] = useState();
-  const [loggedIn, setLoggedIn] = useState(true);
 
   useEffect(() => {
     const id = authService.addListener((user) => {
@@ -36,12 +35,6 @@ export default function HomeLayout() {
       <Stack>
         <Stack.Screen name="index" options={{ headerShown: false }} />
         <Stack.Screen
-          name="NewPin"
-          options={{
-            header: () => <Header color="#FFC900" />,
-          }}
-        />
-        <Stack.Screen
           name="Settings"
           options={{
             header: () => <Header color="#FF6B6B" />,
@@ -53,6 +46,9 @@ export default function HomeLayout() {
             header: () => <Header color="#FFC900" />,
           }}
         />
+        <Stack.Screen name="create-pin" options={{
+          headerShown: false,
+        }}></Stack.Screen>
       </Stack>
     </LocationContext.Provider>
   );

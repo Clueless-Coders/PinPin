@@ -1,4 +1,11 @@
-import { IsInt, IsNumber, IsOptional, IsString, Length } from 'class-validator';
+import {
+  IsBoolean,
+  IsInt,
+  IsNumber,
+  IsOptional,
+  IsString,
+  Length,
+} from 'class-validator';
 
 export class CreatePinDTO {
   @IsString()
@@ -6,8 +13,8 @@ export class CreatePinDTO {
   text: string;
 
   @IsOptional()
-  @IsString()
-  imageURL?: string;
+  @IsBoolean()
+  isUploadingImage?: boolean;
 
   @IsNumber()
   longitude: number;
@@ -26,8 +33,17 @@ export class CreateCommentDTO {
 
 export class UpdatePinDTO {
   @IsString()
+  @IsOptional()
   @Length(1, 300)
-  text: string;
+  text?: string;
+
+  @IsOptional()
+  @IsBoolean()
+  willUploadImage?: boolean;
+}
+
+export interface UpdatePinOptions extends UpdatePinDTO {
+  imageURL?: string;
 }
 
 export class UpdateVotes {

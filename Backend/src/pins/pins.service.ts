@@ -2,10 +2,13 @@ import {
   ForbiddenException,
   Injectable,
   InternalServerErrorException,
-  NotFoundException,
 } from '@nestjs/common';
-import { Pin, Prisma } from '@prisma/client';
-import { CreatePinDTO, UpdatePinDTO, CreateCommentDTO } from './dto/pins.dto';
+import {
+  CreatePinDTO,
+  UpdatePinDTO,
+  CreateCommentDTO,
+  UpdatePinOptions,
+} from './dto/pins.dto';
 import { Request } from 'express';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { computeDestinationPoint } from 'geolib';
@@ -14,28 +17,59 @@ import {
   VisiblePin,
 } from 'src/interfaces/invisible-pin.interface';
 import { UsersService } from 'src/users/users.service';
-import { PinQuery } from 'src/interfaces/PinQuery.interface';
+import { PinCreateResponse, PinQuery } from 'src/interfaces/PinQuery.interface';
+import { ImagesService } from 'src/images/images.service';
 
 @Injectable()
 export class PinsService {
   constructor(
     private readonly databaseService: PrismaService,
     private readonly userService: UsersService,
+    private readonly imagesService: ImagesService,
   ) {}
 
-  async create(createPin: CreatePinDTO, req: Request) {
+  /**
+   * Creates a new Pin in the database with the specified userId
+   * @param createPin
+   * @param req
+   * @returns
+   */
+  async create(
+    createPin: CreatePinDTO,
+    userId: number,
+  ): Promise<PinCreateResponse> {
     try {
-      return await this.databaseService.pin.create({
+      const created = await this.databaseService.pin.create({
         data: {
           text: createPin.text,
-          userID: req['user'].id,
-          imageURL: createPin.imageURL, // This will be optional
+          userID: userId,
           longitude: createPin.longitude,
           latitude: createPin.latitude,
         },
       });
+
+      let s3Ref: { url: string; key: string };
+      if (createPin.isUploadingImage) {
+        s3Ref = await this.imagesService.createImagePresignUrlS3(
+          created.id,
+          'post',
+        );
+        await this.updatePin(
+          created.id,
+          {
+            imageURL: s3Ref.key,
+          },
+          userId,
+        );
+      }
+
+      return {
+        ...created,
+        presignUrl: s3Ref?.url,
+        key: s3Ref?.key,
+      };
     } catch (e) {
-      throw new InternalServerErrorException('Pin create failed.', e);
+      PrismaService.handlePrismaError(e, 'Pin', 'userId: ' + userId);
     }
   }
 
@@ -72,20 +106,31 @@ export class PinsService {
     }
   }
 
-  async updatePin(pinID: number, updatePinDTO: UpdatePinDTO, req: Request) {
-    const currUser = req['user'];
-    const pinToEdit = await this.getPin(pinID);
+  async updatePin(
+    pinID: number,
+    updatePinDTO: UpdatePinOptions,
+    userId: number,
+  ) {
+    const pinToEdit = await this.getPin(pinID, userId);
 
-    if (currUser.id !== pinToEdit.userID)
+    if (userId !== pinToEdit.userID)
       throw new ForbiddenException('User can only edit their own pin');
 
+    let s3Ref: { url: string; key: string } | undefined;
+    if (updatePinDTO.willUploadImage) {
+      s3Ref = await this.imagesService.createImagePresignUrlS3(pinID, 'post');
+      updatePinDTO.imageURL = s3Ref.key;
+    }
+
     try {
-      return this.databaseService.pin.update({
+      const res = await this.databaseService.pin.update({
         where: {
           id: pinID,
         },
         data: updatePinDTO,
       });
+
+      return { ...res, uploadURL: s3Ref?.url, imageURL: s3Ref?.key };
     } catch (e: any) {
       PrismaService.handlePrismaError(e, 'Pin', 'pinId' + pinID);
     }

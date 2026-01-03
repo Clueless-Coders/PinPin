@@ -1,7 +1,6 @@
 import { API_BASE_URL } from "@/environment";
-import { InvisiblePin, VisiblePin } from "@/interfaces/pin.interface";
+import { VisiblePin } from "@/interfaces/pin.interface";
 import axios from "axios";
-import { DO_NOT_USE_OR_YOU_WILL_BE_FIRED_CALLBACK_REF_RETURN_VALUES } from "react";
 
 export interface IPin {
   id: number;
@@ -9,6 +8,7 @@ export interface IPin {
   text: string;
   points: number;
   imageURL?: string;
+  presignUrl?: string;
   longitude: number;
   latitude: number;
   createdAt: string;
@@ -18,9 +18,9 @@ export interface IPin {
 
 export interface ICreatePin {
   text: string;
-  imageURL?: string;
   longitude: number;
   latitude: number;
+  isUploadingImage?: boolean;
 }
 
 export interface ICreateComment {
@@ -39,9 +39,8 @@ export interface IComment {
 }
 
 export class PinService {
-  // private pins: IPins[];
   constructor() {}
-  async getPin(pinID: number): Promise<IPin> {
+  static async getPin(pinID: number): Promise<IPin> {
     try {
       const res = await axios.get<IPin>(`${API_BASE_URL}/pin/${pinID}`);
       const pin = res.data;
@@ -52,7 +51,7 @@ export class PinService {
     }
   }
 
-  async deletePin(pinID: number) {
+  static async deletePin(pinID: number) {
     try {
       const res = await axios.delete<IPin>(`${API_BASE_URL}/pin/${pinID}`);
       const pin = res.data;
@@ -62,7 +61,7 @@ export class PinService {
     }
   }
 
-  async patchPin(pinID: number, text: string) {
+  static async patchPin(pinID: number, text: string) {
     console.log("updating pin " + pinID);
     try {
       const res = await axios.patch<IPin>(`${API_BASE_URL}/pin/${pinID}`, {
@@ -75,17 +74,48 @@ export class PinService {
     }
   }
 
-  async createPin(IPin: ICreatePin) {
+  static async uploadPresignedURL(url: string, imageBase64: string) {
+    console.log("UPLOADING IMAGE!!...");
+    console.log(imageBase64.slice(0, 100));
+    const data = new Blob([imageBase64], { type: "image/jpeg" });
+    const res = await fetch(url, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "image/jpeg",
+      },
+      body: data,
+    });
+
+    if (!res.ok) {
+      console.error(await res.text());
+    }
+    console.log("uploaded image!");
+  }
+
+  static async createPin(IPin: ICreatePin, imageBase64?: string) {
     try {
       const res = await axios.post<IPin>(`${API_BASE_URL}/pin`, IPin);
       const pin = res.data;
+
+      console.log(
+        "Upload details",
+        IPin.isUploadingImage,
+        !!imageBase64,
+        !!res.data.presignUrl
+      );
+
+      console.log(res.data);
+
+      if (IPin.isUploadingImage && imageBase64 && res.data.presignUrl)
+        await PinService.uploadPresignedURL(res.data.presignUrl, imageBase64);
+
       return pin;
     } catch (e) {
       console.log("failed creating pin ", e);
     }
   }
 
-  async getAllViewable() {
+  static async getAllViewable() {
     try {
       const res = await axios.get<VisiblePin[]>(`${API_BASE_URL}/pin/visible`);
       const pins = res.data;
@@ -95,7 +125,7 @@ export class PinService {
     }
   }
 
-  async createComment(IComment: ICreateComment) {
+  static async createComment(IComment: ICreateComment) {
     try {
       const res = await axios.post<IComment>(
         `${API_BASE_URL}/pin/comments`,
@@ -108,7 +138,7 @@ export class PinService {
     }
   }
 
-  async getCommentsByPin(pinID: number) {
+  static async getCommentsByPin(pinID: number) {
     try {
       const res = await axios.get<IComment[]>(
         `${API_BASE_URL}/pin/comments/${pinID}`

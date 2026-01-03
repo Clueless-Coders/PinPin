@@ -1,4 +1,4 @@
-FROM node:24-alpine
+FROM --platform=amd64 node:24-alpine
 
 RUN apk update && apk upgrade && apk add openssl
 
@@ -6,7 +6,7 @@ WORKDIR /pinpin
 
 COPY --chown=node:node . .
 
-RUN npm i 
+RUN npm ci 
 
 RUN npm run build
 
