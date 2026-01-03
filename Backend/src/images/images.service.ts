@@ -94,7 +94,11 @@ export class ImagesService implements OnModuleInit {
   async createImagePresignUrlS3(id: number, type: 'comment' | 'post') {
     const uuid = crypto.randomUUID();
     const key = `${type}/${id}-${uuid}`;
-    const command = new PutObjectCommand({ Bucket: this.bucketName, Key: key });
+    const command = new PutObjectCommand({
+      Bucket: this.bucketName,
+      Key: key,
+      ContentType: 'image/jpeg',
+    });
     this.logErrorIfImageNotUploaded(key);
 
     return {
@@ -140,7 +144,7 @@ export class ImagesService implements OnModuleInit {
     } catch (error) {
       // Image hasn't been uploaded yet
       this.logger.warn(
-        `Image with key ${key} was uploaded to S3 - removing ref from pin(s)`,
+        `Image with key ${key} was not uploaded to S3 - removing ref from pin(s)`,
       );
 
       await this.prismaService.pin.updateMany({

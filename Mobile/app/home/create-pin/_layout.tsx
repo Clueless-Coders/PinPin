@@ -5,11 +5,12 @@ import { CameraCapturedPicture } from 'expo-camera';
 
 interface CapturedImageContext {
     capturedImage?: CameraCapturedPicture;
-    setCapturedImage: (capturedImage: CameraCapturedPicture) => void
+    setCapturedImage: (capturedImage: CameraCapturedPicture | undefined) => void
 }
 
 const CapturedImageContext = createContext<CapturedImageContext>({
-    setCapturedImage: () => { }
+    setCapturedImage: () => { },
+    capturedImage: undefined
 })
 
 export function useCapturedImage(): CapturedImageContext {

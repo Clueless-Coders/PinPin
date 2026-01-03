@@ -73,54 +73,54 @@ export default function PinDetail() {
   };
 
   return (
-    <GestureHandlerRootView>
-      {pin ? (
-        <PinView
-          distance={
-            locationContext?.location
-              ? // Gets the distance between user's current location and
-              // the pin's location, converted to miles then formatted
-              // to 1 decimal place
-              +(
-                geolib.getDistance(locationContext.location.coords, {
-                  latitude: pin.latitude,
-                  longitude: pin.longitude,
-                }) * metersToMilesConversionFactor
-              ).toFixed(1)
-              : -1
+    <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex: 1 }}>
+      <GestureHandlerRootView>
+        {pin ? (
+          <PinView
+            distance={
+              locationContext?.location
+                ? // Gets the distance between user's current location and
+                // the pin's location, converted to miles then formatted
+                // to 1 decimal place
+                +(
+                  geolib.getDistance(locationContext.location.coords, {
+                    latitude: pin.latitude,
+                    longitude: pin.longitude,
+                  }) * metersToMilesConversionFactor
+                ).toFixed(1)
+                : -1
+            }
+            time={new Date(pin.createdAt)}
+            text={pin.text}
+            commentCount={comments.length}
+            karma={pin.points}
+            userVoteStatus={pin.userVoteStatus}
+            pinId={pin.id}
+          />
+        ) : (
+          <></>
+        )}
+        <View
+          style={{
+            maxHeight: "74%",
+            backgroundColor: "#FFF9ED",
+          }}
+        >
+
+          {
+            comments.length === 0 ? <Text>Be the first to leave a comment!</Text> :
+              <FlatList
+                data={comments}
+                keyExtractor={(item, index) => index.toString()}
+                renderItem={renderItem}
+                ref={flatListRef}
+                onScrollToIndexFailed={(info) => {
+                  console.log(info);
+                }}
+              />
           }
-          time={new Date(pin.createdAt)}
-          text={pin.text}
-          commentCount={comments.length}
-          karma={pin.points}
-          userVoteStatus={pin.userVoteStatus}
-          pinId={pin.id}
-        />
-      ) : (
-        <></>
-      )}
-      <View
-        style={{
-          maxHeight: "74%",
-          backgroundColor: "#FFF9ED",
-        }}
-      >
 
-        {
-          comments.length === 0 ? <Text>Be the first to leave a comment!</Text> :
-            <FlatList
-              data={comments}
-              keyExtractor={(item, index) => index.toString()}
-              renderItem={renderItem}
-              ref={flatListRef}
-              onScrollToIndexFailed={(info) => {
-                console.log(info);
-              }}
-            />
-        }
-
-      </View>
-      <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex: 1 }}>
+        </View>
         <View style={styles.textBoxContainer}>
           <TextInput
             style={styles.textInput}
@@ -135,8 +135,8 @@ export default function PinDetail() {
             <FontAwesomeIcon icon={faPaperPlane} size={25} />
           </Pressable>
         </View>
-      </KeyboardAvoidingView>
-    </GestureHandlerRootView >
+      </GestureHandlerRootView >
+    </KeyboardAvoidingView>
   );
 }
 
