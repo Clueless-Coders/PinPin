@@ -1,6 +1,7 @@
 import { API_BASE_URL } from "@/environment";
 import { VisiblePin } from "@/interfaces/pin.interface";
 import axios from "axios";
+import { fetch } from "expo/fetch";
 
 export interface IPin {
   id: number;
@@ -74,25 +75,31 @@ export class PinService {
     }
   }
 
-  static async uploadPresignedURL(url: string, imageBase64: string) {
-    console.log("UPLOADING IMAGE!!...");
-    console.log(imageBase64.slice(0, 100));
-    const data = new Blob([imageBase64], { type: "image/jpeg" });
+  static async uploadPresignedURL(url: string, imageLocalUrl: string) {
+    console.log("[PinService] Uploading image - ", imageLocalUrl);
+    const fileData = await (
+      await fetch(imageLocalUrl, {
+        method: "GET",
+      })
+    ).arrayBuffer();
+
     const res = await fetch(url, {
       method: "PUT",
-      headers: {
-        "Content-Type": "image/jpeg",
-      },
-      body: data,
+      body: fileData,
     });
 
     if (!res.ok) {
-      console.error(await res.text());
+      console.error(
+        "[PinService] IMAGE FAILED TO UPLOAD",
+        res.status,
+        res.statusText
+      );
     }
-    console.log("uploaded image!");
+
+    console.log("[PinService] Image uploaded successfully.");
   }
 
-  static async createPin(IPin: ICreatePin, imageBase64?: string) {
+  static async createPin(IPin: ICreatePin, imageLocalUrl?: string) {
     try {
       const res = await axios.post<IPin>(`${API_BASE_URL}/pin`, IPin);
       const pin = res.data;
@@ -100,14 +107,13 @@ export class PinService {
       console.log(
         "Upload details",
         IPin.isUploadingImage,
-        !!imageBase64,
         !!res.data.presignUrl
       );
 
       console.log(res.data);
 
-      if (IPin.isUploadingImage && imageBase64 && res.data.presignUrl)
-        await PinService.uploadPresignedURL(res.data.presignUrl, imageBase64);
+      if (IPin.isUploadingImage && imageLocalUrl && res.data.presignUrl)
+        await PinService.uploadPresignedURL(res.data.presignUrl, imageLocalUrl);
 
       return pin;
     } catch (e) {

@@ -10,18 +10,6 @@ import { useCapturedImage } from "./_layout";
 import PinImagePreview from "@/components/PinImagePreview";
 import { GestureHandlerRootView, ScrollView } from "react-native-gesture-handler";
 
-import {
-  CreateBucketCommand,
-  DeleteObjectCommand,
-  GetObjectCommand,
-  paginateListBuckets,
-  PutObjectCommand,
-  S3Client,
-  waitUntilBucketExists,
-  waitUntilObjectExists,
-  waitUntilObjectNotExists,
-} from '@aws-sdk/client-s3';
-
 export default function NewPin() {
   const [pinText, setText] = useState("");
   const [creating, setCreating] = useState(false);
@@ -46,7 +34,7 @@ export default function NewPin() {
       isUploadingImage: capturedImage !== null || capturedImage !== undefined
     };
 
-    const res = await PinService.createPin(newPin, capturedImage?.base64);
+    const res = await PinService.createPin(newPin, capturedImage?.uri);
     console.log("Res after returning?!?! ", res)
 
     if (!res) {

@@ -107,7 +107,7 @@ export default function Index() {
             padding: 20,
           }}
         >
-          P!nPin
+          PinPin
         </Text>
         <PinPinTextArea
           style={{

@@ -34,7 +34,7 @@ export default function Camera() {
         // Downsize to 1080p vertical, then compress and save as webp, to save space
         const image = await ImageManipulator.manipulate(imageRef.uri)
             .renderAsync()
-        imageRef = await image.saveAsync({ format: SaveFormat.JPEG, compress: .5, base64: true })
+        imageRef = await image.saveAsync({ format: SaveFormat.JPEG, compress: .7 })
         setCapturedImage(imageRef)
 
         router.dismiss()
