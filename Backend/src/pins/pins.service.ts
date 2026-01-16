@@ -53,6 +53,7 @@ export class PinsService {
         s3Ref = await this.imagesService.createImagePresignUrlS3(
           created.id,
           'post',
+          'PUT',
         );
         await this.updatePin(
           created.id,
@@ -95,10 +96,17 @@ export class PinsService {
       });
 
       const points = await this.getPinPoints(pinID);
+      const url = await this.imagesService.createImagePresignUrlS3(
+        res.imageURL,
+        'post',
+        'GET',
+      );
+
       const ret = {
         ...res,
         points,
         userVoteStatus: res.Vote[0]?.value ?? 0,
+        imageURL: url.url,
       };
       return ret;
     } catch (e) {
@@ -118,7 +126,11 @@ export class PinsService {
 
     let s3Ref: { url: string; key: string } | undefined;
     if (updatePinDTO.willUploadImage) {
-      s3Ref = await this.imagesService.createImagePresignUrlS3(pinID, 'post');
+      s3Ref = await this.imagesService.createImagePresignUrlS3(
+        pinID,
+        'post',
+        'PUT',
+      );
       updatePinDTO.imageURL = s3Ref.key;
     }
 
@@ -466,27 +478,33 @@ export class PinsService {
         },
       });
 
-      const totalVotesPromises: Promise<number>[] = [];
-      const pins = res.map((pin) => {
-        totalVotesPromises.push(this.getPinPoints(pin.pin.id));
+      const pins = res.map(async (pin) => {
+        const p = this.getPinPoints(pin.pin.id);
+        let i;
+        if (pin.pin.imageURL)
+          i = this.imagesService.createImagePresignUrlS3(
+            pin.pin.imageURL,
+            'post',
+            'GET',
+          );
+
+        let [points, imageUrl] = await Promise.all([p, i]);
+
         return {
           id: pin.pin.id,
           userID: pin.pin.userID,
           text: pin.pin.text,
-          imageURL: pin.pin.imageURL,
+          imageURL: imageUrl?.url,
           longitude: pin.pin.longitude,
           latitude: pin.pin.latitude,
           createdAt: pin.pin.createdAt,
           updatedAt: pin.pin.updatedAt,
           userVoteStatus: pin.pin.Vote[0]?.value ?? 0,
+          points,
         };
       });
 
-      const totalVotes = await Promise.all(totalVotesPromises);
-      return pins.map((pin, index) => ({
-        ...pin,
-        points: totalVotes[index],
-      }));
+      return await Promise.all(pins);
     } catch (e: any) {
       PrismaService.handlePrismaError(e, 'Pin', 'userId: ' + userId);
     }

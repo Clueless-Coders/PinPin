@@ -91,14 +91,38 @@ export class ImagesService implements OnModuleInit {
    * @param type
    * @returns
    */
-  async createImagePresignUrlS3(id: number, type: 'comment' | 'post') {
-    const uuid = crypto.randomUUID();
-    const key = `${type}/${id}-${uuid}`;
-    const command = new PutObjectCommand({
+  async createImagePresignUrlS3(
+    id: number | string,
+    type: 'comment' | 'post',
+    urlMethod: 'PUT' | 'GET',
+  ) {
+    let uuid: string = '';
+
+    if (typeof id === 'number') {
+      if (urlMethod !== 'PUT') {
+        throw new Error(
+          'ID must be a number (DB ID of pin) when uploading an image to S3',
+        );
+      }
+
+      uuid = `${id}-${crypto.randomUUID()}`;
+    } else {
+      uuid = id.split('/')[1];
+      console.log('uuid found - ', uuid);
+    }
+
+    const key = `${type}/${uuid}`;
+
+    const options = {
       Bucket: this.bucketName,
       Key: key,
       ContentType: 'image/jpeg',
-    });
+    };
+    const command =
+      urlMethod === 'PUT'
+        ? new PutObjectCommand(options)
+        : new GetObjectCommand(options);
+
     this.logErrorIfImageNotUploaded(key);
 
     return {
